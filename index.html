@@ -549,8 +549,8 @@
   function logic(){
     const p = state.power;
 
-    const red = p && (state.pushTest || bothUp() || mismatch());
-    const green = p && bothDown();
+    const red = p && (state.pushTest || bothUp() || mismatch() || state.ctl === "neutral");
+    const green = p && bothDown() && state.ctl === "neutral";
     const horn = p && (bothUp() || mismatch()) && state.throttle === "retarded";
 
     let img = "off";
