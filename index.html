@@ -11,7 +11,7 @@
     --panel:#111827;
     --card:#f8fafc;
     --line:#2563eb;
-    --hot:#ef4444;
+    --hot:#ef4444
     --ground:#111827;
     --green:#22c55e;
     --amber:#facc15;
@@ -883,15 +883,15 @@
 
     setHidden("greenFlow", !(p && green && !state.pushTest));
 
-    setHidden(
-      "redFlow",
-      !(p && red && !state.pushTest && bothUp())
-    );
+   setHidden(
+  "redFlow",
+  !(p && red && !state.pushTest && (bothUp() || (state.right === "up" && state.left === "down")))
+);
 
-    setHidden(
-      "redMismatchFlow",
-      !(p && red && !state.pushTest && mismatch())
-    );
+   setHidden(
+  "redMismatchFlow",
+  !(p && red && !state.pushTest && state.left === "up" && state.right === "down")
+);
 
     setHidden(
       "testFlow",
@@ -903,10 +903,10 @@
       !horn
     );
 
-    setHidden(
-      "ctlFlow",
-      !(p && bothDown() && state.ctl === "notneutral" && !state.pushTest)
-    );
+setHidden(
+  "ctlFlow",
+  !(p && bothDown() && state.ctl === "notneutral" && !state.pushTest)
+);
   }
 
   function toggleGear(side){
