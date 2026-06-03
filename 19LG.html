@@ -6,62 +6,121 @@
 
 <style>
   body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0b1f33;
-    color: white;
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#0b1f33;
+    color:white;
   }
 
   .wrap {
-    max-width: 1100px;
-    margin: auto;
-    padding: 20px;
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
   }
 
-  .card {
-    background: #102a44;
-    padding: 15px;
-    border-radius: 14px;
-    margin-bottom: 15px;
+  .layout {
+    display:grid;
+    grid-template-columns:260px 1fr;
+    gap:18px;
+    align-items:start;
   }
 
-  button {
-    padding: 12px 16px;
-    margin: 6px;
-    border: 0;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  .on {
-    background: #22c55e;
-    color: #052e16;
-  }
-
-  .off {
-    background: #d1d5db;
-    color: #111827;
-  }
-
-  .test {
-    background: #f2b705;
-    color: #111827;
+  .panel, .status {
+    background:#102a44;
+    padding:16px;
+    border-radius:14px;
   }
 
   .diagramBox {
-    background: white;
-    border-radius: 14px;
-    overflow: hidden;
+    background:white;
+    border-radius:14px;
+    overflow:hidden;
+    border:3px solid #1f2933;
   }
 
   #diagram {
-    width: 100%;
-    display: block;
+    width:100%;
+    display:block;
+    transition:opacity .25s ease;
   }
 
-  .status {
-    font-size: 18px;
+  .control {
+    margin-bottom:16px;
+    padding:12px;
+    background:#0b1f33;
+    border-radius:12px;
+  }
+
+  .control h3 {
+    margin:0 0 8px 0;
+    font-size:16px;
+  }
+
+  button {
+    width:100%;
+    padding:12px;
+    margin-top:7px;
+    border:none;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
+    font-size:15px;
+  }
+
+  .on {
+    background:#22c55e;
+    color:#052e16;
+  }
+
+  .off {
+    background:#d1d5db;
+    color:#111827;
+  }
+
+  .warn {
+    background:#facc15;
+    color:#111827;
+  }
+
+  .test {
+    background:#f2b705;
+    color:#111827;
+  }
+
+  .badgeRow {
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+
+  .badge {
+    padding:8px 10px;
+    border-radius:999px;
+    background:#334155;
+    color:white;
+    font-size:14px;
+    font-weight:bold;
+  }
+
+  .redOn {
+    background:#ef4444;
+  }
+
+  .greenOn {
+    background:#22c55e;
+    color:#052e16;
+  }
+
+  .hornOn {
+    background:#facc15;
+    color:#111827;
+  }
+
+  @media(max-width:850px){
+    .layout {
+      grid-template-columns:1fr;
+    }
   }
 </style>
 </head>
@@ -71,135 +130,185 @@
 <div class="wrap">
 
   <h1>Landing Gear Warning Circuit Trainer</h1>
+  <p>Use the controls to change circuit conditions. The schematic updates to show current flow, light indication, and warning horn operation.</p>
 
-  <div class="card">
-    <p>
-      Click the switches to change circuit conditions. The schematic updates to show
-      switch positions and current flow.
-    </p>
+  <div class="layout">
 
-    <button id="rightBtn" class="off" onclick="toggleSwitch('right')">
-      Right Gear Switch: OPEN
-    </button>
+    <div class="panel">
 
-    <button id="leftBtn" class="off" onclick="toggleSwitch('left')">
-      Left Gear Switch: OPEN
-    </button>
+      <div class="control">
+        <h3>Power</h3>
+        <button id="powerBtn" class="off" onclick="togglePower()">Power: OFF</button>
+      </div>
 
-    <button id="controlBtn" class="off" onclick="toggleSwitch('control')">
-      Control Valve Switch: NEUTRAL
-    </button>
+      <div class="control">
+        <h3>Landing Gear Position</h3>
+        <button id="gearBtn" class="on" onclick="toggleGear()">Landing Gear: DOWN</button>
+      </div>
 
-    <button id="throttleBtn" class="off" onclick="toggleSwitch('throttle')">
-      Throttle Switches: OPEN
-    </button>
+      <div class="control">
+        <h3>Throttle Position</h3>
+        <button id="throttleBtn" class="on" onclick="toggleThrottle()">Throttle: FORWARD</button>
+      </div>
 
-    <button id="testBtn" class="test" onclick="pushTest()">
-      Push To Test
-    </button>
+      <div class="control">
+        <h3>Control Valve</h3>
+        <button id="controlBtn" class="on" onclick="toggleControlValve()">Control Valve: NEUTRAL</button>
+      </div>
+
+      <div class="control">
+        <h3>Test Circuit</h3>
+        <button id="testBtn" class="test" onclick="pushToTest()">Push To Test Red Light</button>
+      </div>
+
+    </div>
+
+    <div>
+      <div class="diagramBox">
+        <img id="diagram" src="19lgoff.png" alt="Landing gear circuit schematic">
+      </div>
+
+      <div class="status" style="margin-top:14px;">
+        <strong>Status:</strong>
+        <p id="statusText">Power is OFF. No circuit is energized.</p>
+
+        <div class="badgeRow">
+          <span id="redBadge" class="badge">Red Light OFF</span>
+          <span id="greenBadge" class="badge">Green Light OFF</span>
+          <span id="hornBadge" class="badge">Horn OFF</span>
+        </div>
+      </div>
+    </div>
+
   </div>
-
-  <div class="diagramBox">
-    <img id="diagram" src="19lgoff.png" alt="Landing gear circuit diagram">
-  </div>
-
-  <div class="card status">
-    <strong>Status:</strong>
-    <span id="statusText">No complete circuit path shown.</span>
-  </div>
-
 </div>
 
 <script>
   const state = {
-    right: false,
-    left: false,
-    control: false,
-    throttle: false
+    power:false,
+    gearDown:true,
+    throttleForward:true,
+    controlNeutral:true,
+    testing:false
   };
 
-  function toggleSwitch(name) {
-    state[name] = !state[name];
+  function togglePower() {
+    state.power = !state.power;
+    state.testing = false;
     updateTrainer();
   }
 
-  function setButton(id, isOn, onText, offText) {
-    const btn = document.getElementById(id);
-    btn.className = isOn ? "on" : "off";
-    btn.innerText = isOn ? onText : offText;
+  function toggleGear() {
+    state.gearDown = !state.gearDown;
+    state.testing = false;
+    updateTrainer();
   }
 
-  function pushTest() {
-    document.getElementById("diagram").src = "19lgpushtest.png";
-    document.getElementById("statusText").innerText =
-      "Push-to-test circuit condition shown.";
+  function toggleThrottle() {
+    state.throttleForward = !state.throttleForward;
+    state.testing = false;
+    updateTrainer();
+  }
 
-    setTimeout(updateTrainer, 2000);
+  function toggleControlValve() {
+    state.controlNeutral = !state.controlNeutral;
+    state.testing = false;
+    updateTrainer();
+  }
+
+  function pushToTest() {
+    if (!state.power) {
+      document.getElementById("statusText").innerText =
+        "Power is OFF. Push-to-test cannot energize the red light.";
+      return;
+    }
+
+    state.testing = true;
+    updateTrainer();
+
+    setTimeout(() => {
+      state.testing = false;
+      updateTrainer();
+    }, 2000);
+  }
+
+  function setButton(id, condition, onText, offText) {
+    const btn = document.getElementById(id);
+    btn.className = condition ? "on" : "off";
+    btn.innerText = condition ? onText : offText;
+  }
+
+  function setBadge(id, text, className) {
+    const badge = document.getElementById(id);
+    badge.innerText = text;
+    badge.className = "badge " + className;
+  }
+
+  function changeImage(fileName) {
+    const img = document.getElementById("diagram");
+    img.style.opacity = 0;
+
+    setTimeout(() => {
+      img.src = fileName;
+      img.style.opacity = 1;
+    }, 150);
   }
 
   function updateTrainer() {
-    setButton(
-      "rightBtn",
-      state.right,
-      "Right Gear Switch: DOWN / CLOSED",
-      "Right Gear Switch: OPEN"
-    );
-
-    setButton(
-      "leftBtn",
-      state.left,
-      "Left Gear Switch: DOWN / CLOSED",
-      "Left Gear Switch: OPEN"
-    );
-
-    setButton(
-      "controlBtn",
-      state.control,
-      "Control Valve Switch: DOWN",
-      "Control Valve Switch: NEUTRAL"
-    );
-
-    setButton(
-      "throttleBtn",
-      state.throttle,
-      "Throttle Switches: CLOSED / RETARDED",
-      "Throttle Switches: OPEN"
-    );
+    setButton("powerBtn", state.power, "Power: ON", "Power: OFF");
+    setButton("gearBtn", state.gearDown, "Landing Gear: DOWN", "Landing Gear: UP");
+    setButton("throttleBtn", state.throttleForward, "Throttle: FORWARD", "Throttle: RETARDED / PULLED BACK");
+    setButton("controlBtn", state.controlNeutral, "Control Valve: NEUTRAL", "Control Valve: NOT NEUTRAL");
 
     let image = "19lgoff.png";
-    let status = "No complete circuit path shown.";
+    let status = "Power is OFF. No circuit is energized.";
 
-    if (!state.right && !state.left && !state.control && !state.throttle) {
+    let redLight = false;
+    let greenLight = false;
+    let horn = false;
+
+    if (!state.power) {
       image = "19lgoff.png";
-      status = "Circuit is off. No complete path shown.";
+      status = "Power is OFF. No circuit is energized.";
     }
 
-    if (state.right && !state.left) {
-      image = "19lgup.png";
-      status = "Unsafe gear condition shown.";
+    else if (state.testing) {
+      image = "19lgpushtest.png";
+      redLight = true;
+      status = "Push-to-test is pressed. The red warning light test circuit is energized.";
     }
 
-    if (!state.right && state.left) {
-      image = "19lgleftup.png";
-      status = "Left gear switch condition shown.";
-    }
-
-    if (state.left && state.control) {
-      image = "19lgon.png";
-      status = "Gear-down indication circuit shown.";
-    }
-
-    if (state.throttle && (!state.right || !state.left)) {
-      image = "19lgupretard.png";
-      status = "Throttle retarded with unsafe gear condition. Warning horn circuit shown.";
-    }
-
-    if (state.right && state.left && state.control) {
+    else if (state.gearDown && !state.controlNeutral) {
       image = "19lgctlvalnotneutral.png";
-      status = "Control valve not neutral condition shown.";
+      redLight = true;
+      status = "Landing gear is DOWN, but the control valve is NOT NEUTRAL. Red warning indication is shown.";
     }
 
-    document.getElementById("diagram").src = image;
+    else if (state.gearDown && state.controlNeutral) {
+      image = "19lgon.png";
+      greenLight = true;
+      status = "Power is ON, landing gear is DOWN, and control valve is NEUTRAL. Green gear-down light is ON.";
+    }
+
+    else if (!state.gearDown && !state.throttleForward) {
+      image = "19lgupretard.png";
+      redLight = true;
+      horn = true;
+      status = "Landing gear is UP and throttle is RETARDED. Red warning light and warning horn are ON.";
+    }
+
+    else if (!state.gearDown && state.throttleForward) {
+      image = "19lgup.png";
+      redLight = true;
+      status = "Landing gear is UP. Red unsafe light is ON.";
+    }
+
+    changeImage(image);
+
+    setBadge("redBadge", redLight ? "Red Light ON" : "Red Light OFF", redLight ? "redOn" : "");
+    setBadge("greenBadge", greenLight ? "Green Light ON" : "Green Light OFF", greenLight ? "greenOn" : "");
+    setBadge("hornBadge", horn ? "Horn ON" : "Horn OFF", horn ? "hornOn" : "");
+
     document.getElementById("statusText").innerText = status;
   }
 
