@@ -163,7 +163,7 @@
   }
 
   .overlay{
-    pointer-events:none;
+    pointer-events:auto;
   }
 
   .clickLayer{
@@ -1024,7 +1024,19 @@ setHidden(
     state.pushTest = !state.pushTest;
     logic();
   };
+document.getElementById("flowSvg").addEventListener("click", function(event){
+  const svg = event.currentTarget;
+  const pt = svg.createSVGPoint();
 
+  pt.x = event.clientX;
+  pt.y = event.clientY;
+
+  const svgPoint = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+  console.log(
+    "L" + Math.round(svgPoint.x) + " " + Math.round(svgPoint.y)
+  );
+});
   logic();
 </script>
 
