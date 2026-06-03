@@ -447,27 +447,47 @@
                    L118 340
                    L118 374" />
 
-          <!-- Red lamp when one gear switch is mismatched -->
-          <path id="pRedMismatch"
-                d="M475 78
-                   L335 78
-                   L137 84
-                   L137 149
-                   L118 149
-                   L118 340
-                   L160 344
-                   L252 344
-                   L401 340
-                   L401 312" />
+          <!-- Red lamp mismatch path:
+     Left gear UP, right gear DOWN.
+     Current follows wire 6, then wire 4, through the right gear switch, then to ground. -->
+<path id="pRedMismatch"
+      d="M475 78
+         L335 78
+         L137 84
+         L137 149
+         L118 149
+         L118 340
+         L160 344
+         L252 344
+         L401 340
+         L401 312
+         L360 312
+         L310 312
+         L310 340
+         L118 340
+         L118 374" />
 
-          <!-- Push-to-test red lamp path to TEST wire #3 ground -->
-          <path id="pTest"
-                d="M475 78
-                   L335 78
-                   L137 84
-                   L137 149
-                   L298 157
-                   L298 174" />
+<!-- Control valve not neutral path:
+     Gear is DOWN, control valve is NOT neutral.
+     Current goes through the control valve branch, into wire 5,
+     through the right gear switch, then to ground. -->
+<path id="pCtl"
+      d="M475 78
+         L523 113
+         L497 148
+         L497 184
+         L428 184
+         L318 184
+         L318 244
+         L311 244
+         L311 310
+         L360 310
+         L401 310
+         L360 312
+         L310 312
+         L310 340
+         L118 340
+         L118 374" />
 
           <!-- Warning horn path when gear is up/mismatch and throttles retarded -->
           <path id="pHorn"
