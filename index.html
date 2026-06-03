@@ -452,33 +452,40 @@
 
           <!-- Red lamp when both gear switches are up -->
           <path id="pRedGear"
-                d="M475 78
-                   L335 78
-                   L137 84
-                   L137 149
-                   L118 149
-                   L118 340
-                   L118 374" />
+      d="M475 75
+         L473 81
+         L137 84
+         L136 101
+         L76 101
+         L76 122
+         L136 122
+         L137 148
+         L119 149
+         L119 343
+         L117 369" />
 
           <!-- Red lamp mismatch path:
      Left gear UP, right gear DOWN.
      Current follows wire 6, then wire 4, through the right gear switch, then to ground. -->
-<path id="pRedMismatch"
-      d="M475 78
-         L335 78
+<path id="pMismatchLeftUpRightDown"
+      d="M475 75
+         L473 81
          L137 84
-         L137 149
-         L118 149
-         L118 340
-         L160 344
-         L252 344
-         L401 340
-         L401 312
-         L360 312
-         L310 312
-         L310 340
-         L118 340
-         L118 374" />
+         L136 101
+         L76 101
+         L76 122
+         L136 122
+         L137 148
+         L119 149
+         L119 343
+         L64 343
+         L64 411
+         L450 411
+         L449 313
+         L402 313
+         L400 342
+         L158 342
+         L116 369" />
 
 <!-- Control valve not neutral path:
      Gear is DOWN, control valve is NOT neutral.
@@ -518,6 +525,21 @@
                    L448 392
                    L118 392
                    L118 374" />
+
+          <!-- Push to test on the red lamp -->
+          <path id="pTest"
+            d="M475 75
+         L473 81
+         L137 84
+         L136 101
+         L76 101
+         L76 122
+         L136 122
+         L137 148
+         L170 148
+         L171 157
+         L297 157
+         L297 171" />
 
           <!-- Control valve not neutral path -->
           <path id="pCtl"
