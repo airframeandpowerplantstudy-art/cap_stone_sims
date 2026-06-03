@@ -3,180 +3,208 @@
 <head>
 <meta charset="UTF-8">
 <title>Landing Gear Circuit Trainer</title>
+
 <style>
-body{margin:0;font-family:Arial;background:#0b1f33;color:white}
-.wrap{max-width:1100px;margin:auto;padding:20px}
-.panel{background:#eef3f7;color:#111;border-radius:14px;padding:18px}
-button{padding:12px 16px;margin:6px;border:0;border-radius:10px;font-weight:bold;cursor:pointer}
-.on{background:#22c55e;color:#062b12}.off{background:#d1d5db;color:#111}
-.wire{stroke:#111;stroke-width:6;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.flow{stroke:#00aaff;stroke-width:7;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.65}
-.electron{fill:#00aaff;filter:drop-shadow(0 0 7px #00aaff);display:none}
-.lamp{fill:white;stroke:#111;stroke-width:3}
-.redOn{fill:#ef4444;filter:drop-shadow(0 0 12px red)}
-.greenOn{fill:#22c55e;filter:drop-shadow(0 0 12px lime)}
-.hornOn{fill:#facc15;filter:drop-shadow(0 0 12px yellow)}
-.txt{font:18px Arial;fill:#111}.big{font:bold 22px Arial;fill:#111}
-.switchBlade{stroke:#111;stroke-width:7;stroke-linecap:round;transition:.25s}
-.switchClosed{stroke:#22c55e}
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b1f33;
+    color: white;
+  }
+
+  .wrap {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+  }
+
+  .card {
+    background: #102a44;
+    padding: 15px;
+    border-radius: 14px;
+    margin-bottom: 15px;
+  }
+
+  button {
+    padding: 12px 16px;
+    margin: 6px;
+    border: 0;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .on {
+    background: #22c55e;
+    color: #052e16;
+  }
+
+  .off {
+    background: #d1d5db;
+    color: #111827;
+  }
+
+  .test {
+    background: #f2b705;
+    color: #111827;
+  }
+
+  .diagramBox {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  #diagram {
+    width: 100%;
+    display: block;
+  }
+
+  .status {
+    font-size: 18px;
+  }
 </style>
 </head>
 
 <body>
+
 <div class="wrap">
-<h1>Landing Gear Warning Circuit Trainer</h1>
-<p>Click the switches. Blue dots show electron flow from the 28V DC bus all the way to ground.</p>
 
-<button id="rightBtn" class="off" onclick="toggle('right')">Right Gear Switch: OPEN</button>
-<button id="leftBtn" class="off" onclick="toggle('left')">Left Gear Switch: OPEN</button>
-<button id="controlBtn" class="off" onclick="toggle('control')">Control Valve Switch: NEUTRAL</button>
-<button id="throttleBtn" class="off" onclick="toggle('throttle')">Throttle Switches: OPEN</button>
+  <h1>Landing Gear Warning Circuit Trainer</h1>
 
-<div class="panel">
-<svg viewBox="0 0 1000 600" width="100%">
+  <div class="card">
+    <p>
+      Click the switches to change circuit conditions. The schematic updates to show
+      switch positions and current flow.
+    </p>
 
-<text class="big" x="420" y="40">28V DC BUS</text>
+    <button id="rightBtn" class="off" onclick="toggleSwitch('right')">
+      Right Gear Switch: OPEN
+    </button>
 
-<!-- wires -->
-<path class="wire" d="M500 60 V95 H180 V175"/>
-<path class="wire" d="M500 95 V175"/>
-<path class="wire" d="M500 95 H820 V175"/>
+    <button id="leftBtn" class="off" onclick="toggleSwitch('left')">
+      Left Gear Switch: OPEN
+    </button>
 
-<path class="wire" d="M180 245 V410 H105 V465"/>
-<path class="wire" d="M500 245 V410 H105"/>
-<path class="wire" d="M820 245 V410 H105"/>
+    <button id="controlBtn" class="off" onclick="toggleSwitch('control')">
+      Control Valve Switch: NEUTRAL
+    </button>
 
-<!-- ground -->
-<line class="wire" x1="105" y1="465" x2="105" y2="500"/>
-<line class="wire" x1="70" y1="500" x2="140" y2="500"/>
-<line class="wire" x1="82" y1="515" x2="128" y2="515"/>
-<line class="wire" x1="94" y1="530" x2="116" y2="530"/>
-<text class="txt" x="55" y="565">GROUND</text>
+    <button id="throttleBtn" class="off" onclick="toggleSwitch('throttle')">
+      Throttle Switches: OPEN
+    </button>
 
-<!-- flow paths -->
-<path id="redFlow" class="flow" d="M500 60 V95 H180 V175 V245 V410 H105 V500" style="display:none"/>
-<path id="greenFlow" class="flow" d="M500 60 V95 V175 V245 V410 H105 V500" style="display:none"/>
-<path id="hornFlow" class="flow" d="M500 60 V95 H820 V175 V245 V410 H105 V500" style="display:none"/>
+    <button id="testBtn" class="test" onclick="pushTest()">
+      Push To Test
+    </button>
+  </div>
 
-<!-- electrons -->
-<circle id="redE" class="electron" r="7">
-<animateMotion dur="2.5s" repeatCount="indefinite" path="M500 60 V95 H180 V175 V245 V410 H105 V500"/>
-</circle>
+  <div class="diagramBox">
+    <img id="diagram" src="19lgoff.png" alt="Landing gear circuit diagram">
+  </div>
 
-<circle id="greenE" class="electron" r="7">
-<animateMotion dur="2.5s" repeatCount="indefinite" path="M500 60 V95 V175 V245 V410 H105 V500"/>
-</circle>
+  <div class="card status">
+    <strong>Status:</strong>
+    <span id="statusText">No complete circuit path shown.</span>
+  </div>
 
-<circle id="hornE" class="electron" r="7">
-<animateMotion dur="2.5s" repeatCount="indefinite" path="M500 60 V95 H820 V175 V245 V410 H105 V500"/>
-</circle>
-
-<!-- components -->
-<circle id="redLamp" class="lamp" cx="180" cy="210" r="36"/>
-<text class="big" x="170" y="218">R</text>
-<text class="txt" x="115" y="285">Red Unsafe Light</text>
-
-<circle id="greenLamp" class="lamp" cx="500" cy="210" r="36"/>
-<text class="big" x="487" y="218">G</text>
-<text class="txt" x="435" y="285">Green Safe Light</text>
-
-<rect id="hornBox" class="lamp" x="780" y="185" width="55" height="50" rx="8"/>
-<polygon id="hornCone" class="lamp" points="835,190 890,165 890,255 835,230"/>
-<text class="txt" x="765" y="285">Warning Horn</text>
-
-<!-- switch drawings -->
-<g onclick="toggle('right')" style="cursor:pointer">
-<text class="txt" x="115" y="340">Right Gear Switch</text>
-<circle cx="145" cy="375" r="8" fill="white" stroke="#111" stroke-width="3"/>
-<circle cx="215" cy="375" r="8" fill="white" stroke="#111" stroke-width="3"/>
-<line id="rightBlade" class="switchBlade" x1="145" y1="375" x2="195" y2="345"/>
-</g>
-
-<g onclick="toggle('left')" style="cursor:pointer">
-<text class="txt" x="440" y="340">Left Gear Switch</text>
-<circle cx="465" cy="375" r="8" fill="white" stroke="#111" stroke-width="3"/>
-<circle cx="535" cy="375" r="8" fill="white" stroke="#111" stroke-width="3"/>
-<line id="leftBlade" class="switchBlade" x1="465" y1="375" x2="515" y2="345"/>
-</g>
-
-<g onclick="toggle('control')" style="cursor:pointer">
-<text class="txt" x="390" y="500">Control Valve Switch</text>
-<circle cx="460" cy="535" r="8" fill="white" stroke="#111" stroke-width="3"/>
-<circle cx="540" cy="535" r="8" fill="white" stroke="#111" stroke-width="3"/>
-<line id="controlBlade" class="switchBlade" x1="460" y1="535" x2="515" y2="505"/>
-</g>
-
-<g onclick="toggle('throttle')" style="cursor:pointer">
-<text class="txt" x="735" y="340">Throttle Switches</text>
-<circle cx="760" cy="375" r="8" fill="white" stroke="#111" stroke-width="3"/>
-<circle cx="820" cy="375" r="8" fill="white" stroke="#111" stroke-width="3"/>
-<line id="throttleBlade1" class="switchBlade" x1="760" y1="375" x2="805" y2="345"/>
-<circle cx="760" cy="420" r="8" fill="white" stroke="#111" stroke-width="3"/>
-<circle cx="820" cy="420" r="8" fill="white" stroke="#111" stroke-width="3"/>
-<line id="throttleBlade2" class="switchBlade" x1="760" y1="420" x2="805" y2="390"/>
-</g>
-
-</svg>
-</div>
-
-<h3 id="status">Status: No complete path yet.</h3>
 </div>
 
 <script>
-let state={right:false,left:false,control:false,throttle:false};
+  const state = {
+    right: false,
+    left: false,
+    control: false,
+    throttle: false
+  };
 
-function toggle(name){state[name]=!state[name];update();}
+  function toggleSwitch(name) {
+    state[name] = !state[name];
+    updateTrainer();
+  }
 
-function btn(id,on,onTxt,offTxt){
- const b=document.getElementById(id);
- b.className=on?"on":"off";
- b.innerText=on?onTxt:offTxt;
-}
+  function setButton(id, isOn, onText, offText) {
+    const btn = document.getElementById(id);
+    btn.className = isOn ? "on" : "off";
+    btn.innerText = isOn ? onText : offText;
+  }
 
-function show(id,on){document.getElementById(id).style.display=on?"block":"none";}
-function cls(id,c){document.getElementById(id).setAttribute("class",c);}
+  function pushTest() {
+    document.getElementById("diagram").src = "19lgpushtest.png";
+    document.getElementById("statusText").innerText =
+      "Push-to-test circuit condition shown.";
 
-function blade(id,on,x2,y2,openX,openY){
- const b=document.getElementById(id);
- b.setAttribute("x2",on?x2:openX);
- b.setAttribute("y2",on?y2:openY);
- b.setAttribute("class",on?"switchBlade switchClosed":"switchBlade");
-}
+    setTimeout(updateTrainer, 2000);
+  }
 
-function update(){
- btn("rightBtn",state.right,"Right Gear Switch: CLOSED / DOWN","Right Gear Switch: OPEN");
- btn("leftBtn",state.left,"Left Gear Switch: CLOSED / DOWN","Left Gear Switch: OPEN");
- btn("controlBtn",state.control,"Control Valve Switch: DOWN","Control Valve Switch: NEUTRAL");
- btn("throttleBtn",state.throttle,"Throttle Switches: CLOSED","Throttle Switches: OPEN");
+  function updateTrainer() {
+    setButton(
+      "rightBtn",
+      state.right,
+      "Right Gear Switch: DOWN / CLOSED",
+      "Right Gear Switch: OPEN"
+    );
 
- blade("rightBlade",state.right,215,375,195,345);
- blade("leftBlade",state.left,535,375,515,345);
- blade("controlBlade",state.control,540,535,515,505);
- blade("throttleBlade1",state.throttle,820,375,805,345);
- blade("throttleBlade2",state.throttle,820,420,805,390);
+    setButton(
+      "leftBtn",
+      state.left,
+      "Left Gear Switch: DOWN / CLOSED",
+      "Left Gear Switch: OPEN"
+    );
 
- const redOn=state.right;
- const greenOn=state.left && state.control;
- const hornOn=state.throttle && (!state.right || !state.left);
+    setButton(
+      "controlBtn",
+      state.control,
+      "Control Valve Switch: DOWN",
+      "Control Valve Switch: NEUTRAL"
+    );
 
- show("redFlow",redOn); show("redE",redOn);
- show("greenFlow",greenOn); show("greenE",greenOn);
- show("hornFlow",hornOn); show("hornE",hornOn);
+    setButton(
+      "throttleBtn",
+      state.throttle,
+      "Throttle Switches: CLOSED / RETARDED",
+      "Throttle Switches: OPEN"
+    );
 
- cls("redLamp",redOn?"lamp redOn":"lamp");
- cls("greenLamp",greenOn?"lamp greenOn":"lamp");
- cls("hornBox",hornOn?"lamp hornOn":"lamp");
- cls("hornCone",hornOn?"lamp hornOn":"lamp");
+    let image = "19lgoff.png";
+    let status = "No complete circuit path shown.";
 
- let notes=[];
- if(redOn)notes.push("Red unsafe light energized");
- if(greenOn)notes.push("Green safe light energized");
- if(hornOn)notes.push("Warning horn energized");
- if(!notes.length)notes.push("No complete path to ground");
+    if (!state.right && !state.left && !state.control && !state.throttle) {
+      image = "19lgoff.png";
+      status = "Circuit is off. No complete path shown.";
+    }
 
- document.getElementById("status").innerText="Status: "+notes.join(" | ");
-}
-update();
+    if (state.right && !state.left) {
+      image = "19lgup.png";
+      status = "Unsafe gear condition shown.";
+    }
+
+    if (!state.right && state.left) {
+      image = "19lgleftup.png";
+      status = "Left gear switch condition shown.";
+    }
+
+    if (state.left && state.control) {
+      image = "19lgon.png";
+      status = "Gear-down indication circuit shown.";
+    }
+
+    if (state.throttle && (!state.right || !state.left)) {
+      image = "19lgupretard.png";
+      status = "Throttle retarded with unsafe gear condition. Warning horn circuit shown.";
+    }
+
+    if (state.right && state.left && state.control) {
+      image = "19lgctlvalnotneutral.png";
+      status = "Control valve not neutral condition shown.";
+    }
+
+    document.getElementById("diagram").src = image;
+    document.getElementById("statusText").innerText = status;
+  }
+
+  updateTrainer();
 </script>
+
 </body>
 </html>
