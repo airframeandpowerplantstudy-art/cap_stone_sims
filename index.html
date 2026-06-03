@@ -163,12 +163,21 @@
   }
 
   .overlay{
-    pointer-events:auto;
-  }
+  pointer-events:auto;
+}
 
-  .clickLayer{
-    pointer-events:none;
-  }
+.clickLayer{
+  display:none;
+  pointer-events:none;
+}
+
+.clickZone{
+  display:none;
+  pointer-events:none;
+  opacity:0;
+  border:0;
+  background:transparent;
+}
 
 /*  .clickZone{
     position:absolute;
@@ -476,22 +485,25 @@
      Current goes through the control valve branch, into wire 5,
      through the right gear switch, then to ground. -->
 <path id="pCtl"
-      d="M475 78
-         L523 113
-         L497 148
-         L497 184
-         L428 184
-         L318 184
-         L318 244
-         L311 244
-         L311 310
-         L360 310
-         L401 310
-         L360 312
-         L310 312
-         L310 340
-         L118 340
-         L118 374" />
+      d="M475 77
+         L475 81
+         L575 81
+         L577 208
+         L617 208
+         L617 223
+         L578 223
+         L577 286
+         L596 286
+         L597 309
+         L400 312
+         L399 222
+         L322 222
+         L310 244
+         L314 311
+         L368 311
+         L399 341
+         L159 345
+         L115 369" />
 
           <!-- Warning horn path when gear is up/mismatch and throttles retarded -->
           <path id="pHorn"
