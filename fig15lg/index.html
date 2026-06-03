@@ -1,1 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Interactive Landing Gear Warning Schematic</title>
 
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: white;
+  }
+
+  .top-panel {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    background: #1f2937;
+    border-bottom: 2px solid #374151;
+  }
+
+  .lamp {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #222;
+    border: 3px solid #555;
+    box-shadow: inset 0 0 8px #000;
+  }
+
+  .lamp.green.on {
+    background: #00ff66;
+    box-shadow: 0 0 18px #00ff66;
+  }
+
+  .lamp.red.on {
+    background: #ff3333;
+    box-shadow: 0 0 18px #ff3333;
+  }
+
+  .horn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    background: #333;
+    border: 2px solid #666;
+    font-weight: bold;
+  }
+
+  .horn.on {
+    background: #ffcc00;
+    color: #111;
+    box-shadow: 0 0 18px #ffcc00;
+  }
+
+  .layout {
+    display: flex;
+    height: calc(100vh - 76px);
+  }
+
+  .controls {
+    width: 230px;
+    padding: 16px;
+    background: #1f2937;
+    border-right: 2px solid #374151;
+  }
+
+  .controls h2 {
+    font-size: 18px;
+    margin-top: 0;
+  }
+
+  button {
+    width: 100%;
+    margin: 8px 0;
+    padding: 10px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #374151;
+    color: white;
+  }
+
+  button.active {
+    background: #2563eb;
+  }
+
+  button.warn {
+    background: #7f1d1d;
+  }
+
+  .schematic-wrap {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    background: #f3f4f6;
+  }
+
+  .schematic-stage {
+    position: relative;
+    width: 865px;
+    height: 608px;
+    margin: 20px auto;
+  }
+
+  .schematic-stage img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 865px;
+    height: 608px;
+    user-select: none;
+  }
+
+  svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 865px;
+    height: 608px;
+    pointer-events: none;
+  }
+
+  .wire {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .wire.green-on {
+    stroke: #00e676;
+    filter: drop-shadow(0 0 4px #00e676);
+  }
+
+  .wire.red-on {
+    stroke: #ff3333;
+    filter: drop-shadow(0 0 4px #ff3333);
+  }
+
+  .wire.power-on {
+    stroke: #00b7ff;
+    filter: drop-shadow(0 0 4px #00b7ff);
+  }
+
+  .wire.warn-on {
+    stroke: #ffcc00;
+    filter: drop-shadow(0 0 4px #ffcc00);
+  }
+
+  .map-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: magenta;
+    border-radius: 50%;
+    transform: translate(-4px, -4px);
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .note {
+    font-size: 12px;
+    color: #d1d5db;
+    margin-top: 12px;
+    line-height: 1.4;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="top-panel">
+  <strong>GREEN GEAR DOWN</strong>
+  <div id="greenLamp" class="lamp green"></div>
+
+  <strong>RED WARNING</strong>
+  <div id="redLamp" class="lamp red"></div>
+
+  <div id="hornBox" class="horn">HORN OFF</div>
+</div>
+
+<div class="layout">
+
+  <div class="controls">
+    <h2>Landing Gear Controls</h2>
+
+    <button id="powerBtn" onclick="togglePower()">Power: OFF</button>
+    <button id="gearBtn" onclick="toggleGear()">Gear: DOWN</button>
+    <button id="throttleBtn" onclick="toggleThrottle()">Throttle: FORWARD</button>
+    <button id="valveBtn" onclick="toggleValve()">Control Valve: NEUTRAL</button>
+    <button id="testBtn" onclick="pushToTest()" class="warn">Push-To-Test Red Lamp</button>
+
+    <div class="note">
+      Click on the schematic to collect map points.<br>
+      Points print to the console as:<br>
+      <code>L### x y</code><br><br>
+      Open console with <strong>F12</strong>.
+    </div>
+  </div>
+
+  <div class="schematic-wrap">
+    <div id="stage" class="schematic-stage">
+
+      <img id="schematicImage" src="fig15.png" alt="Landing Gear Warning Schematic">
+
+      <svg id="wireOverlay" viewBox="0 0 865 608">
+
+        <!-- ======================================================
+             MAP POINT PATH AREA
+             Replace the M/L coordinates below after clicking points.
+             Keep the IDs. These are your wire names.
+        ======================================================= -->
+
+        <!-- Main power feed -->
+        <path id="path-power-main" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #1 gear switch feed -->
+        <path id="path-wire-1" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #2 safety / up limit path -->
+        <path id="path-wire-2" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #3 right lamp/ground area -->
+        <path id="path-wire-3" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #4 right gear down switch -->
+        <path id="path-wire-4" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #5 left gear down switch feed -->
+        <path id="path-wire-5" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #6 nose gear down switch feed -->
+        <path id="path-wire-6" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #7 nose gear / center warning path -->
+        <path id="path-wire-7" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #8 throttle switch path -->
+        <path id="path-wire-8" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #10 horn / throttle warning path -->
+        <path id="path-wire-10" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #11 gear safety to bypass relay -->
+        <path id="path-wire-11" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #12 horn / relay path -->
+        <path id="path-wire-12" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #13 gear switch to relay -->
+        <path id="path-wire-13" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #14 relay / motor path -->
+        <path id="path-wire-14" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #15 motor ground / motor feed area -->
+        <path id="path-wire-15" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #16 throttle switches to bypass relay -->
+        <path id="path-wire-16" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #17 red lamp path -->
+        <path id="path-wire-17" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #18 green / down indication path -->
+        <path id="path-wire-18" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #19 up limit / warning path -->
+        <path id="path-wire-19" class="wire"
+          d="M 0 0 L 0 0" />
+
+        <!-- Wire #20 power source feed -->
+        <path id="path-wire-20" class="wire"
+          d="M 0 0 L 0 0" />
+
+      </svg>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   STATE LOGIC
+========================================================== */
+
+let powerOn = false;
+let gearUp = false;
+let throttleRetard = false;
+let controlValveNeutral = true;
+let pushTestActive = false;
+
+function togglePower() {
+  powerOn = !powerOn;
+  updateSystem();
+}
+
+function toggleGear() {
+  gearUp = !gearUp;
+  updateSystem();
+}
+
+function toggleThrottle() {
+  throttleRetard = !throttleRetard;
+  updateSystem();
+}
+
+function toggleValve() {
+  controlValveNeutral = !controlValveNeutral;
+  updateSystem();
+}
+
+function pushToTest() {
+  pushTestActive = true;
+  updateSystem();
+
+  setTimeout(() => {
+    pushTestActive = false;
+    updateSystem();
+  }, 700);
+}
+
+function clearPaths() {
+  document.querySelectorAll(".wire").forEach(path => {
+    path.classList.remove("green-on", "red-on", "power-on", "warn-on");
+  });
+}
+
+function lightPath(id, className) {
+  const path = document.getElementById(id);
+  if (path) path.classList.add(className);
+}
+
+function updateSystem() {
+  clearPaths();
+
+  const greenLamp = document.getElementById("greenLamp");
+  const redLamp = document.getElementById("redLamp");
+  const hornBox = document.getElementById("hornBox");
+
+  const gearDown = !gearUp;
+
+  const greenOn =
+    powerOn &&
+    gearDown &&
+    controlValveNeutral;
+
+  const redOn =
+    powerOn &&
+    (
+      gearUp ||
+      throttleRetard ||
+      !controlValveNeutral ||
+      pushTestActive
+    );
+
+  const hornOn =
+    powerOn &&
+    gearUp &&
+    throttleRetard;
+
+  greenLamp.classList.toggle("on", greenOn);
+  redLamp.classList.toggle("on", redOn);
+  hornBox.classList.toggle("on", hornOn);
+  hornBox.textContent = hornOn ? "HORN ON" : "HORN OFF";
+
+  document.getElementById("powerBtn").textContent =
+    powerOn ? "Power: ON" : "Power: OFF";
+
+  document.getElementById("gearBtn").textContent =
+    gearUp ? "Gear: UP" : "Gear: DOWN";
+
+  document.getElementById("throttleBtn").textContent =
+    throttleRetard ? "Throttle: RETARD" : "Throttle: FORWARD";
+
+  document.getElementById("valveBtn").textContent =
+    controlValveNeutral ? "Control Valve: NEUTRAL" : "Control Valve: NOT NEUTRAL";
+
+  document.getElementById("powerBtn").classList.toggle("active", powerOn);
+  document.getElementById("gearBtn").classList.toggle("active", gearUp);
+  document.getElementById("throttleBtn").classList.toggle("active", throttleRetard);
+  document.getElementById("valveBtn").classList.toggle("active", !controlValveNeutral);
+
+  if (!powerOn) return;
+
+  /* ======================================================
+     PATH LIGHTING LOGIC
+     These are placeholders.
+     Once your map points are added, we can adjust which
+     paths light for each condition.
+  ======================================================= */
+
+  lightPath("path-wire-20", "power-on");
+  lightPath("path-wire-1", "power-on");
+
+  if (greenOn) {
+    lightPath("path-wire-5", "green-on");
+    lightPath("path-wire-6", "green-on");
+    lightPath("path-wire-7", "green-on");
+    lightPath("path-wire-18", "green-on");
+    lightPath("path-wire-3", "green-on");
+  }
+
+  if (redOn) {
+    lightPath("path-wire-10", "red-on");
+    lightPath("path-wire-17", "red-on");
+    lightPath("path-wire-19", "red-on");
+  }
+
+  if (hornOn) {
+    lightPath("path-wire-10", "warn-on");
+    lightPath("path-wire-12", "warn-on");
+  }
+
+  if (gearUp) {
+    lightPath("path-wire-13", "power-on");
+    lightPath("path-wire-14", "power-on");
+    lightPath("path-wire-15", "power-on");
+  }
+
+  if (!controlValveNeutral) {
+    lightPath("path-wire-11", "red-on");
+    lightPath("path-wire-16", "red-on");
+  }
+}
+
+
+/* ==========================================================
+   MAP POINT TOOL
+   Open console with F12.
+   Click schematic.
+   It prints points like:
+   L123 456
+========================================================== */
+
+let pointNumber = 1;
+
+const stage = document.getElementById("stage");
+
+stage.addEventListener("click", function(event) {
+  const rect = stage.getBoundingClientRect();
+
+  const scaleX = 865 / rect.width;
+  const scaleY = 608 / rect.height;
+
+  const x = Math.round((event.clientX - rect.left) * scaleX);
+  const y = Math.round((event.clientY - rect.top) * scaleY);
+
+  console.log(`L${pointNumber} ${x} ${y}`);
+
+  const dot = document.createElement("div");
+  dot.className = "map-dot";
+  dot.style.left = x + "px";
+  dot.style.top = y + "px";
+  dot.title = `L${pointNumber} ${x} ${y}`;
+  stage.appendChild(dot);
+
+  pointNumber++;
+});
+
+updateSystem();
+</script>
+
+</body>
+</html>
