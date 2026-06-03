@@ -11,16 +11,14 @@
     --panel:#111827;
     --card:#f8fafc;
     --line:#2563eb;
-    --hot:#ef4444
+    --hot:#ef4444;
     --ground:#111827;
     --green:#22c55e;
     --amber:#facc15;
     --orange:#f97316;
   }
 
-  *{
-    box-sizing:border-box;
-  }
+  *{ box-sizing:border-box; }
 
   body{
     margin:0;
@@ -51,10 +49,7 @@
     padding:14px 16px;
   }
 
-  h1{
-    font-size:1.2rem;
-    margin:0 0 6px 0;
-  }
+  h1{ font-size:1.2rem; margin:0 0 6px 0; }
 
   .title p{
     margin:0;
@@ -115,15 +110,8 @@
     text-shadow:0 0 12px var(--amber);
   }
 
-  .lamp b{
-    display:block;
-    font-size:.8rem;
-  }
-
-  .lamp span{
-    font-size:.75rem;
-    color:#cbd5e1;
-  }
+  .lamp b{ display:block; font-size:.8rem; }
+  .lamp span{ font-size:.75rem; color:#cbd5e1; }
 
   .layout{
     display:grid;
@@ -162,47 +150,20 @@
     pointer-events:none;
   }
 
-  .overlay{
-  pointer-events:auto;
-}
+  /* Hit boxes are OFF for now. Side-panel buttons still work. */
+  .overlay{ pointer-events:none; }
 
-.clickLayer{
-  display:none;
-  pointer-events:none;
-}
-
-.clickZone{
-  display:none;
-  pointer-events:none;
-  opacity:0;
-  border:0;
-  background:transparent;
-}
-
-/*  .clickZone{
-    position:absolute;
-    border:2px solid transparent;
-    border-radius:10px;
-    cursor:pointer;
-    pointer-events:auto;
-    background:transparent;
+  .clickLayer{
+    display:none !important;
+    pointer-events:none !important;
   }
 
-  .clickZone:hover{
-    border-color:#f59e0b;
-    background:rgba(245,158,11,.13);
-  }*/
-
-  .hint{
-    position:absolute;
-    left:10px;
-    bottom:8px;
-    background:rgba(15,23,42,.86);
-    color:#fff;
-    border-radius:8px;
-    padding:6px 8px;
-    font-size:.8rem;
+  .clickZone{
+    display:none !important;
+    pointer-events:none !important;
   }
+
+  .hint{ display:none; }
 
   .side{
     background:#111827;
@@ -212,10 +173,7 @@
     align-self:start;
   }
 
-  .side h2{
-    font-size:1rem;
-    margin:0 0 10px;
-  }
+  .side h2{ font-size:1rem; margin:0 0 10px; }
 
   .control{
     background:#1f2937;
@@ -251,22 +209,10 @@
     color:#f8fafc;
   }
 
-  button.active{
-    background:#2563eb;
-  }
-
-  button.danger.active{
-    background:#dc2626;
-  }
-
-  button.good.active{
-    background:#16a34a;
-  }
-
-  button.warn.active{
-    background:#ca8a04;
-    color:#111827;
-  }
+  button.active{ background:#2563eb; }
+  button.danger.active{ background:#dc2626; }
+  button.good.active{ background:#16a34a; }
+  button.warn.active{ background:#ca8a04; color:#111827; }
 
   .row{
     display:flex;
@@ -275,9 +221,7 @@
     margin-top:8px;
   }
 
-  .row button{
-    flex:1 1 auto;
-  }
+  .row button{ flex:1 1 auto; }
 
   .note{
     font-size:.82rem;
@@ -300,9 +244,7 @@
     line-height:1.3;
   }
 
-  .missingImage.show{
-    display:block;
-  }
+  .missingImage.show{ display:block; }
 
   .flowPath{
     fill:none;
@@ -314,21 +256,10 @@
     filter:drop-shadow(0 0 5px rgba(249,115,22,.8));
   }
 
-  .greenPath{
-    stroke:#22c55e;
-  }
-
-  .redPath{
-    stroke:#ef4444;
-  }
-
-  .hornPath{
-    stroke:#facc15;
-  }
-
-  .bluePath{
-    stroke:#2563eb;
-  }
+  .greenPath{ stroke:#22c55e; }
+  .redPath{ stroke:#ef4444; }
+  .hornPath{ stroke:#facc15; }
+  .bluePath{ stroke:#2563eb; }
 
   .electron{
     fill:#fff;
@@ -355,83 +286,39 @@
     fill:#111827;
   }
 
-  .hidden{
-    display:none !important;
-  }
+  .hidden{ display:none !important; }
 
   @media (max-width:900px){
-    .layout{
-      grid-template-columns:1fr;
-    }
-
-    .side{
-      order:-1;
-    }
-
-    .status{
-      min-width:0;
-      flex:1 1 100%;
-    }
-
-    .app{
-      padding:8px;
-    }
-
-    .hint{
-      display:none;
-    }
+    .layout{ grid-template-columns:1fr; }
+    .side{ order:-1; }
+    .status{ min-width:0; flex:1 1 100%; }
+    .app{ padding:8px; }
   }
 </style>
 </head>
 
 <body>
 <div class="app">
-
   <div class="top">
     <div class="title">
       <h1>Landing Gear Warning Circuit — Interactive Schematic</h1>
-      <p>
-        Click the switches on the schematic or use the panel. Animated dots show current flow from the 28V DC source toward ground.
-      </p>
+      <p>Use the control panel to change switch positions. Animated dots show current flow from the 28V DC source toward ground.</p>
     </div>
 
     <div class="status">
-      <div class="lamp">
-        <div id="redBulb" class="bulb red"></div>
-        <b>R red lamp</b>
-        <span id="redText">OFF</span>
-      </div>
-
-      <div class="lamp">
-        <div id="greenBulb" class="bulb green"></div>
-        <b>G green lamp</b>
-        <span id="greenText">OFF</span>
-      </div>
-
-      <div class="lamp">
-        <div id="hornIcon" class="hornIcon">📢</div>
-        <b>Warning horn</b>
-        <span id="hornText">OFF</span>
-      </div>
+      <div class="lamp"><div id="redBulb" class="bulb red"></div><b>R red lamp</b><span id="redText">OFF</span></div>
+      <div class="lamp"><div id="greenBulb" class="bulb green"></div><b>G green lamp</b><span id="greenText">OFF</span></div>
+      <div class="lamp"><div id="hornIcon" class="hornIcon">📢</div><b>Warning horn</b><span id="hornText">OFF</span></div>
     </div>
   </div>
 
   <div class="layout">
-
     <div class="schematicWrap" aria-label="interactive landing gear warning schematic">
-
       <img id="schematicImg" src="19lgoff.png" alt="Landing gear warning schematic" />
 
-      <!-- 
-        IMPORTANT:
-        This overlay assumes the schematic image is 760 x 453-ish.
-        object-fit: contain and preserveAspectRatio: meet keep the paths from warping.
-      -->
       <svg class="overlay" id="flowSvg" viewBox="0 0 760 453" preserveAspectRatio="xMidYMid meet">
-
         <defs>
-          <!-- Green lamp: source to gear-down path to ground -->
-              <path id="pGreen"
+          <path id="pGreen"
       d="M475 77
          L476 93
          L523 94
@@ -450,7 +337,6 @@
          L159 345
          L117 369" />
 
-          <!-- Red lamp when both gear switches are up -->
           <path id="pRedGear"
       d="M475 75
          L473 81
@@ -464,10 +350,7 @@
          L119 343
          L117 369" />
 
-          <!-- Red lamp mismatch path:
-     Left gear UP, right gear DOWN.
-     Current follows wire 6, then wire 4, through the right gear switch, then to ground. -->
-<path id="pMismatchLeftUpRightDown"
+          <path id="pMismatchLeftUpRightDown"
       d="M475 75
          L473 81
          L137 84
@@ -487,11 +370,7 @@
          L158 342
          L116 369" />
 
-<!-- Control valve not neutral path:
-     Gear is DOWN, control valve is NOT neutral.
-     Current goes through the control valve branch, into wire 5,
-     through the right gear switch, then to ground. -->
-<path id="pCtl"
+          <path id="pCtl"
       d="M475 77
          L475 81
          L575 81
@@ -512,7 +391,6 @@
          L159 345
          L115 369" />
 
-          <!-- Warning horn path when gear is up/mismatch and throttles retarded -->
           <path id="pHorn"
                 d="M475 77
          L475 81
@@ -531,7 +409,6 @@
          L119 342
          L115 374" />
 
-          <!-- Push to test on the red lamp -->
           <path id="pTest"
             d="M475 75
          L473 81
@@ -545,22 +422,8 @@
          L171 157
          L297 157
          L297 171" />
-
-          <!-- Control valve not neutral path -->
-          <path id="pCtl"
-                d="M475 78
-                   L523 113
-                   L497 148
-                   L497 184
-                   L428 184
-                   L318 184
-                   L318 244
-                   L311 244
-                   L311 310
-                   L401 310" />
         </defs>
 
-        <!-- Visual source and ground reference dots -->
         <circle cx="475" cy="78" r="6" class="sourceDot"></circle>
         <text x="486" y="73" class="labelBox">28V DC</text>
 
@@ -572,215 +435,80 @@
 
         <g id="greenFlow" class="hidden">
           <use href="#pGreen" class="flowPath greenPath"></use>
-          <circle r="5" class="electron">
-            <animateMotion dur="2.8s" repeatCount="indefinite">
-              <mpath href="#pGreen"></mpath>
-            </animateMotion>
-          </circle>
-          <circle r="4" class="electron">
-            <animateMotion dur="2.8s" begin="-0.9s" repeatCount="indefinite">
-              <mpath href="#pGreen"></mpath>
-            </animateMotion>
-          </circle>
-          <circle r="4" class="electron">
-            <animateMotion dur="2.8s" begin="-1.8s" repeatCount="indefinite">
-              <mpath href="#pGreen"></mpath>
-            </animateMotion>
-          </circle>
+          <circle r="5" class="electron"><animateMotion dur="2.8s" repeatCount="indefinite"><mpath href="#pGreen"></mpath></animateMotion></circle>
+          <circle r="4" class="electron"><animateMotion dur="2.8s" begin="-0.9s" repeatCount="indefinite"><mpath href="#pGreen"></mpath></animateMotion></circle>
+          <circle r="4" class="electron"><animateMotion dur="2.8s" begin="-1.8s" repeatCount="indefinite"><mpath href="#pGreen"></mpath></animateMotion></circle>
         </g>
 
         <g id="redFlow" class="hidden">
           <use href="#pRedGear" class="flowPath redPath"></use>
-          <circle r="5" class="electron">
-            <animateMotion dur="2.3s" repeatCount="indefinite">
-              <mpath href="#pRedGear"></mpath>
-            </animateMotion>
-          </circle>
-          <circle r="4" class="electron">
-            <animateMotion dur="2.3s" begin="-0.75s" repeatCount="indefinite">
-              <mpath href="#pRedGear"></mpath>
-            </animateMotion>
-          </circle>
+          <circle r="5" class="electron"><animateMotion dur="2.3s" repeatCount="indefinite"><mpath href="#pRedGear"></mpath></animateMotion></circle>
+          <circle r="4" class="electron"><animateMotion dur="2.3s" begin="-0.75s" repeatCount="indefinite"><mpath href="#pRedGear"></mpath></animateMotion></circle>
         </g>
 
         <g id="redMismatchFlow" class="hidden">
-          <use href="#pRedMismatch" class="flowPath redPath"></use>
-          <circle r="5" class="electron">
-            <animateMotion dur="2.6s" repeatCount="indefinite">
-              <mpath href="#pRedMismatch"></mpath>
-            </animateMotion>
-          </circle>
-          <circle r="4" class="electron">
-            <animateMotion dur="2.6s" begin="-1.2s" repeatCount="indefinite">
-              <mpath href="#pRedMismatch"></mpath>
-            </animateMotion>
-          </circle>
+          <use href="#pMismatchLeftUpRightDown" class="flowPath redPath"></use>
+          <circle r="5" class="electron"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#pMismatchLeftUpRightDown"></mpath></animateMotion></circle>
+          <circle r="4" class="electron"><animateMotion dur="2.6s" begin="-1.2s" repeatCount="indefinite"><mpath href="#pMismatchLeftUpRightDown"></mpath></animateMotion></circle>
         </g>
 
         <g id="testFlow" class="hidden">
           <use href="#pTest" class="flowPath redPath"></use>
-          <circle r="5" class="electron">
-            <animateMotion dur="1.4s" repeatCount="indefinite">
-              <mpath href="#pTest"></mpath>
-            </animateMotion>
-          </circle>
+          <circle r="5" class="electron"><animateMotion dur="1.4s" repeatCount="indefinite"><mpath href="#pTest"></mpath></animateMotion></circle>
         </g>
 
         <g id="hornFlow" class="hidden">
           <use href="#pHorn" class="flowPath hornPath"></use>
-          <circle r="5" class="electron">
-            <animateMotion dur="3.1s" repeatCount="indefinite">
-              <mpath href="#pHorn"></mpath>
-            </animateMotion>
-          </circle>
-          <circle r="4" class="electron">
-            <animateMotion dur="3.1s" begin="-1s" repeatCount="indefinite">
-              <mpath href="#pHorn"></mpath>
-            </animateMotion>
-          </circle>
-          <circle r="4" class="electron">
-            <animateMotion dur="3.1s" begin="-2s" repeatCount="indefinite">
-              <mpath href="#pHorn"></mpath>
-            </animateMotion>
-          </circle>
+          <circle r="5" class="electron"><animateMotion dur="3.1s" repeatCount="indefinite"><mpath href="#pHorn"></mpath></animateMotion></circle>
+          <circle r="4" class="electron"><animateMotion dur="3.1s" begin="-1s" repeatCount="indefinite"><mpath href="#pHorn"></mpath></animateMotion></circle>
+          <circle r="4" class="electron"><animateMotion dur="3.1s" begin="-2s" repeatCount="indefinite"><mpath href="#pHorn"></mpath></animateMotion></circle>
         </g>
 
         <g id="ctlFlow" class="hidden">
           <use href="#pCtl" class="flowPath bluePath"></use>
-          <circle r="5" class="electron">
-            <animateMotion dur="2s" repeatCount="indefinite">
-              <mpath href="#pCtl"></mpath>
-            </animateMotion>
-          </circle>
-          <circle r="4" class="electron">
-            <animateMotion dur="2s" begin="-1s" repeatCount="indefinite">
-              <mpath href="#pCtl"></mpath>
-            </animateMotion>
-          </circle>
+          <circle r="5" class="electron"><animateMotion dur="2s" repeatCount="indefinite"><mpath href="#pCtl"></mpath></animateMotion></circle>
+          <circle r="4" class="electron"><animateMotion dur="2s" begin="-1s" repeatCount="indefinite"><mpath href="#pCtl"></mpath></animateMotion></circle>
         </g>
       </svg>
 
       <div class="clickLayer">
-        <button class="clickZone" id="zoneRedLamp"
-                title="Push to test red lamp"
-                style="left:5%;top:17%;width:14%;height:12%;"></button>
-
-        <button class="clickZone" id="zoneRightGear"
-                title="Toggle right gear switch"
-                style="left:9%;top:67%;width:27%;height:17%;"></button>
-
-        <button class="clickZone" id="zoneLeftGear"
-                title="Toggle left gear switch"
-                style="left:45%;top:64%;width:18%;height:17%;"></button>
-
-        <button class="clickZone" id="zoneCtl"
-                title="Toggle control valve neutral/not neutral"
-                style="left:31%;top:42%;width:23%;height:20%;"></button>
-
-        <button class="clickZone" id="zoneThrottle"
-                title="Toggle throttle switches"
-                style="left:76%;top:51%;width:19%;height:24%;"></button>
-      </div>
-
-      <div class="hint">
-        Clickable: red lamp test, right gear switch, left gear switch, control valve, throttle switches
+        <button class="clickZone" id="zoneRedLamp" title="Push to test red lamp" style="left:5%;top:17%;width:14%;height:12%;"></button>
+        <button class="clickZone" id="zoneRightGear" title="Toggle right gear switch" style="left:9%;top:67%;width:27%;height:17%;"></button>
+        <button class="clickZone" id="zoneLeftGear" title="Toggle left gear switch" style="left:45%;top:64%;width:18%;height:17%;"></button>
+        <button class="clickZone" id="zoneCtl" title="Toggle control valve neutral/not neutral" style="left:31%;top:42%;width:23%;height:20%;"></button>
+        <button class="clickZone" id="zoneThrottle" title="Toggle throttle switches" style="left:76%;top:51%;width:19%;height:24%;"></button>
       </div>
     </div>
 
     <aside class="side">
       <h2>Control Panel</h2>
 
-      <div class="control">
-        <label>
-          Power
-          <button id="powerBtn" class="good">OFF</button>
-        </label>
-        <small>OFF = no power to the schematic.</small>
-      </div>
+      <div class="control"><label>Power <button id="powerBtn" class="good">OFF</button></label><small>OFF = no power to the schematic.</small></div>
 
-      <div class="control">
-        <label>Gear command</label>
-        <div class="row">
-          <button id="allDownBtn">Both down</button>
-          <button id="allUpBtn">Both up</button>
-        </div>
-        <small>Fast set for both landing gear switches.</small>
-      </div>
+      <div class="control"><label>Gear command</label><div class="row"><button id="allDownBtn">Both down</button><button id="allUpBtn">Both up</button></div><small>Fast set for both landing gear switches.</small></div>
 
-      <div class="control">
-        <label>
-          Right gear switch
-          <button id="rightBtn">DOWN</button>
-        </label>
-        <small>UP connects #4 to #6 ground path. DOWN connects to wire #5.</small>
-      </div>
+      <div class="control"><label>Right gear switch <button id="rightBtn">DOWN</button></label><small>UP connects #4 to #6 ground path. DOWN connects to wire #5.</small></div>
 
-      <div class="control">
-        <label>
-          Left gear switch
-          <button id="leftBtn">DOWN</button>
-        </label>
-        <small>DOWN connects to bottom of #7. UP connects to bottom of #13 and wire #12.</small>
-      </div>
+      <div class="control"><label>Left gear switch <button id="leftBtn">DOWN</button></label><small>DOWN connects to bottom of #7. UP connects to bottom of #13 and wire #12.</small></div>
 
-      <div class="control">
-        <label>
-          Throttle switches
-          <button id="throttleBtn" class="warn">ADVANCED</button>
-        </label>
-        <small>Retarded = left throttle switch closed. Advanced = right switch open.</small>
-      </div>
+      <div class="control"><label>Throttle switches <button id="throttleBtn" class="warn">ADVANCED</button></label><small>Retarded = left throttle switch closed. Advanced = right switch open.</small></div>
 
-      <div class="control">
-        <label>
-          Control valve
-          <button id="ctlBtn">NEUTRAL</button>
-        </label>
-        <small>Not neutral with gear down shows the control valve not neutral circuit.</small>
-      </div>
+      <div class="control"><label>Control valve <button id="ctlBtn">NEUTRAL</button></label><small>Not neutral with gear down shows the control valve not neutral circuit.</small></div>
 
-      <div class="control">
-        <label>
-          Push-to-test
-          <button id="testBtn" class="danger">HOLD</button>
-        </label>
-        <small>Hold or click to test the red lamp through TEST wire #3 ground.</small>
-      </div>
+      <div class="control"><label>Push-to-test <button id="testBtn" class="danger">TEST</button></label><small>Click to test the red lamp through TEST wire #3 ground.</small></div>
 
-      <div class="note">
-        <b id="stateName">State: OFF</b><br>
-        <span id="explain">Power is removed, so no lamps, horn, or current flow are active.</span>
-        <div id="missingImage" class="missingImage"></div>
-      </div>
+      <div class="note"><b id="stateName">State: OFF</b><br><span id="explain">Power is removed, so no lamps, horn, or current flow are active.</span><div id="missingImage" class="missingImage"></div></div>
     </aside>
-
   </div>
 </div>
 
 <script>
-  /*
-    IMAGE FILES:
-    Put these PNG files in the SAME folder as index.html.
-
-    index.html
-    19lgoff.png
-    19lgon.png
-    19lgup.png
-    19lgupretard.png
-    19lgctlvalnotnuetral.png
-    19lgpushtest.png
-    19lgleftup.png
-  */
-
   const assets = {
     off: "19lgoff.png",
     on: "19lgon.png",
     up: "19lgup.png",
     upretard: "19lgupretard.png",
-
-    // Your file name was misspelled as "nuetral", so this matches that exact file.
     ctl: "19lgctlvalnotnuetral.png",
-
     test: "19lgpushtest.png",
     mismatch: "19lgleftup.png"
   };
@@ -796,34 +524,23 @@
 
   const $ = id => document.getElementById(id);
 
-  function bothDown(){
-    return state.right === "down" && state.left === "down";
-  }
+  function bothDown(){ return state.right === "down" && state.left === "down"; }
+  function bothUp(){ return state.right === "up" && state.left === "up"; }
+  function mismatch(){ return state.right !== state.left; }
+  function leftUpRightDown(){ return state.left === "up" && state.right === "down"; }
+  function rightUpLeftDown(){ return state.right === "up" && state.left === "down"; }
 
-  function bothUp(){
-    return state.right === "up" && state.left === "up";
-  }
-
-  function mismatch(){
-    return state.right !== state.left;
-  }
-
-  function setHidden(id, hide){
-    $(id).classList.toggle("hidden", hide);
-  }
+  function setHidden(id, hide){ $(id).classList.toggle("hidden", hide); }
 
   function setImage(key){
     const img = $("schematicImg");
     const warning = $("missingImage");
-
     warning.classList.remove("show");
     warning.textContent = "";
 
     img.onerror = function(){
       warning.classList.add("show");
-      warning.textContent =
-        "Image did not load: " + assets[key] +
-        " — check spelling, capitalization, and that the PNG is in the same folder as index.html.";
+      warning.textContent = "Image did not load: " + assets[key] + " — check spelling, capitalization, and that the PNG is in the same folder as index.html.";
     };
 
     img.src = assets[key];
@@ -832,25 +549,9 @@
   function logic(){
     const p = state.power;
 
-    const red =
-      p &&
-      (
-        state.pushTest ||
-        bothUp() ||
-        mismatch()
-      );
-
-    const green =
-      p &&
-      bothDown();
-
-    const horn =
-      p &&
-      (
-        bothUp() ||
-        mismatch()
-      ) &&
-      state.throttle === "retarded";
+    const red = p && (state.pushTest || bothUp() || mismatch());
+    const green = p && bothDown();
+    const horn = p && (bothUp() || mismatch()) && state.throttle === "retarded";
 
     let img = "off";
     let name = "OFF";
@@ -865,7 +566,7 @@
       else if(bothDown() && state.ctl === "notneutral"){
         img = "ctl";
         name = "CONTROL VALVE NOT NEUTRAL";
-        exp = "Gear is down and the control valve switch is not neutral, so that branch is highlighted.";
+        exp = "Gear is down and the control valve switch is not neutral, so the control-valve branch is highlighted.";
       }
       else if(bothDown()){
         img = "on";
@@ -882,10 +583,15 @@
         name = "GEAR UP";
         exp = "Both gear switches are up. The red lamp circuit is complete. The horn is off because the throttles are advanced.";
       }
-      else{
+      else if(leftUpRightDown()){
         img = "mismatch";
-        name = "GEAR MISMATCH";
-        exp = "One gear switch is up and the other is down. The red lamp warns that the gear positions do not agree.";
+        name = "LEFT GEAR UP / RIGHT GEAR DOWN";
+        exp = "The gear switches do not agree. The red lamp warns that the gear positions are mismatched.";
+      }
+      else if(rightUpLeftDown()){
+        img = "up";
+        name = "RIGHT GEAR UP / LEFT GEAR DOWN";
+        exp = "The gear switches do not agree. This mismatch reuses the gear-up red-lamp path.";
       }
     }
 
@@ -919,37 +625,14 @@
 
     $("testBtn").classList.toggle("active", state.pushTest);
 
-    /*
-      Flow display logic.
-      Current flow appears only when power is on.
-    */
+    // Green flow is hidden when the control valve is not neutral, even though the green lamp can still indicate gear down.
+    setHidden("greenFlow", !(p && green && !state.pushTest && state.ctl === "neutral"));
 
-    setHidden("greenFlow", !(p && green && !state.pushTest));
-
-   setHidden(
-  "redFlow",
-  !(p && red && !state.pushTest && (bothUp() || (state.right === "up" && state.left === "down")))
-);
-
-   setHidden(
-  "redMismatchFlow",
-  !(p && red && !state.pushTest && state.left === "up" && state.right === "down")
-);
-
-    setHidden(
-      "testFlow",
-      !(p && state.pushTest)
-    );
-
-    setHidden(
-      "hornFlow",
-      !horn
-    );
-
-setHidden(
-  "ctlFlow",
-  !(p && bothDown() && state.ctl === "notneutral" && !state.pushTest)
-);
+    setHidden("redFlow", !(p && red && !state.pushTest && (bothUp() || rightUpLeftDown())));
+    setHidden("redMismatchFlow", !(p && red && !state.pushTest && leftUpRightDown()));
+    setHidden("testFlow", !(p && state.pushTest));
+    setHidden("hornFlow", !horn);
+    setHidden("ctlFlow", !(p && bothDown() && state.ctl === "notneutral" && !state.pushTest));
   }
 
   function toggleGear(side){
@@ -959,11 +642,7 @@ setHidden(
 
   $("powerBtn").onclick = function(){
     state.power = !state.power;
-
-    if(!state.power){
-      state.pushTest = false;
-    }
-
+    if(!state.power){ state.pushTest = false; }
     logic();
   };
 
@@ -986,13 +665,8 @@ setHidden(
     logic();
   };
 
-  $("rightBtn").onclick = function(){
-    toggleGear("right");
-  };
-
-  $("leftBtn").onclick = function(){
-    toggleGear("left");
-  };
+  $("rightBtn").onclick = function(){ toggleGear("right"); };
+  $("leftBtn").onclick = function(){ toggleGear("left"); };
 
   $("throttleBtn").onclick = function(){
     state.throttle = state.throttle === "advanced" ? "retarded" : "advanced";
@@ -1004,84 +678,13 @@ setHidden(
     logic();
   };
 
-  // Push-to-test panel button
-/*  $("testBtn").onmousedown = function(){
-    state.power = true;
-    state.pushTest = true;
-    logic();
-  };
-
-  $("testBtn").onmouseup = function(){
-    state.pushTest = false;
-    logic();
-  };
-
-  $("testBtn").onmouseleave = function(){
-    state.pushTest = false;
-    logic();
-  };
-
   $("testBtn").onclick = function(){
     state.power = true;
     state.pushTest = !state.pushTest;
     logic();
   };
 
-  // Click zones on schematic
-  $("zoneRightGear").onclick = function(){
-    toggleGear("right");
-  };
-
-  $("zoneLeftGear").onclick = function(){
-    toggleGear("left");
-  };
-
-  $("zoneThrottle").onclick = function(){
-    state.throttle = state.throttle === "advanced" ? "retarded" : "advanced";
-    logic();
-  };
-
-  $("zoneCtl").onclick = function(){
-    state.ctl = state.ctl === "neutral" ? "notneutral" : "neutral";
-    logic();
-  };
-
-  $("zoneRedLamp").onmousedown = function(){
-    state.power = true;
-    state.pushTest = true;
-    logic();
-  };
-
-  $("zoneRedLamp").onmouseup = function(){
-    state.pushTest = false;
-    logic();
-  };
-
-  $("zoneRedLamp").onmouseleave = function(){
-    state.pushTest = false;
-    logic();
-  };
-
-  $("zoneRedLamp").onclick = function(){
-    state.power = true;
-    state.pushTest = !state.pushTest;
-    logic();
-  };*/
-document.getElementById("flowSvg").addEventListener("click", function(event){
-  const svg = event.currentTarget;
-  const pt = svg.createSVGPoint();
-
-  pt.x = event.clientX;
-  pt.y = event.clientY;
-
-  const svgPoint = pt.matrixTransform(svg.getScreenCTM().inverse());
-
-  console.log(
-    "L" + Math.round(svgPoint.x) + " " + Math.round(svgPoint.y)
-  );
-});
   logic();
 </script>
-
 </body>
 </html>
