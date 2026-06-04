@@ -218,8 +218,8 @@ svg {
     <button id="powerBtn" onclick="togglePower()">Power: ON</button>
     <button id="gearBtn" onclick="toggleGear()">Gear: DOWN</button>
     <button id="throttleBtn" onclick="toggleThrottle()">Throttle: RETARD</button>
-    <button id="testRedBtn" onclick="pushToTest()">Push-To-Test RED</button>
-     <button id="testGreenBtn" onclick="pushToTest()">Push-To-Test GREEN</button>
+    <button id="testRedBtn" onclick="pushToTestRed()">Push-To-Test RED</button>
+    <button id="testGreenBtn" onclick="pushToTestGreen()">Push-To-Test GREEN</button>
 
     <div class="status" id="statusBox">
       Status: Gear DOWN — green light active
@@ -303,26 +303,38 @@ svg {
 let powerOn = true;
 let gearUp = false;
 let throttleRetard = true;
+
 let pushTestRedActive = false;
-  let pushTestGreenActive = false;
+let pushTestGreenActive = false;
+
 let gearTransitioning = false;
 let gearDirection = null;
 let gearTimer = null;
+
 let relayClosed = false;
 let relayCloseTimer = null;
+
+let upSequenceStep = 0;
+// 0 = idle
+// 1 = select gear up path
+// 2 = initiate relay coil path
+// 3 = relay closed / motor path
+
 let wireDelayActive = false;
 let wireDelayTimer = null;
+
 let electronAnimationFrame = null;
 let electronFlows = [];
 
 const greenLamp = document.getElementById("greenLamp");
 const redLamp = document.getElementById("redLamp");
 const hornBox = document.getElementById("hornBox");
+
 const powerBtn = document.getElementById("powerBtn");
 const gearBtn = document.getElementById("gearBtn");
 const throttleBtn = document.getElementById("throttleBtn");
 const testRedBtn = document.getElementById("testRedBtn");
-  const testGreenBtn = document.getElementById("testGreenBtn");
+const testGreenBtn = document.getElementById("testGreenBtn");
 const statusBox = document.getElementById("statusBox");
 const stage = document.getElementById("stage");
 const electronLayer = document.getElementById("electronLayer");
@@ -351,11 +363,15 @@ function updateSwitchAnimations() {
     moveSwitch("sw-right-down", 526, 540, 556, 524);
   }
 
-  if (pushTestActive) {
+  if (pushTestRedActive) {
     moveSwitch("sw-red-test", 583, 469, 543, 464);
-    moveSwitch("sw-green-test", 698, 472, 655, 464);
   } else {
     moveSwitch("sw-red-test", 583, 469, 545, 450);
+  }
+
+  if (pushTestGreenActive) {
+    moveSwitch("sw-green-test", 698, 472, 655, 464);
+  } else {
     moveSwitch("sw-green-test", 698, 472, 661, 454);
   }
 
@@ -391,7 +407,7 @@ function updateSwitchAnimations() {
     moveSwitch("sw-down-limit-1", 420, 218, 457, 199);
     moveSwitch("sw-down-limit-2", 420, 278, 456, 257);
   } else {
-    moveSwitch("sw-down-limit-1", 420, 218, 457, 199);
+    moveSwitch("sw-down-limit-1", 420, 218, 457, 238);
     moveSwitch("sw-down-limit-2", 420, 278, 456, 298);
   }
 
@@ -418,8 +434,8 @@ function togglePower() {
   powerOn = !powerOn;
 
   if (!powerOn) {
-   pushTestRedActive = false;
-pushTestGreenActive = false;
+    pushTestRedActive = false;
+    pushTestGreenActive = false;
     relayClosed = false;
     wireDelayActive = false;
 
@@ -447,27 +463,41 @@ function toggleGear() {
   if (!gearUp) {
     gearDirection = "up";
     gearTransitioning = true;
+    relayClosed = false;
+    upSequenceStep = 1;
     updateSystem();
 
+    setTimeout(() => {
+      if (gearTransitioning && gearDirection === "up") {
+        upSequenceStep = 2;
+        updateSystem();
+      }
+    }, 3000);
+
     relayCloseTimer = setTimeout(() => {
-      relayClosed = true;
-      updateSystem();
-    }, 2600);
+      if (gearTransitioning && gearDirection === "up") {
+        relayClosed = true;
+        upSequenceStep = 3;
+        updateSystem();
+      }
+    }, 6000);
 
     gearTimer = setTimeout(() => {
       gearUp = true;
       gearTransitioning = false;
       gearDirection = null;
       relayClosed = false;
+      upSequenceStep = 0;
       gearTimer = null;
       relayCloseTimer = null;
       updateSystem();
-    }, 5000);
+    }, 9000);
 
   } else {
     gearDirection = "down";
     gearTransitioning = true;
     relayClosed = false;
+    upSequenceStep = 0;
     startWireDelay(550);
     updateSystem();
 
@@ -498,7 +528,8 @@ function pushToTestRed() {
     updateSystem(false);
   }, 900);
 }
-  function pushToTestGreen() {
+
+function pushToTestGreen() {
   if (!powerOn) return;
 
   pushTestGreenActive = true;
@@ -599,7 +630,7 @@ function updateButtons() {
   gearBtn.classList.toggle("active", gearUp || gearTransitioning);
   throttleBtn.classList.toggle("active", throttleRetard);
   testRedBtn.classList.toggle("warning-active", pushTestRedActive);
-testGreenBtn.classList.toggle("warning-active", pushTestGreenActive);
+  testGreenBtn.classList.toggle("warning-active", pushTestGreenActive);
 }
 
 function updateSystem(animateMainWires = true) {
@@ -613,12 +644,12 @@ function updateSystem(animateMainWires = true) {
     !gearTransitioning;
 
   const redOn =
-  powerOn &&
-  !gearTransitioning &&
-  (
-    gearUp ||
-    pushTestRedActive
-  );
+    powerOn &&
+    !gearTransitioning &&
+    (
+      gearUp ||
+      pushTestRedActive
+    );
 
   const hornOn =
     powerOn &&
@@ -638,9 +669,13 @@ function updateSystem(animateMainWires = true) {
   }
 
   if (gearTransitioning && gearDirection === "up") {
-    statusBox.textContent = relayClosed
-      ? "Status: Relay closed — motor circuit energized"
-      : "Status: Gear UP selected — relay coil energizing";
+    if (upSequenceStep === 1) {
+      statusBox.textContent = "Status: Gear UP selected — selector circuit energizing";
+    } else if (upSequenceStep === 2) {
+      statusBox.textContent = "Status: Relay coil energizing";
+    } else if (upSequenceStep === 3) {
+      statusBox.textContent = "Status: Relay closed — motor circuit energized";
+    }
   } else if (gearTransitioning && gearDirection === "down") {
     statusBox.textContent = wireDelayActive
       ? "Status: Switch moved — down circuit energizing..."
@@ -655,23 +690,24 @@ function updateSystem(animateMainWires = true) {
 
   if (wireDelayActive) return;
 
- if (pushTestRedActive) {
-  moveSwitch("sw-red-test", 583, 469, 543, 464);
-} else {
-  moveSwitch("sw-red-test", 583, 469, 545, 450);
-}
+  if (pushTestRedActive) {
+    lightPath("path-push-test-red", "red-on", true, true);
+  }
 
-if (pushTestGreenActive) {
-  moveSwitch("sw-green-test", 698, 472, 655, 464);
-} else {
-  moveSwitch("sw-green-test", 698, 472, 661, 454);
-}
+  if (pushTestGreenActive) {
+    lightPath("path-push-test-green", "green-on", true, true);
+  }
 
   if (gearTransitioning && gearDirection === "up") {
-    lightPath("path-select-gear-up", "power-on", true, true);
-    lightPath("path-select-up-initiate-relay", "power-on", true, true);
+    if (upSequenceStep >= 1) {
+      lightPath("path-select-gear-up", "power-on", true, true);
+    }
 
-    if (relayClosed) {
+    if (upSequenceStep >= 2) {
+      lightPath("path-select-up-initiate-relay", "power-on", true, true);
+    }
+
+    if (upSequenceStep >= 3) {
       lightPath("path-relay-closed-to-motor", "power-on", true, true);
     }
   }
