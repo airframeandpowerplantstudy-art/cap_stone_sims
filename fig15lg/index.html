@@ -240,7 +240,7 @@ svg {
         <!-- WIRE PATHS -->
 
         <path id="path-push-test-red" class="wire"
-        d="M 75 470 L 106 471 L 381 471 L 381 517 L 506 516 L 508 465 L 544 462 L 582 469 L 596 471 L 596 429 L 733 431 L 732 496" />
+        d="M 75 470 L 106 471 L 381 471 L 127 446 L 150 446 L 381 517 L 506 516 L 508 465 L 544 462 L 582 469 L 596 471 L 596 429 L 733 431 L 732 496" />
 
         <path id="path-push-test-green" class="wire"
         d="M 75 470 L 106 471 L 379 471 L 381 517 L 635 519 L 636 467 L 660 465 L 696 472 L 731 472 L 731 498" />
@@ -261,7 +261,7 @@ svg {
         d="M 75 382 L 106 382 L 118 382 L 120 75 L 383 74 L 421 90 L 421 216 L 457 238 L 503 236 L 504 98 L 538 127 L 538 152" />
 
         <path id="path-gear-down-green" class="wire"
-        d="M 75 470 L 105 469 L 192 518 L 223 539 L 354 540 L 388 538 L 524 540 L 562 540 L 611 540 L 610 452 L 658 449 L 697 470 L 731 472 L 732 497" />
+        d="M 75 470 L 105 469 L 105 518 L 192 518 L 223 539 L 354 540 L 388 538 L 524 540 L 562 540 L 611 540 L 610 452 L 658 449 L 697 470 L 731 472 L 732 497" />
 
         <path id="path-gear-up-horn" class="wire"
         d="M 76 472 L 106 471 L 106 520 L 191 520 L 226 496 L 224 416 L 251 412 L 251 366 L 252 354 L 293 354 L 293 368 L 421 367 L 420 278 L 455 295 L 456 333 L 713 334 L 713 323 L 752 322 L 763 341" />
@@ -306,7 +306,8 @@ let throttleRetard = true;
 
 let pushTestRedActive = false;
 let pushTestGreenActive = false;
-
+let pushTestRedHasDrawn = false;
+let pushTestGreenHasDrawn = false;
 let gearTransitioning = false;
 let gearDirection = null;
 let gearTimer = null;
@@ -519,12 +520,14 @@ function toggleThrottle() {
 function pushToTestRed() {
   if (!powerOn) return;
 
+  pushTestRedHasDrawn = false;
   pushTestRedActive = true;
-  startWireDelay(250);
+  startWireDelay(200);
   updateSystem();
 
   setTimeout(() => {
     pushTestRedActive = false;
+    pushTestRedHasDrawn = false;
     updateSystem(false);
   }, 2500);
 }
@@ -532,11 +535,13 @@ function pushToTestRed() {
 function pushToTestGreen() {
   if (!powerOn) return;
 
+  pushTestGreenHasDrawn = false;
   pushTestGreenActive = true;
-  startWireDelay(250);
+  startWireDelay(200);
   updateSystem();
 
   setTimeout(() => {
+    pushTestGreenHasDrawn = false;
     pushTestGreenActive = false;
     updateSystem(false);
   }, 2500);
@@ -691,12 +696,14 @@ function updateSystem(animateMainWires = true) {
   if (wireDelayActive) return;
 
   if (pushTestRedActive) {
-    lightPath("path-push-test-red", "red-on", true, true);
-  }
+  lightPath("path-push-test-red", "red-on", !pushTestRedHasDrawn, true);
+  pushTestRedHasDrawn = true;
+}
 
-  if (pushTestGreenActive) {
-    lightPath("path-push-test-green", "green-on", true, true);
-  }
+if (pushTestGreenActive) {
+  lightPath("path-push-test-green", "green-on", !pushTestGreenHasDrawn, true);
+  pushTestGreenHasDrawn = true;
+}
 
  if (gearTransitioning && gearDirection === "up") {
   if (upSequenceStep === 1) {
