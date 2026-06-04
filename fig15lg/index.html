@@ -59,58 +59,6 @@ body {
   flex-direction: row-reverse;
   height: calc(100vh - 70px);
 }
-  .switch-blade {
-  stroke: #111;
-  stroke-width: 5;
-  stroke-linecap: round;
-  transition: all 0.35s ease;
-  filter: drop-shadow(0 0 2px white);
-}
-
-/* gear selector */
-.switch-blade.gear-up-position {
-  x1: 418px;
-  y1: 49px;
-  x2: 455px;
-  y2: 49px;
-}
-
-.switch-blade.gear-down-position {
-  x1: 421px;
-  y1: 90px;
-  x2: 457px;
-  y2: 238px;
-}
-
-/* relay */
-.switch-blade.relay-open-position {
-  x1: 735px;
-  y1: 183px;
-  x2: 755px;
-  y2: 126px;
-}
-
-.switch-blade.relay-closed-position {
-  x1: 735px;
-  y1: 183px;
-  x2: 684px;
-  y2: 241px;
-}
-
-/* throttle */
-.switch-blade.throttle-forward-position {
-  x1: 713px;
-  y1: 334px;
-  x2: 752px;
-  y2: 322px;
-}
-
-.switch-blade.throttle-retard-position {
-  x1: 713px;
-  y1: 334px;
-  x2: 763px;
-  y2: 341px;
-}
 
 .controls {
   width: 240px;
@@ -195,6 +143,14 @@ svg {
   filter: drop-shadow(0 0 2px #ffcc00);
 }
 
+.switch-blade {
+  stroke: #111;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: all 0.35s ease;
+  filter: drop-shadow(0 0 2px white);
+}
+
 .map-dot {
   position: absolute;
   width: 8px;
@@ -263,6 +219,7 @@ svg {
 
       <svg viewBox="0 0 865 608">
 
+        <!-- WIRE PATHS -->
         <path id="path-push-test-red" class="wire"
         d="M 75 470 L 106 471 L 381 471 L 381 517 L 506 516 L 508 465 L 544 462 L 582 469 L 596 471 L 596 429 L 733 431 L 732 496" />
 
@@ -286,25 +243,30 @@ svg {
 
         <path id="path-select-up-initiate-relay" class="wire"
         d="M 755 126 L 752 127 L 770 145 L 811 147 L 810 409 L 328 408 L 327 289 L 189 288 L 149 267 L 151 201 L 277 200 L 315 224 L 318 187 L 366 188 L 368 315 L 650 316 L 650 171 L 717 169 L 743 175 L 733 183 L 745 190 L 735 198 L 745 206 L 721 209 L 685 212 L 684 241" />
-<!-- ANIMATED SWITCH BLADES -->
 
-<!-- Gear selector switch -->
-<line id="gearSwitchBlade"
-   x1="421" y1="90"
-  x2="457" y2="238"
-  class="switch-blade gear-down-position" />
+        <!-- ANIMATED SWITCH BLADES -->
+        <line id="sw-nose-down" class="switch-blade" x1="192" y1="520" x2="225" y2="540" />
+        <line id="sw-left-down" class="switch-blade" x1="354" y1="540" x2="386" y2="540" />
+        <line id="sw-right-down" class="switch-blade" x1="526" y1="540" x2="562" y2="540" />
 
-<!-- Relay contact / initiate relay visual -->
-<line id="relaySwitchBlade"
-  x1="735" y1="183"
-  x2="755" y2="126"
-  class="switch-blade relay-open-position" />
+        <line id="sw-red-test" class="switch-blade" x1="583" y1="469" x2="545" y2="450" />
+        <line id="sw-green-test" class="switch-blade" x1="698" y1="472" x2="661" y2="454" />
 
-<!-- Throttle switch -->
-<line id="throttleSwitchBlade"
-  x1="713" y1="334"
-  x2="752" y2="322"
-  class="switch-blade throttle-forward-position" />
+        <line id="sw-throttle-1" class="switch-blade" x1="250" y1="414" x2="252" y2="365" />
+        <line id="sw-throttle-2" class="switch-blade" x1="294" y1="414" x2="291" y2="366" />
+
+        <line id="sw-up-limit-1" class="switch-blade" x1="150" y1="330" x2="186" y2="350" />
+        <line id="sw-up-limit-2" class="switch-blade" x1="152" y1="268" x2="186" y2="290" />
+
+        <line id="sw-gear-safety" class="switch-blade" x1="277" y1="201" x2="318" y2="224" />
+
+        <line id="sw-gear-selector" class="switch-blade" x1="382" y1="74" x2="421" y2="92" />
+
+        <line id="sw-down-limit-1" class="switch-blade" x1="420" y1="218" x2="457" y2="199" />
+        <line id="sw-down-limit-2" class="switch-blade" x1="420" y1="278" x2="456" y2="257" />
+
+        <line id="sw-relay" class="switch-blade" x1="713" y1="112" x2="750" y2="112" />
+
       </svg>
     </div>
   </div>
@@ -334,7 +296,81 @@ const testBtn = document.getElementById("testBtn");
 const statusBox = document.getElementById("statusBox");
 const stage = document.getElementById("stage");
 
-  
+function moveSwitch(id, x1, y1, x2, y2) {
+  const sw = document.getElementById(id);
+  if (!sw) return;
+
+  sw.setAttribute("x1", x1);
+  sw.setAttribute("y1", y1);
+  sw.setAttribute("x2", x2);
+  sw.setAttribute("y2", y2);
+}
+
+function updateSwitchAnimations() {
+  const gearDownComplete = powerOn && !gearUp && !gearTransitioning;
+  const gearUpComplete = powerOn && gearUp && !gearTransitioning;
+
+  if (gearDownComplete) {
+    moveSwitch("sw-nose-down", 192, 520, 225, 540);
+    moveSwitch("sw-left-down", 354, 540, 386, 540);
+    moveSwitch("sw-right-down", 526, 540, 562, 540);
+  } else {
+    moveSwitch("sw-nose-down", 192, 520, 226, 495);
+    moveSwitch("sw-left-down", 354, 540, 383, 524);
+    moveSwitch("sw-right-down", 526, 540, 556, 524);
+  }
+
+  if (pushTestActive) {
+    moveSwitch("sw-red-test", 583, 469, 543, 464);
+    moveSwitch("sw-green-test", 698, 472, 655, 464);
+  } else {
+    moveSwitch("sw-red-test", 583, 469, 545, 450);
+    moveSwitch("sw-green-test", 698, 472, 661, 454);
+  }
+
+  if (throttleRetard) {
+    moveSwitch("sw-throttle-1", 250, 414, 252, 365);
+    moveSwitch("sw-throttle-2", 294, 414, 291, 366);
+  } else {
+    moveSwitch("sw-throttle-1", 250, 414, 238, 365);
+    moveSwitch("sw-throttle-2", 294, 414, 276, 366);
+  }
+
+  if (gearUpComplete) {
+    moveSwitch("sw-up-limit-1", 150, 330, 187, 312);
+    moveSwitch("sw-up-limit-2", 152, 268, 186, 245);
+  } else {
+    moveSwitch("sw-up-limit-1", 150, 330, 186, 350);
+    moveSwitch("sw-up-limit-2", 152, 268, 186, 290);
+  }
+
+  if (gearTransitioning || gearUp) {
+    moveSwitch("sw-gear-safety", 277, 201, 316, 186);
+  } else {
+    moveSwitch("sw-gear-safety", 277, 201, 318, 224);
+  }
+
+  if ((gearTransitioning && gearDirection === "up") || gearUp) {
+    moveSwitch("sw-gear-selector", 382, 74, 419, 50);
+  } else {
+    moveSwitch("sw-gear-selector", 382, 74, 421, 92);
+  }
+
+  if (gearDownComplete) {
+    moveSwitch("sw-down-limit-1", 420, 218, 457, 199);
+    moveSwitch("sw-down-limit-2", 420, 278, 456, 257);
+  } else {
+    moveSwitch("sw-down-limit-1", 420, 218, 457, 199);
+    moveSwitch("sw-down-limit-2", 420, 278, 456, 298);
+  }
+
+  if (gearTransitioning && gearDirection === "up") {
+    moveSwitch("sw-relay", 713, 130, 750, 130);
+  } else {
+    moveSwitch("sw-relay", 713, 112, 750, 112);
+  }
+}
+
 function togglePower() {
   powerOn = !powerOn;
 
@@ -351,35 +387,7 @@ function togglePower() {
 
   updateSystem();
 }
-function updateSwitchAnimations() {
-  const gearSwitchBlade = document.getElementById("gearSwitchBlade");
-  const relaySwitchBlade = document.getElementById("relaySwitchBlade");
-  const throttleSwitchBlade = document.getElementById("throttleSwitchBlade");
 
-  gearSwitchBlade.classList.remove("gear-up-position", "gear-down-position");
-  relaySwitchBlade.classList.remove("relay-open-position", "relay-closed-position");
-  throttleSwitchBlade.classList.remove("throttle-forward-position", "throttle-retard-position");
-
-  if (gearTransitioning && gearDirection === "up") {
-    gearSwitchBlade.classList.add("gear-up-position");
-    relaySwitchBlade.classList.add("relay-closed-position");
-  } else if (gearTransitioning && gearDirection === "down") {
-    gearSwitchBlade.classList.add("gear-down-position");
-    relaySwitchBlade.classList.add("relay-open-position");
-  } else if (gearUp) {
-    gearSwitchBlade.classList.add("gear-up-position");
-    relaySwitchBlade.classList.add("relay-open-position");
-  } else {
-    gearSwitchBlade.classList.add("gear-down-position");
-    relaySwitchBlade.classList.add("relay-open-position");
-  }
-
-  if (throttleRetard) {
-    throttleSwitchBlade.classList.add("throttle-retard-position");
-  } else {
-    throttleSwitchBlade.classList.add("throttle-forward-position");
-  }
-}
 function toggleGear() {
   if (!powerOn || gearTransitioning) return;
 
@@ -451,6 +459,7 @@ function lightPath(id, className) {
 
 function updateButtons() {
   powerBtn.textContent = powerOn ? "Power: ON" : "Power: OFF";
+
   gearBtn.textContent = gearTransitioning
     ? (gearDirection === "up" ? "Gear: TRAVELING UP" : "Gear: TRAVELING DOWN")
     : (gearUp ? "Gear: UP" : "Gear: DOWN");
@@ -468,7 +477,7 @@ function updateButtons() {
 function updateSystem() {
   clearPaths();
   updateButtons();
-  updateSwitch();
+  updateSwitchAnimations();
 
   const greenOn =
     powerOn &&
