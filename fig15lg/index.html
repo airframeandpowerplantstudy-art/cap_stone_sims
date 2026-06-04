@@ -218,7 +218,6 @@ svg {
     <button id="powerBtn" onclick="togglePower()">Power: ON</button>
     <button id="gearBtn" onclick="toggleGear()">Gear: DOWN</button>
     <button id="throttleBtn" onclick="toggleThrottle()">Throttle: RETARD</button>
-    <button id="valveBtn" onclick="toggleValve()">Control Valve: NEUTRAL</button>
     <button id="testBtn" onclick="pushToTest()">Push-To-Test</button>
 
     <div class="status" id="statusBox">
@@ -226,9 +225,8 @@ svg {
     </div>
 
     <div class="note">
-      Open console with <strong>F12</strong>.<br>
-      Click the schematic to get map points.<br>
-      It prints like: <code>L1 123 456</code>
+      You can click map to trace with pink dots<br>
+      Requires refresh to clear.<br>
     </div>
   </div>
 
@@ -297,12 +295,14 @@ svg {
 let powerOn = true;
 let gearUp = false;
 let throttleRetard = true;
-let controlValveNeutral = true;
 let pushTestActive = false;
 
 let gearTransitioning = false;
 let gearDirection = null;
 let gearTimer = null;
+
+let relayClosed = false;
+let relayCloseTimer = null;
 
 let wireDelayActive = false;
 let wireDelayTimer = null;
@@ -316,7 +316,6 @@ const hornBox = document.getElementById("hornBox");
 const powerBtn = document.getElementById("powerBtn");
 const gearBtn = document.getElementById("gearBtn");
 const throttleBtn = document.getElementById("throttleBtn");
-const valveBtn = document.getElementById("valveBtn");
 const testBtn = document.getElementById("testBtn");
 const statusBox = document.getElementById("statusBox");
 const stage = document.getElementById("stage");
@@ -390,7 +389,7 @@ function updateSwitchAnimations() {
     moveSwitch("sw-down-limit-2", 420, 278, 456, 298);
   }
 
-  if (gearTransitioning && gearDirection === "up") {
+  if (relayClosed) {
     moveSwitch("sw-relay", 713, 130, 750, 130);
   } else {
     moveSwitch("sw-relay", 713, 112, 750, 112);
@@ -419,13 +418,16 @@ function togglePower() {
     gearTransitioning = false;
     pushTestActive = false;
     gearDirection = null;
+    relayClosed = false;
     wireDelayActive = false;
 
     if (gearTimer) clearTimeout(gearTimer);
     if (wireDelayTimer) clearTimeout(wireDelayTimer);
+    if (relayCloseTimer) clearTimeout(relayCloseTimer);
 
     gearTimer = null;
     wireDelayTimer = null;
+    relayCloseTimer = null;
   }
 
   updateSystem();
@@ -434,37 +436,45 @@ function togglePower() {
 function toggleGear() {
   if (!powerOn || gearTransitioning) return;
 
-  if (gearTimer) {
-    clearTimeout(gearTimer);
-    gearTimer = null;
-  }
+  if (gearTimer) clearTimeout(gearTimer);
+  if (relayCloseTimer) clearTimeout(relayCloseTimer);
 
-  startWireDelay(550);
+  gearTimer = null;
+  relayCloseTimer = null;
+  relayClosed = false;
+  wireDelayActive = false;
 
   if (!gearUp) {
     gearDirection = "up";
     gearTransitioning = true;
     updateSystem();
 
+    relayCloseTimer = setTimeout(() => {
+      relayClosed = true;
+      updateSystem();
+    }, 1600);
+
     gearTimer = setTimeout(() => {
       gearUp = true;
       gearTransitioning = false;
       gearDirection = null;
-      wireDelayActive = false;
+      relayClosed = false;
       gearTimer = null;
+      relayCloseTimer = null;
       updateSystem();
     }, 5000);
 
   } else {
     gearDirection = "down";
     gearTransitioning = true;
+    relayClosed = false;
+    startWireDelay(550);
     updateSystem();
 
     gearTimer = setTimeout(() => {
       gearUp = false;
       gearTransitioning = false;
       gearDirection = null;
-      wireDelayActive = false;
       gearTimer = null;
       updateSystem();
     }, 5000);
@@ -473,14 +483,7 @@ function toggleGear() {
 
 function toggleThrottle() {
   throttleRetard = !throttleRetard;
-  startWireDelay(350);
-  updateSystem();
-}
-
-function toggleValve() {
-  controlValveNeutral = !controlValveNeutral;
-  startWireDelay(350);
-  updateSystem();
+  updateSystem(false);
 }
 
 function pushToTest() {
@@ -492,7 +495,7 @@ function pushToTest() {
 
   setTimeout(() => {
     pushTestActive = false;
-    updateSystem();
+    updateSystem(false);
   }, 900);
 }
 
@@ -559,7 +562,7 @@ function addElectronFlow(path) {
   }
 }
 
-function animateElectrons(timestamp) {
+function animateElectrons() {
   electronFlows.forEach(flow => {
     const t = ((performance.now() * flow.speed) + flow.offset) % 1;
     const point = flow.path.getPointAtLength(t * flow.length);
@@ -579,16 +582,14 @@ function updateButtons() {
     : (gearUp ? "Gear: UP" : "Gear: DOWN");
 
   throttleBtn.textContent = throttleRetard ? "Throttle: RETARD" : "Throttle: FORWARD";
-  valveBtn.textContent = controlValveNeutral ? "Control Valve: NEUTRAL" : "Control Valve: NOT NEUTRAL";
 
   powerBtn.classList.toggle("active", powerOn);
   gearBtn.classList.toggle("active", gearUp || gearTransitioning);
   throttleBtn.classList.toggle("active", throttleRetard);
-  valveBtn.classList.toggle("warning-active", !controlValveNeutral);
   testBtn.classList.toggle("warning-active", pushTestActive);
 }
 
-function updateSystem() {
+function updateSystem(animateMainWires = true) {
   clearPaths();
   updateButtons();
   updateSwitchAnimations();
@@ -596,16 +597,14 @@ function updateSystem() {
   const greenOn =
     powerOn &&
     !gearUp &&
-    !gearTransitioning &&
-    controlValveNeutral;
+    !gearTransitioning;
 
   const redOn =
     powerOn &&
     !gearTransitioning &&
     (
       gearUp ||
-      pushTestActive ||
-      !controlValveNeutral
+      pushTestActive
     );
 
   const hornOn =
@@ -626,19 +625,17 @@ function updateSystem() {
   }
 
   if (gearTransitioning && gearDirection === "up") {
-    statusBox.textContent = wireDelayActive
-      ? "Status: Switch moved — circuit energizing..."
-      : "Status: Gear UP selected — relay energized for 5 seconds";
+    statusBox.textContent = relayClosed
+      ? "Status: Relay closed — motor circuit energized"
+      : "Status: Gear UP selected — relay coil energizing";
   } else if (gearTransitioning && gearDirection === "down") {
     statusBox.textContent = wireDelayActive
-      ? "Status: Switch moved — circuit energizing..."
+      ? "Status: Switch moved — down circuit energizing..."
       : "Status: Gear DOWN selected — down circuit energized for 5 seconds";
   } else if (gearUp) {
     statusBox.textContent = throttleRetard
       ? "Status: Gear UP — red light and horn active"
       : "Status: Gear UP — red light active";
-  } else if (!controlValveNeutral) {
-    statusBox.textContent = "Status: Gear DOWN, control valve NOT neutral";
   } else {
     statusBox.textContent = "Status: Gear DOWN — green light active";
   }
@@ -646,29 +643,32 @@ function updateSystem() {
   if (wireDelayActive) return;
 
   if (pushTestActive) {
-    lightPath("path-push-test-red", "red-on");
-    lightPath("path-push-test-green", "green-on");
+    lightPath("path-push-test-red", "red-on", true, true);
+    lightPath("path-push-test-green", "green-on", true, true);
   }
 
   if (gearTransitioning && gearDirection === "up") {
-    lightPath("path-select-gear-up", "power-on");
-    lightPath("path-select-up-initiate-relay", "power-on");
+    lightPath("path-select-up-initiate-relay", "power-on", true, true);
+
+    if (relayClosed) {
+      lightPath("path-select-gear-up", "power-on", true, true);
+    }
   }
 
   if (!gearTransitioning && gearUp) {
-    lightPath("path-gear-up-red", "red-on");
+    lightPath("path-gear-up-red", "red-on", animateMainWires, false);
 
     if (throttleRetard) {
-      lightPath("path-gear-up-horn", "warn-on");
+      lightPath("path-gear-up-horn", "warn-on", true, true);
     }
   }
 
   if (gearTransitioning && gearDirection === "down") {
-    lightPath("path-select-gear-down", "power-on");
+    lightPath("path-select-gear-down", "power-on", animateMainWires, true);
   }
 
-  if (!gearTransitioning && !gearUp && controlValveNeutral) {
-    lightPath("path-gear-down-green", "green-on");
+  if (!gearTransitioning && !gearUp) {
+    lightPath("path-gear-down-green", "green-on", animateMainWires, false);
   }
 }
 
