@@ -125,22 +125,22 @@ svg {
 
 .wire.power-on {
   stroke: #00b7ff;
-  filter: drop-shadow(0 0 4px #00b7ff);
+  filter: drop-shadow(0 0 2px #00b7ff);
 }
 
 .wire.green-on {
   stroke: #00e676;
-  filter: drop-shadow(0 0 4px #00e676);
+  filter: drop-shadow(0 0 2px #00e676);
 }
 
 .wire.red-on {
   stroke: #ff3333;
-  filter: drop-shadow(0 0 4px #ff3333);
+  filter: drop-shadow(0 0 2px #ff3333);
 }
 
 .wire.warn-on {
   stroke: #ffcc00;
-  filter: drop-shadow(0 0 4px #ffcc00);
+  filter: drop-shadow(0 0 2px #ffcc00);
 }
 
 .map-dot {
@@ -189,14 +189,14 @@ svg {
   <div class="controls">
     <h2>Landing Gear Controls</h2>
 
-    <button id="powerBtn" onclick="togglePower()">Power: OFF</button>
+    <button id="powerBtn" onclick="togglePower()">Power: ON</button>
     <button id="gearBtn" onclick="toggleGear()">Gear: DOWN</button>
     <button id="throttleBtn" onclick="toggleThrottle()">Throttle: FORWARD</button>
     <button id="valveBtn" onclick="toggleValve()">Control Valve: NEUTRAL</button>
     <button id="testBtn" onclick="pushToTest()">Push-To-Test</button>
 
     <div class="status" id="statusBox">
-      Status: Power off
+      Status: Gear DOWN — green light active
     </div>
 
     <div class="note">
@@ -211,148 +211,29 @@ svg {
 
       <svg viewBox="0 0 865 608">
 
-        <!-- PUSH TO TEST RED -->
         <path id="path-push-test-red" class="wire"
-        d="M 75 470
-        L 106 471
-        L 381 471
-        L 381 517
-        L 506 516
-        L 508 465
-        L 544 462
-        L 582 469
-        L 596 471
-        L 596 429
-        L 733 431
-        L 732 496" />
+        d="M 75 470 L 106 471 L 381 471 L 381 517 L 506 516 L 508 465 L 544 462 L 582 469 L 596 471 L 596 429 L 733 431 L 732 496" />
 
-        <!-- PUSH TO TEST GREEN -->
         <path id="path-push-test-green" class="wire"
-        d="M 75 470
-        L 106 471
-        L 379 471
-        L 381 517
-        L 635 519
-        L 636 467
-        L 660 465
-        L 696 472
-        L 731 472
-        L 731 498" />
+        d="M 75 470 L 106 471 L 379 471 L 381 517 L 635 519 L 636 467 L 660 465 L 696 472 L 731 472 L 731 498" />
 
-        <!-- GEAR UP RED LIGHT -->
         <path id="path-gear-up-red" class="wire"
-        d="M 75 470
-        L 106 471
-        L 153 331
-        L 186 310
-        L 210 310
-        L 210 450
-        L 546 450
-        L 582 468
-        L 598 471
-        L 595 429
-        L 731 429
-        L 732 496" />
+        d="M 75 470 L 106 471 L 153 331 L 186 310 L 210 310 L 210 450 L 546 450 L 582 468 L 598 471 L 595 429 L 731 429 L 732 496" />
 
-        <!-- SELECT GEAR UP -->
         <path id="path-select-gear-up" class="wire"
-        d="M 75 382
-        L 107 382
-        L 120 382
-        L 120 75
-        L 380 74
-        L 418 49
-        L 806 50
-        L 807 108
-        L 769 109
-        L 755 126
-        L 712 130
-        L 565 98
-        L 539 125
-        L 539 152" />
+        d="M 75 382 L 107 382 L 120 382 L 120 75 L 380 74 L 418 49 L 806 50 L 807 108 L 769 109 L 755 126 L 712 130 L 565 98 L 539 125 L 539 152" />
 
-        <!-- SELECT GEAR DOWN -->
         <path id="path-select-gear-down" class="wire"
-        d="M 75 382
-        L 106 382
-        L 118 382
-        L 120 75
-        L 383 74
-        L 421 90
-        L 421 216
-        L 457 238
-        L 503 236
-        L 504 98
-        L 538 127
-        L 538 152" />
+        d="M 75 382 L 106 382 L 118 382 L 120 75 L 383 74 L 421 90 L 421 216 L 457 238 L 503 236 L 504 98 L 538 127 L 538 152" />
 
-        <!-- GEAR DOWN GREEN LIGHT -->
         <path id="path-gear-down-green" class="wire"
-        d="M 75 470
-        L 105 469
-        L 192 518
-        L 223 539
-        L 354 540
-        L 388 538
-        L 524 540
-        L 562 540
-        L 611 540
-        L 610 452
-        L 658 449
-        L 697 470
-        L 731 472
-        L 732 497" />
+        d="M 75 470 L 105 469 L 192 518 L 223 539 L 354 540 L 388 538 L 524 540 L 562 540 L 611 540 L 610 452 L 658 449 L 697 470 L 731 472 L 732 497" />
 
-        <!-- GEAR UP HORN -->
         <path id="path-gear-up-horn" class="wire"
-        d="M 76 472
-        L 106 471
-        L 106 520
-        L 191 520
-        L 226 496
-        L 224 416
-        L 251 412
-        L 251 366
-        L 252 354
-        L 293 354
-        L 293 368
-        L 421 367
-        L 420 278
-        L 455 295
-        L 456 333
-        L 713 334
-        L 713 323
-        L 752 322
-        L 763 341" />
+        d="M 76 472 L 106 471 L 106 520 L 191 520 L 226 496 L 224 416 L 251 412 L 251 366 L 252 354 L 293 354 L 293 368 L 421 367 L 420 278 L 455 295 L 456 333 L 713 334 L 713 323 L 752 322 L 763 341" />
 
-        <!-- SELECT UP INITIATE RELAY -->
         <path id="path-select-up-initiate-relay" class="wire"
-        d="M 755 126
-        L 752 127
-        L 770 145
-        L 811 147
-        L 810 409
-        L 328 408
-        L 327 289
-        L 189 288
-        L 149 267
-        L 151 201
-        L 277 200
-        L 315 224
-        L 318 187
-        L 366 188
-        L 368 315
-        L 650 316
-        L 650 171
-        L 717 169
-        L 743 175
-        L 733 183
-        L 745 190
-        L 735 198
-        L 745 206
-        L 721 209
-        L 685 212
-        L 684 241" />
+        d="M 755 126 L 752 127 L 770 145 L 811 147 L 810 409 L 328 408 L 327 289 L 189 288 L 149 267 L 151 201 L 277 200 L 315 224 L 318 187 L 366 188 L 368 315 L 650 316 L 650 171 L 717 169 L 743 175 L 733 183 L 745 190 L 735 198 L 745 206 L 721 209 L 685 212 L 684 241" />
 
       </svg>
     </div>
@@ -361,12 +242,14 @@ svg {
 </div>
 
 <script>
-let powerOn = false;
+let powerOn = true;
 let gearUp = false;
 let throttleRetard = false;
 let controlValveNeutral = true;
 let pushTestActive = false;
+
 let gearTransitioning = false;
+let gearDirection = null;
 let gearTimer = null;
 
 const greenLamp = document.getElementById("greenLamp");
@@ -387,6 +270,7 @@ function togglePower() {
   if (!powerOn) {
     gearTransitioning = false;
     pushTestActive = false;
+    gearDirection = null;
 
     if (gearTimer) {
       clearTimeout(gearTimer);
@@ -398,25 +282,38 @@ function togglePower() {
 }
 
 function toggleGear() {
-  gearUp = !gearUp;
+  if (!powerOn || gearTransitioning) return;
 
   if (gearTimer) {
     clearTimeout(gearTimer);
     gearTimer = null;
   }
 
-  if (powerOn && gearUp) {
+  if (!gearUp) {
+    gearDirection = "up";
     gearTransitioning = true;
     updateSystem();
 
     gearTimer = setTimeout(() => {
+      gearUp = true;
       gearTransitioning = false;
+      gearDirection = null;
       gearTimer = null;
       updateSystem();
     }, 5000);
+
   } else {
-    gearTransitioning = false;
+    gearDirection = "down";
+    gearTransitioning = true;
     updateSystem();
+
+    gearTimer = setTimeout(() => {
+      gearUp = false;
+      gearTransitioning = false;
+      gearDirection = null;
+      gearTimer = null;
+      updateSystem();
+    }, 5000);
   }
 }
 
@@ -450,19 +347,20 @@ function clearPaths() {
 
 function lightPath(id, className) {
   const path = document.getElementById(id);
-  if (path) {
-    path.classList.add(className);
-  }
+  if (path) path.classList.add(className);
 }
 
 function updateButtons() {
   powerBtn.textContent = powerOn ? "Power: ON" : "Power: OFF";
-  gearBtn.textContent = gearUp ? "Gear: UP" : "Gear: DOWN";
+  gearBtn.textContent = gearTransitioning
+    ? (gearDirection === "up" ? "Gear: TRAVELING UP" : "Gear: TRAVELING DOWN")
+    : (gearUp ? "Gear: UP" : "Gear: DOWN");
+
   throttleBtn.textContent = throttleRetard ? "Throttle: RETARD" : "Throttle: FORWARD";
   valveBtn.textContent = controlValveNeutral ? "Control Valve: NEUTRAL" : "Control Valve: NOT NEUTRAL";
 
   powerBtn.classList.toggle("active", powerOn);
-  gearBtn.classList.toggle("active", gearUp);
+  gearBtn.classList.toggle("active", gearUp || gearTransitioning);
   throttleBtn.classList.toggle("active", throttleRetard);
   valveBtn.classList.toggle("warning-active", !controlValveNeutral);
   testBtn.classList.toggle("warning-active", pushTestActive);
@@ -472,15 +370,15 @@ function updateSystem() {
   clearPaths();
   updateButtons();
 
-  const gearDown = !gearUp;
-
   const greenOn =
     powerOn &&
-    gearDown &&
+    !gearUp &&
+    !gearTransitioning &&
     controlValveNeutral;
 
   const redOn =
     powerOn &&
+    !gearTransitioning &&
     (
       gearUp ||
       pushTestActive ||
@@ -504,8 +402,10 @@ function updateSystem() {
     return;
   }
 
-  if (gearTransitioning) {
+  if (gearTransitioning && gearDirection === "up") {
     statusBox.textContent = "Status: Gear UP selected — relay energized for 5 seconds";
+  } else if (gearTransitioning && gearDirection === "down") {
+    statusBox.textContent = "Status: Gear DOWN selected — down circuit energized for 5 seconds";
   } else if (gearUp) {
     statusBox.textContent = throttleRetard
       ? "Status: Gear UP — red light and horn active"
@@ -516,31 +416,30 @@ function updateSystem() {
     statusBox.textContent = "Status: Gear DOWN — green light active";
   }
 
-  /* PUSH TO TEST */
   if (pushTestActive) {
     lightPath("path-push-test-red", "red-on");
     lightPath("path-push-test-green", "green-on");
   }
 
-  /* GEAR DOWN */
-  if (gearDown && controlValveNeutral && !pushTestActive) {
-    lightPath("path-select-gear-down", "power-on");
-    lightPath("path-gear-down-green", "green-on");
-  }
-
-  /* SELECT GEAR UP: 5 SECOND TRANSITION */
-  if (gearUp && gearTransitioning) {
+  if (gearTransitioning && gearDirection === "up") {
     lightPath("path-select-gear-up", "power-on");
     lightPath("path-select-up-initiate-relay", "power-on");
   }
 
-  /* AFTER 5 SECONDS: GEAR UP INDICATION */
-  if (gearUp && !gearTransitioning) {
+  if (!gearTransitioning && gearUp) {
     lightPath("path-gear-up-red", "red-on");
 
     if (throttleRetard) {
       lightPath("path-gear-up-horn", "warn-on");
     }
+  }
+
+  if (gearTransitioning && gearDirection === "down") {
+    lightPath("path-select-gear-down", "power-on");
+  }
+
+  if (!gearTransitioning && !gearUp && controlValveNeutral) {
+    lightPath("path-gear-down-green", "green-on");
   }
 }
 
