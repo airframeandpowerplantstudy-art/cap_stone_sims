@@ -59,6 +59,58 @@ body {
   flex-direction: row-reverse;
   height: calc(100vh - 70px);
 }
+  .switch-blade {
+  stroke: #111;
+  stroke-width: 5;
+  stroke-linecap: round;
+  transition: all 0.35s ease;
+  filter: drop-shadow(0 0 2px white);
+}
+
+/* gear selector */
+.switch-blade.gear-up-position {
+  x1: 418px;
+  y1: 49px;
+  x2: 455px;
+  y2: 49px;
+}
+
+.switch-blade.gear-down-position {
+  x1: 421px;
+  y1: 90px;
+  x2: 457px;
+  y2: 238px;
+}
+
+/* relay */
+.switch-blade.relay-open-position {
+  x1: 735px;
+  y1: 183px;
+  x2: 755px;
+  y2: 126px;
+}
+
+.switch-blade.relay-closed-position {
+  x1: 735px;
+  y1: 183px;
+  x2: 684px;
+  y2: 241px;
+}
+
+/* throttle */
+.switch-blade.throttle-forward-position {
+  x1: 713px;
+  y1: 334px;
+  x2: 752px;
+  y2: 322px;
+}
+
+.switch-blade.throttle-retard-position {
+  x1: 713px;
+  y1: 334px;
+  x2: 763px;
+  y2: 341px;
+}
 
 .controls {
   width: 240px;
@@ -234,7 +286,25 @@ svg {
 
         <path id="path-select-up-initiate-relay" class="wire"
         d="M 755 126 L 752 127 L 770 145 L 811 147 L 810 409 L 328 408 L 327 289 L 189 288 L 149 267 L 151 201 L 277 200 L 315 224 L 318 187 L 366 188 L 368 315 L 650 316 L 650 171 L 717 169 L 743 175 L 733 183 L 745 190 L 735 198 L 745 206 L 721 209 L 685 212 L 684 241" />
+<!-- ANIMATED SWITCH BLADES -->
 
+<!-- Gear selector switch -->
+<line id="gearSwitchBlade"
+   x1="421" y1="90"
+  x2="457" y2="238"
+  class="switch-blade gear-down-position" />
+
+<!-- Relay contact / initiate relay visual -->
+<line id="relaySwitchBlade"
+  x1="735" y1="183"
+  x2="755" y2="126"
+  class="switch-blade relay-open-position" />
+
+<!-- Throttle switch -->
+<line id="throttleSwitchBlade"
+  x1="713" y1="334"
+  x2="752" y2="322"
+  class="switch-blade throttle-forward-position" />
       </svg>
     </div>
   </div>
@@ -264,6 +334,7 @@ const testBtn = document.getElementById("testBtn");
 const statusBox = document.getElementById("statusBox");
 const stage = document.getElementById("stage");
 
+  
 function togglePower() {
   powerOn = !powerOn;
 
@@ -280,7 +351,35 @@ function togglePower() {
 
   updateSystem();
 }
+function updateSwitchAnimations() {
+  const gearSwitchBlade = document.getElementById("gearSwitchBlade");
+  const relaySwitchBlade = document.getElementById("relaySwitchBlade");
+  const throttleSwitchBlade = document.getElementById("throttleSwitchBlade");
 
+  gearSwitchBlade.classList.remove("gear-up-position", "gear-down-position");
+  relaySwitchBlade.classList.remove("relay-open-position", "relay-closed-position");
+  throttleSwitchBlade.classList.remove("throttle-forward-position", "throttle-retard-position");
+
+  if (gearTransitioning && gearDirection === "up") {
+    gearSwitchBlade.classList.add("gear-up-position");
+    relaySwitchBlade.classList.add("relay-closed-position");
+  } else if (gearTransitioning && gearDirection === "down") {
+    gearSwitchBlade.classList.add("gear-down-position");
+    relaySwitchBlade.classList.add("relay-open-position");
+  } else if (gearUp) {
+    gearSwitchBlade.classList.add("gear-up-position");
+    relaySwitchBlade.classList.add("relay-open-position");
+  } else {
+    gearSwitchBlade.classList.add("gear-down-position");
+    relaySwitchBlade.classList.add("relay-open-position");
+  }
+
+  if (throttleRetard) {
+    throttleSwitchBlade.classList.add("throttle-retard-position");
+  } else {
+    throttleSwitchBlade.classList.add("throttle-forward-position");
+  }
+}
 function toggleGear() {
   if (!powerOn || gearTransitioning) return;
 
@@ -369,6 +468,7 @@ function updateButtons() {
 function updateSystem() {
   clearPaths();
   updateButtons();
+  updateSwitch();
 
   const greenOn =
     powerOn &&
