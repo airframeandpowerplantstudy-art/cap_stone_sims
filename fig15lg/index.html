@@ -5,6 +5,7 @@
 <title>Fig 15 Landing Gear Interactive Schematic</title>
 
 <style>
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -65,7 +66,6 @@ body {
   background: #1f2937;
   padding: 16px;
   border-left: 2px solid #374151;
-  box-shadow: inset 3px 0 10px rgba(0,0,0,0.35);
 }
 
 button {
@@ -84,10 +84,6 @@ button.active {
   background: #2563eb;
 }
 
-button.warning-active {
-  background: #991b1b;
-}
-
 .viewer {
   flex: 1;
   overflow: auto;
@@ -102,7 +98,6 @@ button.warning-active {
   background-image: url("fig15.png");
   background-size: 865px 608px;
   background-repeat: no-repeat;
-  background-position: top left;
   border: 2px solid #111;
 }
 
@@ -144,7 +139,7 @@ svg {
 }
 
 .wire.draw-wire {
-  animation: drawWire 1.4s ease forwards;
+  animation: drawWire 2.8s ease forwards;
 }
 
 @keyframes drawWire {
@@ -165,26 +160,8 @@ svg {
   stroke: #3b82f6;
   stroke-width: 4;
   stroke-linecap: round;
-  transition: all 0.35s ease;
+  transition: all 1.2s ease;
   filter: drop-shadow(0 0 4px #93c5fd);
-}
-
-.map-dot {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: magenta;
-  border-radius: 50%;
-  transform: translate(-4px, -4px);
-  z-index: 50;
-  pointer-events: none;
-}
-
-.note {
-  font-size: 12px;
-  color: #d1d5db;
-  line-height: 1.4;
-  margin-top: 12px;
 }
 
 .status {
@@ -193,8 +170,8 @@ svg {
   background: #111827;
   border-radius: 8px;
   font-size: 13px;
-  line-height: 1.4;
 }
+
 </style>
 </head>
 
@@ -212,118 +189,90 @@ svg {
 
 <div class="main">
 
-  <div class="controls">
-    <h2>Landing Gear Controls</h2>
+<div class="controls">
 
-    <button id="powerBtn" onclick="togglePower()">Power: ON</button>
-    <button id="gearBtn" onclick="toggleGear()">Gear: DOWN</button>
-    <button id="throttleBtn" onclick="toggleThrottle()">Throttle: RETARD</button>
-    <button id="testBtn" onclick="pushToTest()">Push-To-Test</button>
+<h2>Landing Gear Controls</h2>
 
-    <div class="status" id="statusBox">
-      Status: Gear DOWN — green light active
-    </div>
+<button id="powerBtn" onclick="togglePower()">Power: ON</button>
+<button id="gearBtn" onclick="toggleGear()">Gear: DOWN</button>
+<button id="throttleBtn" onclick="toggleThrottle()">Throttle: RETARD</button>
+<button id="testBtn" onclick="pushToTest()">Push-To-Test</button>
 
-    <div class="note">
-      You can click map to trace with pink dots<br>
-      Requires refresh to clear.<br>
-    </div>
-  </div>
-
-  <div class="viewer">
-    <div id="stage">
-
-      <svg viewBox="0 0 865 608">
-
-        <!-- WIRE PATHS -->
-        <path id="path-push-test-red" class="wire"
-        d="M 75 470 L 106 471 L 381 471 L 381 517 L 506 516 L 508 465 L 544 462 L 582 469 L 596 471 L 596 429 L 733 431 L 732 496" />
-
-        <path id="path-push-test-green" class="wire"
-        d="M 75 470 L 106 471 L 379 471 L 381 517 L 635 519 L 636 467 L 660 465 L 696 472 L 731 472 L 731 498" />
-
-        <path id="path-gear-up-red" class="wire"
-        d="M 75 470 L 106 471 L 153 331 L 186 310 L 210 310 L 210 450 L 546 450 L 582 468 L 598 471 L 595 429 L 731 429 L 732 496" />
-
-        <path id="path-select-gear-up" class="wire"
-        d="M 75 382 L 107 382 L 120 382 L 120 75 L 380 74 L 418 49 L 806 50 L 807 108 L 769 109 L 755 126 L 712 130 L 565 98 L 539 125 L 539 152" />
-
-        <path id="path-select-gear-down" class="wire"
-        d="M 75 382 L 106 382 L 118 382 L 120 75 L 383 74 L 421 90 L 421 216 L 457 238 L 503 236 L 504 98 L 538 127 L 538 152" />
-
-        <path id="path-gear-down-green" class="wire"
-        d="M 75 470 L 105 469 L 192 518 L 223 539 L 354 540 L 388 538 L 524 540 L 562 540 L 611 540 L 610 452 L 658 449 L 697 470 L 731 472 L 732 497" />
-
-        <path id="path-gear-up-horn" class="wire"
-        d="M 76 472 L 106 471 L 106 520 L 191 520 L 226 496 L 224 416 L 251 412 L 251 366 L 252 354 L 293 354 L 293 368 L 421 367 L 420 278 L 455 295 L 456 333 L 713 334 L 713 323 L 752 322 L 763 341" />
-
-        <path id="path-select-up-initiate-relay" class="wire"
-        d="M 755 126 L 752 127 L 770 145 L 811 147 L 810 409 L 328 408 L 327 289 L 189 288 L 149 267 L 151 201 L 277 200 L 315 224 L 318 187 L 366 188 L 368 315 L 650 316 L 650 171 L 717 169 L 743 175 L 733 183 L 745 190 L 735 198 L 745 206 L 721 209 L 685 212 L 684 241" />
-
-        <!-- ELECTRON ANIMATION DOT LAYER -->
-        <g id="electronLayer"></g>
-
-        <!-- ANIMATED SWITCH BLADES -->
-        <line id="sw-nose-down" class="switch-blade" x1="192" y1="520" x2="225" y2="540" />
-        <line id="sw-left-down" class="switch-blade" x1="354" y1="540" x2="386" y2="540" />
-        <line id="sw-right-down" class="switch-blade" x1="526" y1="540" x2="562" y2="540" />
-
-        <line id="sw-red-test" class="switch-blade" x1="583" y1="469" x2="545" y2="450" />
-        <line id="sw-green-test" class="switch-blade" x1="698" y1="472" x2="661" y2="454" />
-
-        <line id="sw-throttle-1" class="switch-blade" x1="250" y1="414" x2="252" y2="365" />
-        <line id="sw-throttle-2" class="switch-blade" x1="294" y1="414" x2="291" y2="366" />
-
-        <line id="sw-up-limit-1" class="switch-blade" x1="150" y1="330" x2="186" y2="350" />
-        <line id="sw-up-limit-2" class="switch-blade" x1="152" y1="268" x2="186" y2="290" />
-
-        <line id="sw-gear-safety" class="switch-blade" x1="277" y1="201" x2="318" y2="224" />
-        <line id="sw-gear-selector" class="switch-blade" x1="382" y1="74" x2="421" y2="92" />
-
-        <line id="sw-down-limit-1" class="switch-blade" x1="420" y1="218" x2="457" y2="199" />
-        <line id="sw-down-limit-2" class="switch-blade" x1="420" y1="278" x2="456" y2="257" />
-
-        <line id="sw-relay" class="switch-blade" x1="713" y1="112" x2="750" y2="112" />
-
-      </svg>
-    </div>
-  </div>
+<div class="status" id="statusBox">
+Status: Gear DOWN — green light active
+</div>
 
 </div>
 
+<div class="viewer">
+<div id="stage">
+
+<svg viewBox="0 0 865 608">
+
+<!-- PATHS -->
+
+<path id="path-select-gear-up" class="wire"
+d="M 75 382 L 107 382 L 120 382 L 120 75 L 380 74 L 418 49 L 806 50 L 807 108 L 769 109 L 755 126" />
+
+<path id="path-select-up-initiate-relay" class="wire"
+d="M 755 126 L 752 127 L 770 145 L 811 147 L 810 409 L 328 408 L 327 289 L 189 288 L 149 267 L 151 201 L 277 200 L 315 224 L 318 187 L 366 188 L 368 315 L 650 316 L 650 171 L 717 169 L 743 175 L 733 183 L 745 190 L 735 198 L 745 206 L 721 209 L 685 212 L 684 241" />
+
+<path id="path-relay-closed-to-motor" class="wire"
+d="M 753 128 L 712 131 L 568 130 L 567 98 L 537 126 L 539 152" />
+
+<path id="path-select-gear-down" class="wire"
+d="M 75 382 L 106 382 L 118 382 L 120 75 L 383 74 L 421 90 L 421 216 L 457 238 L 503 236 L 504 98 L 538 127 L 538 152" />
+
+<path id="path-gear-up-red" class="wire"
+d="M 75 470 L 106 471 L 153 331 L 186 310 L 210 310 L 210 450 L 546 450 L 582 468 L 598 471 L 595 429 L 731 429 L 732 496" />
+
+<path id="path-gear-down-green" class="wire"
+d="M 75 470 L 105 469 L 192 518 L 223 539 L 354 540 L 388 538 L 524 540 L 562 540 L 611 540 L 610 452 L 658 449 L 697 470 L 731 472 L 732 497" />
+
+<path id="path-gear-up-horn" class="wire"
+d="M 76 472 L 106 471 L 106 520 L 191 520 L 226 496 L 224 416 L 251 412 L 251 366 L 252 354 L 293 354 L 293 368 L 421 367 L 420 278 L 455 295 L 456 333 L 713 334 L 713 323 L 752 322 L 763 341" />
+
+<!-- ELECTRONS -->
+<g id="electronLayer"></g>
+
+<!-- SWITCHES -->
+
+<line id="sw-relay" class="switch-blade"
+x1="713" y1="112"
+x2="750" y2="112" />
+
+<line id="sw-gear-selector" class="switch-blade"
+x1="382" y1="74"
+x2="421" y2="92" />
+
+</svg>
+
+</div>
+</div>
+</div>
+
 <script>
+
 let powerOn = true;
 let gearUp = false;
 let throttleRetard = true;
-let pushTestActive = false;
 
 let gearTransitioning = false;
 let gearDirection = null;
-let gearTimer = null;
 
 let relayClosed = false;
-let relayCloseTimer = null;
 
-let wireDelayActive = false;
-let wireDelayTimer = null;
-let electronAnimationFrame = null;
-let electronFlows = [];
+let gearTimer = null;
+let relayCloseTimer = null;
 
 const greenLamp = document.getElementById("greenLamp");
 const redLamp = document.getElementById("redLamp");
 const hornBox = document.getElementById("hornBox");
 
-const powerBtn = document.getElementById("powerBtn");
-const gearBtn = document.getElementById("gearBtn");
-const throttleBtn = document.getElementById("throttleBtn");
-const testBtn = document.getElementById("testBtn");
-const statusBox = document.getElementById("statusBox");
-const stage = document.getElementById("stage");
 const electronLayer = document.getElementById("electronLayer");
 
 function moveSwitch(id, x1, y1, x2, y2) {
   const sw = document.getElementById(id);
-  if (!sw) return;
 
   sw.setAttribute("x1", x1);
   sw.setAttribute("y1", y1);
@@ -332,176 +281,60 @@ function moveSwitch(id, x1, y1, x2, y2) {
 }
 
 function updateSwitchAnimations() {
-  const gearDownComplete = powerOn && !gearUp && !gearTransitioning;
-  const gearUpComplete = powerOn && gearUp && !gearTransitioning;
 
-  if (gearDownComplete) {
-    moveSwitch("sw-nose-down", 192, 520, 225, 540);
-    moveSwitch("sw-left-down", 354, 540, 386, 540);
-    moveSwitch("sw-right-down", 526, 540, 562, 540);
-  } else {
-    moveSwitch("sw-nose-down", 192, 520, 226, 495);
-    moveSwitch("sw-left-down", 354, 540, 383, 524);
-    moveSwitch("sw-right-down", 526, 540, 556, 524);
-  }
+  const gearDownComplete =
+    !gearUp && !gearTransitioning;
 
-  if (pushTestActive) {
-    moveSwitch("sw-red-test", 583, 469, 543, 464);
-    moveSwitch("sw-green-test", 698, 472, 655, 464);
-  } else {
-    moveSwitch("sw-red-test", 583, 469, 545, 450);
-    moveSwitch("sw-green-test", 698, 472, 661, 454);
-  }
-
-  if (throttleRetard) {
-    moveSwitch("sw-throttle-1", 250, 414, 252, 365);
-    moveSwitch("sw-throttle-2", 294, 414, 291, 366);
-  } else {
-    moveSwitch("sw-throttle-1", 250, 414, 238, 365);
-    moveSwitch("sw-throttle-2", 294, 414, 276, 366);
-  }
-
-  if (gearUpComplete) {
-    moveSwitch("sw-up-limit-1", 150, 330, 187, 312);
-    moveSwitch("sw-up-limit-2", 152, 268, 186, 245);
-  } else {
-    moveSwitch("sw-up-limit-1", 150, 330, 186, 350);
-    moveSwitch("sw-up-limit-2", 152, 268, 186, 290);
-  }
-
-  if (gearTransitioning || gearUp) {
-    moveSwitch("sw-gear-safety", 277, 201, 316, 186);
-  } else {
-    moveSwitch("sw-gear-safety", 277, 201, 318, 224);
-  }
+  const gearUpComplete =
+    gearUp && !gearTransitioning;
 
   if ((gearTransitioning && gearDirection === "up") || gearUp) {
-    moveSwitch("sw-gear-selector", 382, 74, 419, 50);
-  } else {
-    moveSwitch("sw-gear-selector", 382, 74, 421, 92);
-  }
 
-  if (gearDownComplete) {
-    moveSwitch("sw-down-limit-1", 420, 218, 457, 199);
-    moveSwitch("sw-down-limit-2", 420, 278, 456, 257);
+    moveSwitch(
+      "sw-gear-selector",
+      382, 74,
+      419, 50
+    );
+
   } else {
-    moveSwitch("sw-down-limit-1", 420, 218, 457, 199);
-    moveSwitch("sw-down-limit-2", 420, 278, 456, 298);
+
+    moveSwitch(
+      "sw-gear-selector",
+      382, 74,
+      421, 92
+    );
   }
 
   if (relayClosed) {
-    moveSwitch("sw-relay", 713, 130, 750, 130);
-  } else {
-    moveSwitch("sw-relay", 713, 112, 750, 112);
-  }
-}
 
-function startWireDelay(ms = 500) {
-  wireDelayActive = true;
-
-  if (wireDelayTimer) {
-    clearTimeout(wireDelayTimer);
-    wireDelayTimer = null;
-  }
-
-  wireDelayTimer = setTimeout(() => {
-    wireDelayActive = false;
-    wireDelayTimer = null;
-    updateSystem();
-  }, ms);
-}
-
-function togglePower() {
-  powerOn = !powerOn;
-
-  if (!powerOn) {
-    gearTransitioning = false;
-    pushTestActive = false;
-    gearDirection = null;
-    relayClosed = false;
-    wireDelayActive = false;
-
-    if (gearTimer) clearTimeout(gearTimer);
-    if (wireDelayTimer) clearTimeout(wireDelayTimer);
-    if (relayCloseTimer) clearTimeout(relayCloseTimer);
-
-    gearTimer = null;
-    wireDelayTimer = null;
-    relayCloseTimer = null;
-  }
-
-  updateSystem();
-}
-
-function toggleGear() {
-  if (!powerOn || gearTransitioning) return;
-
-  if (gearTimer) clearTimeout(gearTimer);
-  if (relayCloseTimer) clearTimeout(relayCloseTimer);
-
-  gearTimer = null;
-  relayCloseTimer = null;
-  relayClosed = false;
-  wireDelayActive = false;
-
-  if (!gearUp) {
-    gearDirection = "up";
-    gearTransitioning = true;
-    updateSystem();
-
-    relayCloseTimer = setTimeout(() => {
-      relayClosed = true;
-      updateSystem();
-    }, 1600);
-
-    gearTimer = setTimeout(() => {
-      gearUp = true;
-      gearTransitioning = false;
-      gearDirection = null;
-      relayClosed = false;
-      gearTimer = null;
-      relayCloseTimer = null;
-      updateSystem();
-    }, 5000);
+    moveSwitch(
+      "sw-relay",
+      713, 130,
+      750, 130
+    );
 
   } else {
-    gearDirection = "down";
-    gearTransitioning = true;
-    relayClosed = false;
-    startWireDelay(550);
-    updateSystem();
 
-    gearTimer = setTimeout(() => {
-      gearUp = false;
-      gearTransitioning = false;
-      gearDirection = null;
-      gearTimer = null;
-      updateSystem();
-    }, 5000);
+    moveSwitch(
+      "sw-relay",
+      713, 112,
+      750, 112
+    );
   }
-}
-
-function toggleThrottle() {
-  throttleRetard = !throttleRetard;
-  updateSystem(false);
-}
-
-function pushToTest() {
-  if (!powerOn) return;
-
-  pushTestActive = true;
-  startWireDelay(250);
-  updateSystem();
-
-  setTimeout(() => {
-    pushTestActive = false;
-    updateSystem(false);
-  }, 900);
 }
 
 function clearPaths() {
+
   document.querySelectorAll(".wire").forEach(path => {
-    path.classList.remove("power-on", "green-on", "red-on", "warn-on", "draw-wire");
+
+    path.classList.remove(
+      "power-on",
+      "green-on",
+      "red-on",
+      "warn-on",
+      "draw-wire"
+    );
+
     path.style.strokeDasharray = "";
     path.style.strokeDashoffset = "";
   });
@@ -509,43 +342,20 @@ function clearPaths() {
   clearElectrons();
 }
 
-function lightPath(id, className, draw = true, electrons = true) {
-  const path = document.getElementById(id);
-  if (!path) return;
-
-  path.classList.add(className);
-
-  if (draw) {
-    const length = path.getTotalLength();
-    path.style.strokeDasharray = length;
-    path.style.strokeDashoffset = length;
-
-    requestAnimationFrame(() => {
-      path.classList.add("draw-wire");
-    });
-  }
-
-  if (electrons) {
-    addElectronFlow(path);
-  }
-}
-
-function clearElectrons() {
-  electronLayer.innerHTML = "";
-  electronFlows = [];
-
-  if (electronAnimationFrame) {
-    cancelAnimationFrame(electronAnimationFrame);
-    electronAnimationFrame = null;
-  }
-}
-
 function addElectronFlow(path) {
+
   const length = path.getTotalLength();
 
   for (let i = 0; i < 4; i++) {
-    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+
+    const dot =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+      );
+
     dot.setAttribute("class", "electron");
+
     electronLayer.appendChild(dot);
 
     electronFlows.push({
@@ -553,7 +363,7 @@ function addElectronFlow(path) {
       dot: dot,
       length: length,
       offset: i * 0.25,
-      speed: 0.00022
+      speed: 0.00018
     });
   }
 
@@ -562,36 +372,166 @@ function addElectronFlow(path) {
   }
 }
 
+let electronFlows = [];
+let electronAnimationFrame = null;
+
+function clearElectrons() {
+
+  electronLayer.innerHTML = "";
+  electronFlows = [];
+
+  if (electronAnimationFrame) {
+
+    cancelAnimationFrame(
+      electronAnimationFrame
+    );
+
+    electronAnimationFrame = null;
+  }
+}
+
 function animateElectrons() {
+
   electronFlows.forEach(flow => {
-    const t = ((performance.now() * flow.speed) + flow.offset) % 1;
-    const point = flow.path.getPointAtLength(t * flow.length);
+
+    const t =
+      (
+        (performance.now() * flow.speed)
+        + flow.offset
+      ) % 1;
+
+    const point =
+      flow.path.getPointAtLength(
+        t * flow.length
+      );
 
     flow.dot.setAttribute("cx", point.x);
     flow.dot.setAttribute("cy", point.y);
+
   });
 
-  electronAnimationFrame = requestAnimationFrame(animateElectrons);
+  electronAnimationFrame =
+    requestAnimationFrame(
+      animateElectrons
+    );
 }
 
-function updateButtons() {
-  powerBtn.textContent = powerOn ? "Power: ON" : "Power: OFF";
+function lightPath(
+  id,
+  className,
+  draw = true,
+  electrons = true
+) {
 
-  gearBtn.textContent = gearTransitioning
-    ? (gearDirection === "up" ? "Gear: TRAVELING UP" : "Gear: TRAVELING DOWN")
-    : (gearUp ? "Gear: UP" : "Gear: DOWN");
+  const path =
+    document.getElementById(id);
 
-  throttleBtn.textContent = throttleRetard ? "Throttle: RETARD" : "Throttle: FORWARD";
+  if (!path) return;
 
-  powerBtn.classList.toggle("active", powerOn);
-  gearBtn.classList.toggle("active", gearUp || gearTransitioning);
-  throttleBtn.classList.toggle("active", throttleRetard);
-  testBtn.classList.toggle("warning-active", pushTestActive);
+  path.classList.add(className);
+
+  if (draw) {
+
+    const length =
+      path.getTotalLength();
+
+    path.style.strokeDasharray =
+      length;
+
+    path.style.strokeDashoffset =
+      length;
+
+    requestAnimationFrame(() => {
+
+      path.classList.add(
+        "draw-wire"
+      );
+    });
+  }
+
+  if (electrons) {
+    addElectronFlow(path);
+  }
 }
 
-function updateSystem(animateMainWires = true) {
+function togglePower() {
+
+  powerOn = !powerOn;
+
+  updateSystem(false);
+}
+
+function toggleThrottle() {
+
+  throttleRetard =
+    !throttleRetard;
+
+  updateSystem(false);
+}
+
+function pushToTest() {
+
+  // placeholder
+}
+
+function toggleGear() {
+
+  if (!powerOn || gearTransitioning)
+    return;
+
+  relayClosed = false;
+
+  if (!gearUp) {
+
+    gearDirection = "up";
+    gearTransitioning = true;
+
+    updateSystem();
+
+    relayCloseTimer = setTimeout(() => {
+
+      relayClosed = true;
+
+      updateSystem();
+
+    }, 2600);
+
+    gearTimer = setTimeout(() => {
+
+      gearUp = true;
+      gearTransitioning = false;
+      gearDirection = null;
+      relayClosed = false;
+
+      updateSystem();
+
+    }, 5000);
+
+  } else {
+
+    gearDirection = "down";
+    gearTransitioning = true;
+
+    updateSystem();
+
+    gearTimer = setTimeout(() => {
+
+      gearUp = false;
+      gearTransitioning = false;
+      gearDirection = null;
+
+      updateSystem();
+
+    }, 5000);
+  }
+}
+
+function updateSystem(
+  animateMainWires = true
+) {
+
   clearPaths();
-  updateButtons();
+
   updateSwitchAnimations();
 
   const greenOn =
@@ -602,98 +542,118 @@ function updateSystem(animateMainWires = true) {
   const redOn =
     powerOn &&
     !gearTransitioning &&
-    (
-      gearUp ||
-      pushTestActive
-    );
+    gearUp;
 
   const hornOn =
     powerOn &&
     gearUp &&
-    throttleRetard &&
-    !gearTransitioning;
+    throttleRetard;
 
-  greenLamp.classList.toggle("on", greenOn || pushTestActive);
-  redLamp.classList.toggle("on", redOn);
+  greenLamp.classList.toggle(
+    "on",
+    greenOn
+  );
 
-  hornBox.classList.toggle("on", hornOn);
-  hornBox.textContent = hornOn ? "HORN ON" : "HORN OFF";
+  redLamp.classList.toggle(
+    "on",
+    redOn
+  );
 
-  if (!powerOn) {
-    statusBox.textContent = "Status: Power off";
+  hornBox.classList.toggle(
+    "on",
+    hornOn
+  );
+
+  hornBox.textContent =
+    hornOn
+      ? "HORN ON"
+      : "HORN OFF";
+
+  if (!powerOn)
     return;
-  }
 
-  if (gearTransitioning && gearDirection === "up") {
-    statusBox.textContent = relayClosed
-      ? "Status: Relay closed — motor circuit energized"
-      : "Status: Gear UP selected — relay coil energizing";
-  } else if (gearTransitioning && gearDirection === "down") {
-    statusBox.textContent = wireDelayActive
-      ? "Status: Switch moved — down circuit energizing..."
-      : "Status: Gear DOWN selected — down circuit energized for 5 seconds";
-  } else if (gearUp) {
-    statusBox.textContent = throttleRetard
-      ? "Status: Gear UP — red light and horn active"
-      : "Status: Gear UP — red light active";
-  } else {
-    statusBox.textContent = "Status: Gear DOWN — green light active";
-  }
+  if (
+    gearTransitioning &&
+    gearDirection === "up"
+  ) {
 
-  if (wireDelayActive) return;
+    lightPath(
+      "path-select-gear-up",
+      "power-on",
+      true,
+      true
+    );
 
-  if (pushTestActive) {
-    lightPath("path-push-test-red", "red-on", true, true);
-    lightPath("path-push-test-green", "green-on", true, true);
-  }
-
-  if (gearTransitioning && gearDirection === "up") {
-    lightPath("path-select-up-initiate-relay", "power-on", true, true);
+    lightPath(
+      "path-select-up-initiate-relay",
+      "power-on",
+      true,
+      true
+    );
 
     if (relayClosed) {
-      lightPath("path-select-gear-up", "power-on", true, true);
+
+      lightPath(
+        "path-relay-closed-to-motor",
+        "power-on",
+        true,
+        true
+      );
     }
   }
 
-  if (!gearTransitioning && gearUp) {
-    lightPath("path-gear-up-red", "red-on", animateMainWires, false);
+  if (
+    !gearTransitioning &&
+    gearUp
+  ) {
+
+    lightPath(
+      "path-gear-up-red",
+      "red-on",
+      animateMainWires,
+      false
+    );
 
     if (throttleRetard) {
-      lightPath("path-gear-up-horn", "warn-on", true, true);
+
+      lightPath(
+        "path-gear-up-horn",
+        "warn-on",
+        true,
+        true
+      );
     }
   }
 
-  if (gearTransitioning && gearDirection === "down") {
-    lightPath("path-select-gear-down", "power-on", animateMainWires, true);
+  if (
+    gearTransitioning &&
+    gearDirection === "down"
+  ) {
+
+    lightPath(
+      "path-select-gear-down",
+      "power-on",
+      true,
+      true
+    );
   }
 
-  if (!gearTransitioning && !gearUp) {
-    lightPath("path-gear-down-green", "green-on", animateMainWires, false);
+  if (
+    !gearTransitioning &&
+    !gearUp
+  ) {
+
+    lightPath(
+      "path-gear-down-green",
+      "green-on",
+      animateMainWires,
+      false
+    );
   }
 }
 
-/* F12 CONSOLE MAP POINT TOOL */
-let pointNumber = 1;
-
-stage.addEventListener("click", function(event) {
-  const rect = stage.getBoundingClientRect();
-
-  const x = Math.round(event.clientX - rect.left);
-  const y = Math.round(event.clientY - rect.top);
-
-  console.log(`L${pointNumber} ${x} ${y}`);
-
-  const dot = document.createElement("div");
-  dot.className = "map-dot";
-  dot.style.left = x + "px";
-  dot.style.top = y + "px";
-  stage.appendChild(dot);
-
-  pointNumber++;
-});
-
 updateSystem();
-</script>
 
+</script>
 </body>
 </html>
