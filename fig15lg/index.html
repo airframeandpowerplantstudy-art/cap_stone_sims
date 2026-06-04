@@ -218,7 +218,8 @@ svg {
     <button id="powerBtn" onclick="togglePower()">Power: ON</button>
     <button id="gearBtn" onclick="toggleGear()">Gear: DOWN</button>
     <button id="throttleBtn" onclick="toggleThrottle()">Throttle: RETARD</button>
-    <button id="testBtn" onclick="pushToTest()">Push-To-Test</button>
+    <button id="testRedBtn" onclick="pushToTest()">Push-To-Test RED</button>
+     <button id="testGreenBtn" onclick="pushToTest()">Push-To-Test GREEN</button>
 
     <div class="status" id="statusBox">
       Status: Gear DOWN — green light active
@@ -302,29 +303,26 @@ svg {
 let powerOn = true;
 let gearUp = false;
 let throttleRetard = true;
-let pushTestActive = false;
-
+let pushTestRedActive = false;
+  let pushTestGreenActive = false;
 let gearTransitioning = false;
 let gearDirection = null;
 let gearTimer = null;
-
 let relayClosed = false;
 let relayCloseTimer = null;
-
 let wireDelayActive = false;
 let wireDelayTimer = null;
-
 let electronAnimationFrame = null;
 let electronFlows = [];
 
 const greenLamp = document.getElementById("greenLamp");
 const redLamp = document.getElementById("redLamp");
 const hornBox = document.getElementById("hornBox");
-
 const powerBtn = document.getElementById("powerBtn");
 const gearBtn = document.getElementById("gearBtn");
 const throttleBtn = document.getElementById("throttleBtn");
-const testBtn = document.getElementById("testBtn");
+const testRedBtn = document.getElementById("testRedBtn");
+  const testGreenBtn = document.getElementById("testGreenBtn");
 const statusBox = document.getElementById("statusBox");
 const stage = document.getElementById("stage");
 const electronLayer = document.getElementById("electronLayer");
@@ -420,7 +418,8 @@ function togglePower() {
   powerOn = !powerOn;
 
   if (!powerOn) {
-    pushTestActive = false;
+   pushTestRedActive = false;
+pushTestGreenActive = false;
     relayClosed = false;
     wireDelayActive = false;
 
@@ -487,15 +486,27 @@ function toggleThrottle() {
   updateSystem(false);
 }
 
-function pushToTest() {
+function pushToTestRed() {
   if (!powerOn) return;
 
-  pushTestActive = true;
+  pushTestRedActive = true;
   startWireDelay(250);
   updateSystem();
 
   setTimeout(() => {
-    pushTestActive = false;
+    pushTestRedActive = false;
+    updateSystem(false);
+  }, 900);
+}
+  function pushToTestGreen() {
+  if (!powerOn) return;
+
+  pushTestGreenActive = true;
+  startWireDelay(250);
+  updateSystem();
+
+  setTimeout(() => {
+    pushTestGreenActive = false;
     updateSystem(false);
   }, 900);
 }
@@ -587,7 +598,8 @@ function updateButtons() {
   powerBtn.classList.toggle("active", powerOn);
   gearBtn.classList.toggle("active", gearUp || gearTransitioning);
   throttleBtn.classList.toggle("active", throttleRetard);
-  testBtn.classList.toggle("warning-active", pushTestActive);
+  testRedBtn.classList.toggle("warning-active", pushTestRedActive);
+testGreenBtn.classList.toggle("warning-active", pushTestGreenActive);
 }
 
 function updateSystem(animateMainWires = true) {
@@ -601,12 +613,12 @@ function updateSystem(animateMainWires = true) {
     !gearTransitioning;
 
   const redOn =
-    powerOn &&
-    !gearTransitioning &&
-    (
-      gearUp ||
-      pushTestActive
-    );
+  powerOn &&
+  !gearTransitioning &&
+  (
+    gearUp ||
+    pushTestRedActive
+  );
 
   const hornOn =
     powerOn &&
@@ -614,7 +626,7 @@ function updateSystem(animateMainWires = true) {
     throttleRetard &&
     !gearTransitioning;
 
-  greenLamp.classList.toggle("on", greenOn || pushTestActive);
+  greenLamp.classList.toggle("on", greenOn || pushTestGreenActive);
   redLamp.classList.toggle("on", redOn);
 
   hornBox.classList.toggle("on", hornOn);
@@ -643,10 +655,17 @@ function updateSystem(animateMainWires = true) {
 
   if (wireDelayActive) return;
 
-  if (pushTestActive) {
-    lightPath("path-push-test-red", "red-on", true, true);
-    lightPath("path-push-test-green", "green-on", true, true);
-  }
+ if (pushTestRedActive) {
+  moveSwitch("sw-red-test", 583, 469, 543, 464);
+} else {
+  moveSwitch("sw-red-test", 583, 469, 545, 450);
+}
+
+if (pushTestGreenActive) {
+  moveSwitch("sw-green-test", 698, 472, 655, 464);
+} else {
+  moveSwitch("sw-green-test", 698, 472, 661, 454);
+}
 
   if (gearTransitioning && gearDirection === "up") {
     lightPath("path-select-gear-up", "power-on", true, true);
