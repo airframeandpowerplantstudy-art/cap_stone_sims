@@ -91,8 +91,8 @@
 
   .lamp {
     position: absolute;
-    width: 54px;
-    height: 54px;
+    width: 75px;
+    height: 75px;
     border-radius: 50%;
     border: 2px solid rgba(0,0,0,.35);
     opacity: 0;
@@ -508,6 +508,8 @@ function render() {
     state.rightGear === "up" &&
     state.leftGear === "down";
 
+  const leftUpOrBothUp = state.leftGear == "up";
+
   const leftDownRightUpRetarded =
     powerOn &&
     rightUpOnly &&
@@ -572,7 +574,7 @@ function render() {
   setOn(els.redMismatchRightUpPath, redUnsafe && rightUpOnly && !valveNotNeutralHorn);
 
   // Old horn paths kept off so the new dedicated horn paths control the warning displays.
-  setOn(els.hornLeftOrBothUpPath, false);
+  setOn(els.hornLeftOrBothUpPath, hornOn && leftUpOrBothUp);
   setOn(els.hornRightUpPath, false);
 
   els.greenStatus.textContent = greenSafe ? "ON" : "OFF";
