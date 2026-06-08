@@ -55,10 +55,11 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    pointer-events: auto;
+    pointer-events: auto; /* needed for F12 mapper clicks */
   }
 
   .path {
+    pointer-events: none;
     fill: none;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -67,13 +68,22 @@
     stroke-dasharray: 18 14;
     animation: flow 0.85s linear infinite;
     filter: drop-shadow(0 0 5px currentColor);
-    pointer-events: none;
   }
 
   .path.on { opacity: .9; }
   .path.green { stroke: var(--green); color: var(--green); }
   .path.red { stroke: var(--red); color: var(--red); }
   .path.yellow { stroke: var(--yellow); color: var(--yellow); }
+
+  .switch-arm {
+    fill: none;
+    stroke: var(--blue);
+    stroke-width: 9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 4px rgba(30,136,229,.75));
+    pointer-events: none;
+  }
 
   @keyframes flow {
     to { stroke-dashoffset: -64; }
@@ -232,16 +242,21 @@
       <div class="switch-marker" id="mk-valve">VALVE</div>
 
       <svg class="overlay" viewBox="0 0 1600 968" preserveAspectRatio="none">
-        <!-- These are starter paths. They are intentionally editable. -->
+        <!-- Real mapped animated paths from your F12 points -->
+        <path id="pathGreenDown" class="path green" d="M758 93 L753 154 L755 193 L1304 191 L1368 238 L1376 645 L1297 649 L1259 691 L1261 741 L1017 748 L978 803 L580 805 L547 853 L357 856 L355 889" />
+        <path id="pathRedUnsafe" class="path red" d="M758 93 L756 199 L297 205 L227 249 L232 814 L516 814 L549 855 L353 856 L353 891" />
+        <path id="pathRedMismatchRightUp" class="path red" d="M755 93 L755 199 L297 207 L228 252 L230 817 L513 814 L513 661 L926 655 L923 745 L978 803 L585 806 L549 855 L350 856 L350 887" />
+        <path id="pathHornLeftOrBothUp" class="path yellow" d="M808 230 L758 94 L761 193 L755 430 L706 433 L705 475 L759 475 L756 600 L419 602 L419 663 L516 663 L513 811 L550 859 L353 855 L350 889" />
+        <path id="pathHornRightUp" class="path yellow" d="M755 94 L758 199 L758 435 L702 435 L705 477 L756 472 L756 594 L422 603 L421 658 L925 653 L926 750 L981 805 L581 806 L550 856 L353 856 L353 887" />
 
-        <!-- Green lamp/down-and-locked circuit: 28V -> #8 -> green lamp -> #9 -> valve -> #11 -> right gear -> #3 -> left gear -> ground -->
-        <path id="pathGreenDown" class="path green" d="M760 205 L1290 205 L1350 205 L1350 645 L1295 645 L1262 705 L1030 705 L1030 650 L920 650 L920 810 L1020 810 L1020 830 L585 830 L540 875 L355 875" />
-
-        <!-- Red/unsafe lamp feed placeholder -->
-        <path id="pathRedUnsafe" class="path red" d="M760 205 L500 205 L300 205 L250 205 L250 812 L512 812" />
-
-        <!-- Horn path placeholder: power -> horn -> throttle/gear warning branch -->
-        <path id="pathHorn" class="path yellow" d="M760 205 L760 452 L695 452 L695 520 L760 520 L760 610 L620 610 L515 610 L420 610 L420 668 L515 668 L515 812" />
+        <!-- Blue switch arms from your switch points -->
+        <path id="swLeftGear" class="switch-arm" d="" />
+        <path id="swRightGear" class="switch-arm" d="" />
+        <path id="swThrottleOne" class="switch-arm" d="" />
+        <path id="swThrottleTwo" class="switch-arm" d="" />
+        <path id="swRedTest" class="switch-arm" d="" />
+        <path id="swGreenTest" class="switch-arm" d="" />
+        <path id="swValve" class="switch-arm" d="" />
       </svg>
     </div>
   </div>
@@ -254,6 +269,22 @@
       <div class="btnrow">
         <button data-set="power" data-value="off">OFF</button>
         <button data-set="power" data-value="on">ON</button>
+      </div>
+    </div>
+
+    <div class="control">
+      <label>Red Push-to-Test</label>
+      <div class="btnrow">
+        <button data-set="redTest" data-value="regular">REGULAR</button>
+        <button data-set="redTest" data-value="activated">PUSH</button>
+      </div>
+    </div>
+
+    <div class="control">
+      <label>Green Push-to-Test</label>
+      <div class="btnrow">
+        <button data-set="greenTest" data-value="regular">REGULAR</button>
+        <button data-set="greenTest" data-value="activated">PUSH</button>
       </div>
     </div>
 
@@ -305,7 +336,7 @@
       <div><strong>Mode</strong><span id="modeStatus">Ready</span></div>
     </div>
 
-    <p class="note">Blue labels are placeholders. Move/resize them after you define the exact switches. The SVG paths are starter overlays and can be replaced with your final traced paths.</p>
+    <p class="note">Blue switch arms and animated paths use your mapped coordinates. Fn+F12 Console mapper is still included for cleanup.</p>
   </aside>
 </div>
 
@@ -316,16 +347,30 @@ const state = {
   throttle: "open",
   valve: "neutral",
   leftGear: "down",
-  rightGear: "down"
+  rightGear: "down",
+  redTest: "regular",
+  greenTest: "regular"
 };
 
 const els = {
   redLamp: document.getElementById("redLamp"),
   greenLamp: document.getElementById("greenLamp"),
   hornBadge: document.getElementById("hornBadge"),
+
   greenPath: document.getElementById("pathGreenDown"),
   redPath: document.getElementById("pathRedUnsafe"),
-  hornPath: document.getElementById("pathHorn"),
+  redMismatchRightUpPath: document.getElementById("pathRedMismatchRightUp"),
+  hornLeftOrBothUpPath: document.getElementById("pathHornLeftOrBothUp"),
+  hornRightUpPath: document.getElementById("pathHornRightUp"),
+
+  swLeftGear: document.getElementById("swLeftGear"),
+  swRightGear: document.getElementById("swRightGear"),
+  swThrottleOne: document.getElementById("swThrottleOne"),
+  swThrottleTwo: document.getElementById("swThrottleTwo"),
+  swRedTest: document.getElementById("swRedTest"),
+  swGreenTest: document.getElementById("swGreenTest"),
+  swValve: document.getElementById("swValve"),
+
   greenStatus: document.getElementById("greenStatus"),
   redStatus: document.getElementById("redStatus"),
   hornStatus: document.getElementById("hornStatus"),
@@ -349,8 +394,17 @@ function hornShouldSound() {
   return state.throttle === "retarded" && !isDownAndLocked();
 }
 
-function setOn(el, yes) { el.classList.toggle("on", yes); }
-function setBlink(el, yes) { el.classList.toggle("blink", yes); }
+function setOn(el, yes) {
+  el.classList.toggle("on", yes);
+}
+
+function setBlink(el, yes) {
+  el.classList.toggle("blink", yes);
+}
+
+function dLine(x1, y1, x2, y2) {
+  return `M ${x1} ${y1} L ${x2} ${y2}`;
+}
 
 function updateButtons() {
   document.querySelectorAll("button[data-set]").forEach(btn => {
@@ -367,39 +421,106 @@ function updateMarkers() {
   document.getElementById("mk-valve").classList.toggle("active", state.valve === "neutral");
 }
 
+function renderSwitches() {
+  els.swLeftGear.setAttribute("d",
+    state.leftGear === "down"
+      ? dLine(549,855,585,808)
+      : dLine(549,855,514,813)
+  );
+
+  els.swRightGear.setAttribute("d",
+    state.rightGear === "down"
+      ? dLine(978,805,1017,747)
+      : dLine(978,805,928,750)
+  );
+
+  els.swThrottleOne.setAttribute("d",
+    state.throttle === "open"
+      ? dLine(347,667,324,603)
+      : dLine(347,667,344,606)
+  );
+
+  els.swThrottleTwo.setAttribute("d",
+    state.throttle === "open"
+      ? dLine(424,659,399,600)
+      : dLine(424,659,421,603)
+  );
+
+  els.swRedTest.setAttribute("d",
+    state.redTest === "activated"
+      ? dLine(296,207,213,188)
+      : dLine(296,207,225,253)
+  );
+
+  els.swGreenTest.setAttribute("d",
+    state.greenTest === "activated"
+      ? dLine(1306,196,1386,179)
+      : dLine(1306,196,1373,235)
+  );
+
+  els.swValve.setAttribute("d",
+    state.valve === "neutral"
+      ? dLine(1261,689,1297,649)
+      : dLine(1261,689,1215,652)
+  );
+}
+
+function hideAllPaths() {
+  [
+    els.greenPath,
+    els.redPath,
+    els.redMismatchRightUpPath,
+    els.hornLeftOrBothUpPath,
+    els.hornRightUpPath
+  ].forEach(p => setOn(p, false));
+}
+
 function render() {
   const powerOn = state.power === "on";
-  const greenOn = powerOn && isDownAndLocked();
-  const redOn = isUnsafe();
+  const greenSafe = powerOn && isDownAndLocked();
+  const greenTestOn = powerOn && state.greenTest === "activated";
+  const redTestOn = powerOn && state.redTest === "activated";
+  const redUnsafe = isUnsafe();
   const hornOn = hornShouldSound();
 
-  setOn(els.greenLamp, greenOn);
-  setOn(els.redLamp, redOn);
+  const rightUpOnly = state.rightGear === "up" && state.leftGear === "down";
+  const leftUpOrBothUp = state.leftGear === "up";
+
+  setOn(els.greenLamp, greenSafe || greenTestOn);
+  setOn(els.redLamp, redUnsafe || redTestOn);
   setBlink(els.redLamp, hornOn || state.gear === "transit");
   setOn(els.hornBadge, hornOn);
 
-  setOn(els.greenPath, greenOn);
-  setOn(els.redPath, redOn);
-  setOn(els.hornPath, hornOn);
+  hideAllPaths();
 
-  els.greenStatus.textContent = greenOn ? "ON" : "OFF";
-  els.redStatus.textContent = redOn ? "ON" : "OFF";
+  setOn(els.greenPath, greenSafe || greenTestOn);
+
+  setOn(els.redPath, powerOn && (redTestOn || (redUnsafe && !rightUpOnly)));
+  setOn(els.redMismatchRightUpPath, powerOn && redUnsafe && rightUpOnly);
+
+  setOn(els.hornLeftOrBothUpPath, hornOn && leftUpOrBothUp);
+  setOn(els.hornRightUpPath, hornOn && rightUpOnly);
+
+  els.greenStatus.textContent = (greenSafe || greenTestOn) ? "ON" : "OFF";
+  els.redStatus.textContent = (redUnsafe || redTestOn) ? "ON" : "OFF";
   els.hornStatus.textContent = hornOn ? "ON" : "OFF";
 
   if (!powerOn) els.modeStatus.textContent = "Power Off";
-  else if (greenOn) els.modeStatus.textContent = "Gear Down Safe";
+  else if (greenSafe) els.modeStatus.textContent = "Gear Down Safe";
   else if (hornOn) els.modeStatus.textContent = "Warning Horn";
+  else if (redTestOn || greenTestOn) els.modeStatus.textContent = "Push-to-Test";
   else els.modeStatus.textContent = "Unsafe / Transit";
 
   updateButtons();
   updateMarkers();
+  renderSwitches();
 }
 
 document.querySelectorAll("button[data-set]").forEach(btn => {
   btn.addEventListener("click", () => {
     state[btn.dataset.set] = btn.dataset.value;
 
-    // Helpful auto logic. You can delete this if you want every switch totally manual.
+    // Helpful auto logic. Delete this block if you want every switch totally manual.
     if (btn.dataset.set === "gear") {
       if (state.gear === "down") {
         state.leftGear = "down";
