@@ -220,6 +220,7 @@
         <path id="pathRedPushTest" class="path red" d="M758 93 L756 199 L297 205 L211 192 L107 188 L102 233" />
         <path id="pathGreenPushTest" class="path green" d="M758 93 L753 154 L755 193 L1306 196 L1384 174 L1498 174 L1496 220" />
         <path id="pathValveNotNeutral" class="path yellow" d="M759 96 L752 204 L756 430 L702 435 L703 472 L753 474 L758 600 L419 605 L424 663 L1217 650 L1258 695 L1261 742 L1017 745 L984 805 L583 806 L549 858 L352 856 L352 892" />
+        <path id="pathHornGearUpRetarded" class="path yellow" d="M1066 464 L758 96 L758 430 L703 437 L705 476 L753 474 L758 600 L424 604 L424 661 L514 660 L516 816 L550 857 L350 853 L352 891" />
 
         
         <!-- Blue switch arms from your switch points -->
@@ -338,6 +339,7 @@ const els = {
   redPushPath: document.getElementById("pathRedPushTest"),
   greenPushPath: document.getElementById("pathGreenPushTest"),
   valveNotNeutralPath: document.getElementById("pathValveNotNeutral"),
+  hornGearUpRetardedPath: document.getElementById("pathHornGearUpRetarded"),
 
   swLeftGear: document.getElementById("swLeftGear"),
   swRightGear: document.getElementById("swRightGear"),
@@ -442,27 +444,54 @@ function hideAllPaths() {
     els.hornRightUpPath,
     els.redPushPath,
     els.greenPushPath,
-    els.valveNotNeutralPath
+    els.valveNotNeutralPath,
+    els.hornGearUpRetardedPath
   ].forEach(p => setOn(p, false));
 }
 
 function render() {
   const powerOn = state.power === "on";
-  const greenSafe = powerOn && isDownAndLocked();
-  const redUnsafe = isUnsafe();
-  const hornOn = hornShouldSound();
 
   const redPushOn = powerOn && state.redPush === "pressed";
   const greenPushOn = powerOn && state.greenPush === "pressed";
   const pushOverride = redPushOn || greenPushOn;
 
-  const rightUpOnly = state.rightGear === "up" && state.leftGear === "down";
-  const leftUpOrBothUp = state.leftGear === "up";
+  const gearDown = state.gear === "down";
+  const gearUp = state.gear === "up";
+  const throttleRetarded = state.throttle === "retarded";
+  const valveNotNeutral = state.valve === "notNeutral";
+
+  const greenSafe =
+    powerOn &&
+    gearDown &&
+    state.leftGear === "down" &&
+    state.rightGear === "down" &&
+    state.valve === "neutral";
 
   const valveNotNeutralHorn =
     powerOn &&
-    state.gear === "down" &&
-    state.valve === "notNeutral";
+    gearDown &&
+    throttleRetarded &&
+    valveNotNeutral;
+
+  const gearUpRetardedHorn =
+    powerOn &&
+    gearUp &&
+    throttleRetarded;
+
+  const rightUpOnly =
+    state.rightGear === "up" &&
+    state.leftGear === "down";
+
+  const leftUpOrBothUp =
+    state.leftGear === "up";
+
+  const redUnsafe =
+    powerOn &&
+    !greenSafe &&
+    !valveNotNeutralHorn &&
+    !gearUpRetardedHorn &&
+    !(gearDown && valveNotNeutral && !throttleRetarded);
 
   hideAllPaths();
 
@@ -486,28 +515,41 @@ function render() {
     return;
   }
 
+  // Lamps
   setOn(els.greenLamp, greenSafe);
   setOn(els.redLamp, redUnsafe);
-  setBlink(els.redLamp, hornOn || valveNotNeutralHorn || state.gear === "transit");
-  setOn(els.hornBadge, hornOn || valveNotNeutralHorn);
 
+  // Horn badge and blink
+  const anyHorn = valveNotNeutralHorn || gearUpRetardedHorn;
+  setBlink(els.redLamp, anyHorn || state.gear === "transit");
+  setOn(els.hornBadge, anyHorn);
+
+  // Normal safe path
   setOn(els.greenPath, greenSafe);
 
-  setOn(els.redPath, powerOn && redUnsafe && !rightUpOnly);
-  setOn(els.redMismatchRightUpPath, powerOn && redUnsafe && rightUpOnly);
-
-  setOn(els.hornLeftOrBothUpPath, hornOn && leftUpOrBothUp);
-  setOn(els.hornRightUpPath, hornOn && rightUpOnly);
+  // Gear-down + valve not neutral + throttle retarded = horn only, no green/red paths
   setOn(els.valveNotNeutralPath, valveNotNeutralHorn);
+
+  // Gear-up + throttle retarded = dedicated horn path
+  setOn(els.hornGearUpRetardedPath, gearUpRetardedHorn);
+
+  // Red unsafe paths only when not in one of the horn-only/silent valve states
+  setOn(els.redPath, redUnsafe && !rightUpOnly);
+  setOn(els.redMismatchRightUpPath, redUnsafe && rightUpOnly);
+
+  // Old horn paths kept available for mismatch/transit logic, but not used for gear-up-retarded now.
+  setOn(els.hornLeftOrBothUpPath, false);
+  setOn(els.hornRightUpPath, false);
 
   els.greenStatus.textContent = greenSafe ? "ON" : "OFF";
   els.redStatus.textContent = redUnsafe ? "ON" : "OFF";
-  els.hornStatus.textContent = (hornOn || valveNotNeutralHorn) ? "ON" : "OFF";
+  els.hornStatus.textContent = anyHorn ? "ON" : "OFF";
 
   if (!powerOn) els.modeStatus.textContent = "Power Off";
   else if (greenSafe) els.modeStatus.textContent = "Gear Down Safe";
   else if (valveNotNeutralHorn) els.modeStatus.textContent = "Valve Not Neutral Horn";
-  else if (hornOn) els.modeStatus.textContent = "Warning Horn";
+  else if (gearUpRetardedHorn) els.modeStatus.textContent = "Gear Up Warning Horn";
+  else if (gearDown && valveNotNeutral && !throttleRetarded) els.modeStatus.textContent = "Valve Not Neutral / No Warning";
   else els.modeStatus.textContent = "Unsafe / Transit";
 
   updateButtons();
