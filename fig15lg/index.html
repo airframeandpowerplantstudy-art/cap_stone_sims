@@ -548,13 +548,13 @@ function pushToTestRed() {
   pushTestRedHasDrawn = false;
   pushTestRedActive = true;
   startWireDelay(200);
-  updateSystem();
+  updateSystem(false);
 
   setTimeout(() => {
     pushTestRedActive = false;
     pushTestRedHasDrawn = false;
     updateSystem(false);
-  }, 2500);
+  }, 3000);
 }
 
 function pushToTestGreen() {
@@ -563,13 +563,13 @@ function pushToTestGreen() {
   pushTestGreenHasDrawn = false;
   pushTestGreenActive = true;
   startWireDelay(200);
-  updateSystem();
+  updateSystem(false);
 
   setTimeout(() => {
     pushTestGreenHasDrawn = false;
     pushTestGreenActive = false;
     updateSystem(false);
-  }, 2500);
+  }, 3000);
 }
 
 function clearPaths() {
