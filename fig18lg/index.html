@@ -452,13 +452,13 @@ function renderSwitches() {
   );
 
   els.swRedTest.setAttribute("d",
-    state.redTest === "activated"
+    state.redPush === "pressed"
       ? dLine(296,207,213,188)
       : dLine(296,207,225,253)
   );
 
   els.swGreenTest.setAttribute("d",
-    state.greenTest === "activated"
+    state.greenPush === "pressed"
       ? dLine(1306,196,1386,179)
       : dLine(1306,196,1373,235)
   );
@@ -476,7 +476,9 @@ function hideAllPaths() {
     els.redPath,
     els.redMismatchRightUpPath,
     els.hornLeftOrBothUpPath,
-    els.hornRightUpPath
+    els.hornRightUpPath,
+    els.redPushPath,
+    els.greenPushPath
   ].forEach(p => setOn(p, false));
 }
 
@@ -485,37 +487,35 @@ function render() {
   const greenSafe = powerOn && isDownAndLocked();
   const redUnsafe = isUnsafe();
   const greenPushOn = powerOn && state.greenPush === "pressed";
-const redPushOn = powerOn && state.redPush === "pressed";
+  const redPushOn = powerOn && state.redPush === "pressed";
   const hornOn = hornShouldSound();
-  const redPushTest = state.redPush === "pressed";
-  const greenPushTest = state.greenPush === "pressed";
   const rightUpOnly = state.rightGear === "up" && state.leftGear === "down";
   const leftUpOrBothUp = state.leftGear === "up";
 
-setOn(els.greenLamp, greenSafe || greenPushOn);
-setOn(els.redLamp, redUnsafe || redPushOn);
+  setOn(els.greenLamp, greenSafe || greenPushOn);
+  setOn(els.redLamp, redUnsafe || redPushOn);
   setBlink(els.redLamp, hornOn || state.gear === "transit");
   setOn(els.hornBadge, hornOn);
-  setOn(els.redPushPath, redPushTest);
-  setOn(els.greenPushPath, greenPushTest);
 
   hideAllPaths();
 
-setOn(els.greenPath, greenSafe);
-setOn(els.redPath, powerOn && (redUnsafe && !rightUpOnly));
+  setOn(els.greenPath, greenSafe);
+  setOn(els.redPath, powerOn && (redUnsafe && !rightUpOnly));
+  setOn(els.redPushPath, redPushOn);
+  setOn(els.greenPushPath, greenPushOn);
   setOn(els.redMismatchRightUpPath, powerOn && redUnsafe && rightUpOnly);
 
   setOn(els.hornLeftOrBothUpPath, hornOn && leftUpOrBothUp);
   setOn(els.hornRightUpPath, hornOn && rightUpOnly);
 
-  els.greenStatus.textContent = (greenSafe || greenTestOn) ? "ON" : "OFF";
-  els.redStatus.textContent = (redUnsafe || redTestOn) ? "ON" : "OFF";
+  els.greenStatus.textContent = (greenSafe || greenPushOn) ? "ON" : "OFF";
+  els.redStatus.textContent = (redUnsafe || redPushOn) ? "ON" : "OFF";
   els.hornStatus.textContent = hornOn ? "ON" : "OFF";
 
   if (!powerOn) els.modeStatus.textContent = "Power Off";
   else if (greenSafe) els.modeStatus.textContent = "Gear Down Safe";
   else if (hornOn) els.modeStatus.textContent = "Warning Horn";
-  else if (redTestOn || greenTestOn) els.modeStatus.textContent = "Push-to-Test";
+  else if (redPushOn || greenPushOn) els.modeStatus.textContent = "Push-to-Test";
   else els.modeStatus.textContent = "Unsafe / Transit";
 
   updateButtons();
