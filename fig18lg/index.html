@@ -351,8 +351,6 @@ const state = {
   valve: "neutral",
   leftGear: "down",
   rightGear: "down",
-  redTest: "regular",
-  greenTest: "regular"
   redPush: "normal",
   greenPush: "normal",
 };
@@ -485,17 +483,17 @@ function hideAllPaths() {
 function render() {
   const powerOn = state.power === "on";
   const greenSafe = powerOn && isDownAndLocked();
-  const greenTestOn = powerOn && state.greenTest === "activated";
-  const redTestOn = powerOn && state.redTest === "activated";
   const redUnsafe = isUnsafe();
+  const greenPushOn = powerOn && state.greenPush === "pressed";
+const redPushOn = powerOn && state.redPush === "pressed";
   const hornOn = hornShouldSound();
   const redPushTest = state.redPush === "pressed";
   const greenPushTest = state.greenPush === "pressed";
   const rightUpOnly = state.rightGear === "up" && state.leftGear === "down";
   const leftUpOrBothUp = state.leftGear === "up";
 
-  setOn(els.greenLamp, greenSafe || greenTestOn);
-  setOn(els.redLamp, redUnsafe || redTestOn);
+setOn(els.greenLamp, greenSafe || greenPushOn);
+setOn(els.redLamp, redUnsafe || redPushOn);
   setBlink(els.redLamp, hornOn || state.gear === "transit");
   setOn(els.hornBadge, hornOn);
   setOn(els.redPushPath, redPushTest);
@@ -503,9 +501,8 @@ function render() {
 
   hideAllPaths();
 
-  setOn(els.greenPath, greenSafe || greenTestOn);
-
-  setOn(els.redPath, powerOn && (redTestOn || (redUnsafe && !rightUpOnly)));
+setOn(els.greenPath, greenSafe);
+setOn(els.redPath, powerOn && (redUnsafe && !rightUpOnly));
   setOn(els.redMismatchRightUpPath, powerOn && redUnsafe && rightUpOnly);
 
   setOn(els.hornLeftOrBothUpPath, hornOn && leftUpOrBothUp);
