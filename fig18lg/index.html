@@ -221,7 +221,8 @@
         <path id="pathGreenPushTest" class="path green" d="M758 93 L753 154 L755 193 L1306 196 L1384 174 L1498 174 L1496 220" />
         <path id="pathValveNotNeutral" class="path yellow" d="M759 96 L752 204 L756 430 L702 435 L703 472 L753 474 L758 600 L419 605 L424 663 L1217 650 L1258 695 L1261 742 L1017 745 L984 805 L583 806 L549 858 L352 856 L352 892" />
         <path id="pathRedValveNotNeutral" class="path red" d="M1330 328 L758 98 L758 206 L299 206 L230 251 L232 815 L513 813 L516 657 L1214 648 L1259 690 L1259 740 L1019 742 L981 804 L586 804 L549 854 L353 857 L353 888" />
-        <path id="pathHornGearUpRetarded" class="path yellow" d="M758 96 L758 430 L703 437 L705 476 L753 474 L758 600 L424 604 L424 661 L514 660 L516 816 L550 857 L350 853 L352 891" />
+        <path id="pathHornGearUpRetarded" class="path yellow" d="M1066 464 L758 96 L758 430 L703 437 L705 476 L753 474 L758 600 L424 604 L424 661 L514 660 L516 816 L550 857 L350 853 L352 891" />
+        <path id="pathHornLeftDownRightUpRetarded" class="path yellow" d="M758 96 L758 430 L703 437 L705 476 L753 474 L758 600 L424 604 L424 661 L514 660 L926 655 L929 748 L983 805 L582 805 L551 854 L352 854 L352 888" />
 
         
         <!-- Blue switch arms from your switch points -->
@@ -267,6 +268,7 @@
       <label>Gear Selector</label>
       <div class="btnrow three">
         <button data-set="gear" data-value="down">DOWN</button>
+        <button data-set="gear" data-value="transit">TRANSIT</button>
         <button data-set="gear" data-value="up">UP</button>
       </div>
     </div>
@@ -341,6 +343,7 @@ const els = {
   valveNotNeutralPath: document.getElementById("pathValveNotNeutral"),
   hornGearUpRetardedPath: document.getElementById("pathHornGearUpRetarded"),
   redValveNotNeutralPath: document.getElementById("pathRedValveNotNeutral"),
+  hornLeftDownRightUpRetardedPath: document.getElementById("pathHornLeftDownRightUpRetarded"),
 
   swLeftGear: document.getElementById("swLeftGear"),
   swRightGear: document.getElementById("swRightGear"),
@@ -447,7 +450,8 @@ function hideAllPaths() {
     els.greenPushPath,
     els.valveNotNeutralPath,
     els.hornGearUpRetardedPath,
-    els.redValveNotNeutralPath
+    els.redValveNotNeutralPath,
+    els.hornLeftDownRightUpRetardedPath
   ].forEach(p => setOn(p, false));
 }
 
@@ -479,11 +483,18 @@ function render() {
   const gearUpRetardedHorn =
     powerOn &&
     gearUp &&
-    throttleRetarded;
+    throttleRetarded &&
+    !rightUpOnly;
 
   const rightUpOnly =
     state.rightGear === "up" &&
     state.leftGear === "down";
+
+  const leftDownRightUpRetarded =
+    powerOn &&
+    rightUpOnly &&
+    throttleRetarded &&
+    !valveNotNeutral;
 
   const silentValveNotNeutral =
     powerOn &&
@@ -518,11 +529,12 @@ function render() {
     return;
   }
 
-  const anyHorn = valveNotNeutralHorn || gearUpRetardedHorn;
+  const anyHorn = valveNotNeutralHorn || gearUpRetardedHorn || leftDownRightUpRetarded;
 
   // Lamps
   setOn(els.greenLamp, greenSafe);
   setOn(els.redLamp, redUnsafe);
+  setBlink(els.redLamp, anyHorn || state.gear === "transit");
   setOn(els.hornBadge, anyHorn);
 
   // Green safe path
@@ -536,6 +548,7 @@ function render() {
   // Gear-up + throttle retarded:
   // horn path AND normal red unsafe path should still show.
   setOn(els.hornGearUpRetardedPath, gearUpRetardedHorn);
+  setOn(els.hornLeftDownRightUpRetardedPath, leftDownRightUpRetarded);
 
   // Normal red unsafe paths stay active unless this is the special valve-not-neutral warning.
   setOn(els.redPath, redUnsafe && !rightUpOnly && !valveNotNeutralHorn);
@@ -552,9 +565,10 @@ function render() {
   if (!powerOn) els.modeStatus.textContent = "Power Off";
   else if (greenSafe) els.modeStatus.textContent = "Gear Down Safe";
   else if (valveNotNeutralHorn) els.modeStatus.textContent = "Valve Not Neutral Horn";
+  else if (leftDownRightUpRetarded) els.modeStatus.textContent = "Right Gear Up Warning Horn";
   else if (gearUpRetardedHorn) els.modeStatus.textContent = "Gear Up Warning Horn";
   else if (silentValveNotNeutral) els.modeStatus.textContent = "Valve Not Neutral / No Warning";
-  else els.modeStatus.textContent = "Gear Unsafe";
+  else els.modeStatus.textContent = "Unsafe / Transit";
 
   updateButtons();
   renderSwitches();
@@ -576,7 +590,9 @@ document.querySelectorAll("button[data-set]").forEach(btn => {
         state.rightGear = "up";
         state.valve = "neutral";
       }
-   
+      if (state.gear === "transit") {
+        state.valve = "notNeutral";
+      }
     }
 
     render();
