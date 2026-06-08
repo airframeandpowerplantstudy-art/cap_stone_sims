@@ -1,1 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Landing Gear Warning Schematic - Starter</title>
+<style>
+  :root {
+    --panel-bg: #101827;
+    --panel-card: #172033;
+    --blue: #1e88e5;      /* same continuity blue */
+    --blue-dark: #0f5fa8;
+    --green: #31d158;
+    --red: #ff453a;
+    --yellow: #ffd60a;
+    --wire: #111;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #e9edf3;
+    color: #111;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 14px;
+    padding: 14px;
+    min-height: 100vh;
+  }
+
+  .schematic-wrap {
+    background: white;
+    border: 3px solid #111;
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1600 / 968;
+    background-image: url("fig18lg.png");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+
+  svg.overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 9;
+    opacity: 0;
+    stroke-dasharray: 18 14;
+    animation: flow 0.85s linear infinite;
+    filter: drop-shadow(0 0 5px currentColor);
+  }
+
+  .path.on { opacity: .9; }
+  .path.green { stroke: var(--green); color: var(--green); }
+  .path.red { stroke: var(--red); color: var(--red); }
+  .path.yellow { stroke: var(--yellow); color: var(--yellow); }
+
+  @keyframes flow {
+    to { stroke-dashoffset: -64; }
+  }
+
+  .lamp {
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: 3px solid #222;
+    opacity: .18;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .lamp.red { left: 15.5%; top: 18%; background: var(--red); }
+  .lamp.green { left: 84.8%; top: 18%; background: var(--green); }
+  .lamp.on {
+    opacity: 1;
+    box-shadow: 0 0 12px currentColor, 0 0 30px currentColor;
+  }
+  .lamp.red.on { color: var(--red); }
+  .lamp.green.on { color: var(--green); }
+  .lamp.blink { animation: blink .55s alternate infinite; }
+  @keyframes blink { from { opacity: .35; } to { opacity: 1; } }
+
+  .horn-badge {
+    position: absolute;
+    left: 40.8%;
+    top: 44%;
+    transform: translate(-50%, -50%);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: clamp(10px, 1.1vw, 16px);
+    background: #222;
+    color: white;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .horn-badge.on {
+    opacity: 1;
+    background: var(--yellow);
+    color: #111;
+    animation: hornPulse .45s alternate infinite;
+  }
+  @keyframes hornPulse { from { transform: translate(-50%, -50%) scale(.96); } to { transform: translate(-50%, -50%) scale(1.08); } }
+
+  .switch-marker {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border: 3px solid var(--blue);
+    background: rgba(30,136,229,.18);
+    color: var(--blue-dark);
+    font-weight: 800;
+    border-radius: 10px;
+    padding: 5px 8px;
+    font-size: clamp(10px, .95vw, 14px);
+    pointer-events: none;
+    box-shadow: 0 0 0 2px rgba(255,255,255,.7);
+  }
+  .switch-marker.active { background: rgba(30,136,229,.32); }
+
+  /* Move/resize these after you define the exact switch boxes */
+  #mk-power { left: 48.8%; top: 14.5%; }
+  #mk-throttle { left: 25.5%; top: 66%; }
+  #mk-leftGear { left: 38.2%; top: 86%; }
+  #mk-rightGear { left: 66.2%; top: 80%; }
+  #mk-valve { left: 81.8%; top: 74%; }
+
+  .panel {
+    background: var(--panel-bg);
+    color: white;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.22);
+  }
+
+  .panel h1 {
+    margin: 0 0 12px;
+    font-size: 20px;
+    line-height: 1.1;
+  }
+
+  .control {
+    background: var(--panel-card);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  .control label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 8px;
+    opacity: .85;
+    font-weight: 700;
+  }
+  .btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .btnrow.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  button {
+    border: 0;
+    border-radius: 8px;
+    padding: 9px 8px;
+    background: #26344f;
+    color: white;
+    cursor: pointer;
+    font-weight: 800;
+  }
+  button:hover { background: #334563; }
+  button.selected {
+    background: var(--blue);
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.22), 0 0 0 2px rgba(30,136,229,.32);
+  }
+
+  .status {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .status div {
+    background: #0b1220;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 13px;
+  }
+  .status strong { display:block; margin-bottom: 4px; }
+
+  .note {
+    margin-top: 10px;
+    font-size: 12px;
+    line-height: 1.35;
+    opacity: .78;
+  }
+
+  @media (max-width: 1000px) {
+    .app { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="schematic-wrap">
+    <div class="stage" id="stage">
+      <div class="lamp red" id="redLamp"></div>
+      <div class="lamp green" id="greenLamp"></div>
+      <div class="horn-badge" id="hornBadge">HORN</div>
+
+      <!-- Blue placeholders so you can define switch locations cleanly -->
+      <div class="switch-marker" id="mk-power">POWER</div>
+      <div class="switch-marker" id="mk-throttle">THROTTLE</div>
+      <div class="switch-marker" id="mk-leftGear">LEFT GEAR</div>
+      <div class="switch-marker" id="mk-rightGear">RIGHT GEAR</div>
+      <div class="switch-marker" id="mk-valve">VALVE</div>
+
+      <svg class="overlay" viewBox="0 0 1600 968" preserveAspectRatio="none">
+        <!-- These are starter paths. They are intentionally editable. -->
+
+        <!-- Green lamp/down-and-locked circuit: 28V -> #8 -> green lamp -> #9 -> valve -> #11 -> right gear -> #3 -> left gear -> ground -->
+        <path id="pathGreenDown" class="path green" d="M760 205 L1290 205 L1350 205 L1350 645 L1295 645 L1262 705 L1030 705 L1030 650 L920 650 L920 810 L1020 810 L1020 830 L585 830 L540 875 L355 875" />
+
+        <!-- Red/unsafe lamp feed placeholder -->
+        <path id="pathRedUnsafe" class="path red" d="M760 205 L500 205 L300 205 L250 205 L250 812 L512 812" />
+
+        <!-- Horn path placeholder: power -> horn -> throttle/gear warning branch -->
+        <path id="pathHorn" class="path yellow" d="M760 205 L760 452 L695 452 L695 520 L760 520 L760 610 L620 610 L515 610 L420 610 L420 668 L515 668 L515 812" />
+      </svg>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <h1>Landing Gear Warning<br>Schematic Starter</h1>
+
+    <div class="control">
+      <label>Power</label>
+      <div class="btnrow">
+        <button data-set="power" data-value="off">OFF</button>
+        <button data-set="power" data-value="on">ON</button>
+      </div>
+    </div>
+
+    <div class="control">
+      <label>Gear Selector</label>
+      <div class="btnrow three">
+        <button data-set="gear" data-value="down">DOWN</button>
+        <button data-set="gear" data-value="transit">TRANSIT</button>
+        <button data-set="gear" data-value="up">UP</button>
+      </div>
+    </div>
+
+    <div class="control">
+      <label>Throttle</label>
+      <div class="btnrow">
+        <button data-set="throttle" data-value="open">OPEN</button>
+        <button data-set="throttle" data-value="retarded">RETARDED</button>
+      </div>
+    </div>
+
+    <div class="control">
+      <label>Control Valve</label>
+      <div class="btnrow">
+        <button data-set="valve" data-value="neutral">NEUTRAL</button>
+        <button data-set="valve" data-value="notNeutral">NOT NEUTRAL</button>
+      </div>
+    </div>
+
+    <div class="control">
+      <label>Left Gear Switch</label>
+      <div class="btnrow">
+        <button data-set="leftGear" data-value="down">DOWN</button>
+        <button data-set="leftGear" data-value="up">UP</button>
+      </div>
+    </div>
+
+    <div class="control">
+      <label>Right Gear Switch</label>
+      <div class="btnrow">
+        <button data-set="rightGear" data-value="down">DOWN</button>
+        <button data-set="rightGear" data-value="up">UP</button>
+      </div>
+    </div>
+
+    <div class="status">
+      <div><strong>Green Lamp</strong><span id="greenStatus">OFF</span></div>
+      <div><strong>Red Lamp</strong><span id="redStatus">OFF</span></div>
+      <div><strong>Horn</strong><span id="hornStatus">OFF</span></div>
+      <div><strong>Mode</strong><span id="modeStatus">Ready</span></div>
+    </div>
+
+    <p class="note">Blue labels are placeholders. Move/resize them after you define the exact switches. The SVG paths are starter overlays and can be replaced with your final traced paths.</p>
+  </aside>
+</div>
+
+<script>
+const state = {
+  power: "on",
+  gear: "down",
+  throttle: "open",
+  valve: "neutral",
+  leftGear: "down",
+  rightGear: "down"
+};
+
+const els = {
+  redLamp: document.getElementById("redLamp"),
+  greenLamp: document.getElementById("greenLamp"),
+  hornBadge: document.getElementById("hornBadge"),
+  greenPath: document.getElementById("pathGreenDown"),
+  redPath: document.getElementById("pathRedUnsafe"),
+  hornPath: document.getElementById("pathHorn"),
+  greenStatus: document.getElementById("greenStatus"),
+  redStatus: document.getElementById("redStatus"),
+  hornStatus: document.getElementById("hornStatus"),
+  modeStatus: document.getElementById("modeStatus")
+};
+
+function isDownAndLocked() {
+  return state.gear === "down" &&
+         state.leftGear === "down" &&
+         state.rightGear === "down" &&
+         state.valve === "neutral";
+}
+
+function isUnsafe() {
+  if (state.power !== "on") return false;
+  return !isDownAndLocked();
+}
+
+function hornShouldSound() {
+  if (state.power !== "on") return false;
+  return state.throttle === "retarded" && !isDownAndLocked();
+}
+
+function setOn(el, yes) { el.classList.toggle("on", yes); }
+function setBlink(el, yes) { el.classList.toggle("blink", yes); }
+
+function updateButtons() {
+  document.querySelectorAll("button[data-set]").forEach(btn => {
+    btn.classList.toggle("selected", state[btn.dataset.set] === btn.dataset.value);
+  });
+}
+
+function updateMarkers() {
+  document.querySelectorAll(".switch-marker").forEach(m => m.classList.remove("active"));
+  document.getElementById("mk-power").classList.toggle("active", state.power === "on");
+  document.getElementById("mk-throttle").classList.toggle("active", state.throttle === "retarded");
+  document.getElementById("mk-leftGear").classList.toggle("active", state.leftGear === "down");
+  document.getElementById("mk-rightGear").classList.toggle("active", state.rightGear === "down");
+  document.getElementById("mk-valve").classList.toggle("active", state.valve === "neutral");
+}
+
+function render() {
+  const powerOn = state.power === "on";
+  const greenOn = powerOn && isDownAndLocked();
+  const redOn = isUnsafe();
+  const hornOn = hornShouldSound();
+
+  setOn(els.greenLamp, greenOn);
+  setOn(els.redLamp, redOn);
+  setBlink(els.redLamp, hornOn || state.gear === "transit");
+  setOn(els.hornBadge, hornOn);
+
+  setOn(els.greenPath, greenOn);
+  setOn(els.redPath, redOn);
+  setOn(els.hornPath, hornOn);
+
+  els.greenStatus.textContent = greenOn ? "ON" : "OFF";
+  els.redStatus.textContent = redOn ? "ON" : "OFF";
+  els.hornStatus.textContent = hornOn ? "ON" : "OFF";
+
+  if (!powerOn) els.modeStatus.textContent = "Power Off";
+  else if (greenOn) els.modeStatus.textContent = "Gear Down Safe";
+  else if (hornOn) els.modeStatus.textContent = "Warning Horn";
+  else els.modeStatus.textContent = "Unsafe / Transit";
+
+  updateButtons();
+  updateMarkers();
+}
+
+document.querySelectorAll("button[data-set]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state[btn.dataset.set] = btn.dataset.value;
+
+    // Helpful auto logic. You can delete this if you want every switch totally manual.
+    if (btn.dataset.set === "gear") {
+      if (state.gear === "down") {
+        state.leftGear = "down";
+        state.rightGear = "down";
+        state.valve = "neutral";
+      }
+      if (state.gear === "up") {
+        state.leftGear = "up";
+        state.rightGear = "up";
+        state.valve = "neutral";
+      }
+      if (state.gear === "transit") {
+        state.valve = "notNeutral";
+      }
+    }
+
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>
 
