@@ -94,19 +94,37 @@
     width: 54px;
     height: 54px;
     border-radius: 50%;
-    border: 3px solid #222;
-    opacity: .18;
+    border: 2px solid rgba(0,0,0,.35);
+    opacity: 0;
     transform: translate(-50%, -50%);
     pointer-events: none;
+
+    mix-blend-mode: screen;
+
+    transition:
+      opacity .18s ease,
+      box-shadow .18s ease,
   }
   .lamp.red { left: 15.5%; top: 18%; background: var(--red); }
   .lamp.green { left: 84.8%; top: 18%; background: var(--green); }
   .lamp.on {
-    opacity: 1;
-    box-shadow: 0 0 12px currentColor, 0 0 30px currentColor;
+    opacity: .45;
   }
-  .lamp.red.on { color: var(--red); }
-  .lamp.green.on { color: var(--green); }
+ .lamp.red.on {
+  background: rgba(255, 69, 58, .75);
+
+  box-shadow:
+    0 0 10px rgba(255,69,58,.55),
+    0 0 22px rgba(255,69,58,.35);
+}
+
+.lamp.green.on {
+  background: rgba(49, 209, 88, .70);
+
+  box-shadow:
+    0 0 10px rgba(49,209,88,.50),
+    0 0 22px rgba(49,209,88,.30);
+}
   .lamp.blink { animation: blink .55s alternate infinite; }
   @keyframes blink { from { opacity: .35; } to { opacity: 1; } }
 
