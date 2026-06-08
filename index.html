@@ -644,11 +644,11 @@
 
     // Green flow is hidden when the control valve is not neutral, even though the green lamp can still indicate gear down.
     setHidden("greenFlow", !(p && green && !state.pushTest && state.ctl === "neutral"));
-
     setHidden("redFlow", !(p && red && !state.pushTest && (bothUp() || rightUpLeftDown())));
     setHidden("redMismatchFlow", !(p && red && !state.pushTest && leftUpRightDown()));
     setHidden("testFlow", !(p && state.pushTest));
-    setHidden("hornFlow", !horn);
+    setHidden("hornFlow", !(horn && !(state.left === "up" && state.right === "down")));
+    setHidden("hornLeftUpRightDownFlow", !(horn && state.left === "up" && state.right === "down"));
     setHidden("ctlFlow", !(p && bothDown() && state.ctl === "notneutral" && !state.pushTest));
   }
 
