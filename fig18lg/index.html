@@ -132,6 +132,28 @@
   }
   @keyframes hornPulse { from { transform: translate(-50%, -50%) scale(.96); } to { transform: translate(-50%, -50%) scale(1.08); } }
 
+  .switch-marker {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border: 3px solid var(--blue);
+    background: rgba(30,136,229,.18);
+    color: var(--blue-dark);
+    font-weight: 800;
+    border-radius: 10px;
+    padding: 5px 8px;
+    font-size: clamp(10px, .95vw, 14px);
+    pointer-events: none;
+    box-shadow: 0 0 0 2px rgba(255,255,255,.7);
+  }
+  .switch-marker.active { background: rgba(30,136,229,.32); }
+
+  /* Move/resize these after you define the exact switch boxes */
+  #mk-power { left: 48.8%; top: 14.5%; }
+  #mk-throttle { left: 25.5%; top: 66%; }
+  #mk-leftGear { left: 38.2%; top: 86%; }
+  #mk-rightGear { left: 66.2%; top: 80%; }
+  #mk-valve { left: 81.8%; top: 74%; }
+
   .panel {
     background: var(--panel-bg);
     color: white;
@@ -211,6 +233,13 @@
       <div class="lamp red" id="redLamp"></div>
       <div class="lamp green" id="greenLamp"></div>
       <div class="horn-badge" id="hornBadge">HORN</div>
+
+      <!-- Blue placeholders so you can define switch locations cleanly -->
+      <div class="switch-marker" id="mk-power">POWER</div>
+      <div class="switch-marker" id="mk-throttle">THROTTLE</div>
+      <div class="switch-marker" id="mk-leftGear">LEFT GEAR</div>
+      <div class="switch-marker" id="mk-rightGear">RIGHT GEAR</div>
+      <div class="switch-marker" id="mk-valve">VALVE</div>
 
       <svg class="overlay" viewBox="0 0 1600 968" preserveAspectRatio="none">
         <!-- Real mapped animated paths from your F12 points -->
@@ -388,6 +417,15 @@ function updateButtons() {
   });
 }
 
+function updateMarkers() {
+  document.querySelectorAll(".switch-marker").forEach(m => m.classList.remove("active"));
+  document.getElementById("mk-power").classList.toggle("active", state.power === "on");
+  document.getElementById("mk-throttle").classList.toggle("active", state.throttle === "retarded");
+  document.getElementById("mk-leftGear").classList.toggle("active", state.leftGear === "down");
+  document.getElementById("mk-rightGear").classList.toggle("active", state.rightGear === "down");
+  document.getElementById("mk-valve").classList.toggle("active", state.valve === "neutral");
+}
+
 function renderSwitches() {
   els.swLeftGear.setAttribute("d",
     state.leftGear === "down"
@@ -414,13 +452,13 @@ function renderSwitches() {
   );
 
   els.swRedTest.setAttribute("d",
-    state.redPush === "pressed"
+    state.redTest === "activated"
       ? dLine(296,207,213,188)
       : dLine(296,207,225,253)
   );
 
   els.swGreenTest.setAttribute("d",
-    state.greenPush === "pressed"
+    state.greenTest === "activated"
       ? dLine(1306,196,1386,179)
       : dLine(1306,196,1373,235)
   );
@@ -438,9 +476,7 @@ function hideAllPaths() {
     els.redPath,
     els.redMismatchRightUpPath,
     els.hornLeftOrBothUpPath,
-    els.hornRightUpPath,
-    els.redPushPath,
-    els.greenPushPath
+    els.hornRightUpPath
   ].forEach(p => setOn(p, false));
 }
 
@@ -449,38 +485,41 @@ function render() {
   const greenSafe = powerOn && isDownAndLocked();
   const redUnsafe = isUnsafe();
   const greenPushOn = powerOn && state.greenPush === "pressed";
-  const redPushOn = powerOn && state.redPush === "pressed";
+const redPushOn = powerOn && state.redPush === "pressed";
   const hornOn = hornShouldSound();
+  const redPushTest = state.redPush === "pressed";
+  const greenPushTest = state.greenPush === "pressed";
   const rightUpOnly = state.rightGear === "up" && state.leftGear === "down";
   const leftUpOrBothUp = state.leftGear === "up";
 
-  setOn(els.greenLamp, greenSafe || greenPushOn);
-  setOn(els.redLamp, redUnsafe || redPushOn);
+setOn(els.greenLamp, greenSafe || greenPushOn);
+setOn(els.redLamp, redUnsafe || redPushOn);
   setBlink(els.redLamp, hornOn || state.gear === "transit");
   setOn(els.hornBadge, hornOn);
+  setOn(els.redPushPath, redPushTest);
+  setOn(els.greenPushPath, greenPushTest);
 
   hideAllPaths();
 
-  setOn(els.greenPath, greenSafe);
-  setOn(els.redPath, powerOn && (redUnsafe && !rightUpOnly));
-  setOn(els.redPushPath, redPushOn);
-  setOn(els.greenPushPath, greenPushOn);
+setOn(els.greenPath, greenSafe);
+setOn(els.redPath, powerOn && (redUnsafe && !rightUpOnly));
   setOn(els.redMismatchRightUpPath, powerOn && redUnsafe && rightUpOnly);
 
   setOn(els.hornLeftOrBothUpPath, hornOn && leftUpOrBothUp);
   setOn(els.hornRightUpPath, hornOn && rightUpOnly);
 
-  els.greenStatus.textContent = (greenSafe || greenPushOn) ? "ON" : "OFF";
-  els.redStatus.textContent = (redUnsafe || redPushOn) ? "ON" : "OFF";
+  els.greenStatus.textContent = (greenSafe || greenTestOn) ? "ON" : "OFF";
+  els.redStatus.textContent = (redUnsafe || redTestOn) ? "ON" : "OFF";
   els.hornStatus.textContent = hornOn ? "ON" : "OFF";
 
   if (!powerOn) els.modeStatus.textContent = "Power Off";
   else if (greenSafe) els.modeStatus.textContent = "Gear Down Safe";
   else if (hornOn) els.modeStatus.textContent = "Warning Horn";
-  else if (redPushOn || greenPushOn) els.modeStatus.textContent = "Push-to-Test";
+  else if (redTestOn || greenTestOn) els.modeStatus.textContent = "Push-to-Test";
   else els.modeStatus.textContent = "Unsafe / Transit";
 
   updateButtons();
+  updateMarkers();
   renderSwitches();
 }
 
