@@ -480,6 +480,27 @@
           <circle r="4" class="electron"><animateMotion dur="3.1s" begin="-1s" repeatCount="indefinite"><mpath href="#pHorn"></mpath></animateMotion></circle>
           <circle r="4" class="electron"><animateMotion dur="3.1s" begin="-2s" repeatCount="indefinite"><mpath href="#pHorn"></mpath></animateMotion></circle>
         </g>
+        <g id="hornLeftUpRightDownFlow" class="hidden">
+  <use href="#pHornLeftUpRightDown" class="flowPath hornPath"></use>
+
+  <circle r="5" class="electron">
+    <animateMotion dur="3.1s" repeatCount="indefinite">
+      <mpath href="#pHornLeftUpRightDown"></mpath>
+    </animateMotion>
+  </circle>
+
+  <circle r="4" class="electron">
+    <animateMotion dur="3.1s" begin="-1s" repeatCount="indefinite">
+      <mpath href="#pHornLeftUpRightDown"></mpath>
+    </animateMotion>
+  </circle>
+
+  <circle r="4" class="electron">
+    <animateMotion dur="3.1s" begin="-2s" repeatCount="indefinite">
+      <mpath href="#pHornLeftUpRightDown"></mpath>
+    </animateMotion>
+  </circle>
+        </g>
 
         <g id="ctlFlow" class="hidden">
           <use href="#pCtl" class="flowPath bluePath"></use>
@@ -566,7 +587,7 @@
   function logic(){
     const p = state.power;
 
-    const red = p && (state.pushTest || bothUp() || mismatch() || state.ctl === "neutral");
+    const red = p && (state.pushTest || bothUp() || mismatch());
     const green = p && bothDown() && state.ctl === "neutral";
     const horn = p && (bothUp() || mismatch()) && state.throttle === "retarded";
 
