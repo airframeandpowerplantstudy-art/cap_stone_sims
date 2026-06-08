@@ -267,7 +267,6 @@
       <label>Gear Selector</label>
       <div class="btnrow three">
         <button data-set="gear" data-value="down">DOWN</button>
-        <button data-set="gear" data-value="transit">TRANSIT</button>
         <button data-set="gear" data-value="up">UP</button>
       </div>
     </div>
@@ -524,7 +523,6 @@ function render() {
   // Lamps
   setOn(els.greenLamp, greenSafe);
   setOn(els.redLamp, redUnsafe);
-  setBlink(els.redLamp, anyHorn || state.gear === "transit");
   setOn(els.hornBadge, anyHorn);
 
   // Green safe path
@@ -556,7 +554,7 @@ function render() {
   else if (valveNotNeutralHorn) els.modeStatus.textContent = "Valve Not Neutral Horn";
   else if (gearUpRetardedHorn) els.modeStatus.textContent = "Gear Up Warning Horn";
   else if (silentValveNotNeutral) els.modeStatus.textContent = "Valve Not Neutral / No Warning";
-  else els.modeStatus.textContent = "Unsafe / Transit";
+  else els.modeStatus.textContent = "Gear Unsafe";
 
   updateButtons();
   renderSwitches();
@@ -578,9 +576,7 @@ document.querySelectorAll("button[data-set]").forEach(btn => {
         state.rightGear = "up";
         state.valve = "neutral";
       }
-      if (state.gear === "transit") {
-        state.valve = "notNeutral";
-      }
+   
     }
 
     render();
