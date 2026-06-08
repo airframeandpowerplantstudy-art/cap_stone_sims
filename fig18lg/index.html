@@ -132,28 +132,6 @@
   }
   @keyframes hornPulse { from { transform: translate(-50%, -50%) scale(.96); } to { transform: translate(-50%, -50%) scale(1.08); } }
 
-  .switch-marker {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    border: 3px solid var(--blue);
-    background: rgba(30,136,229,.18);
-    color: var(--blue-dark);
-    font-weight: 800;
-    border-radius: 10px;
-    padding: 5px 8px;
-    font-size: clamp(10px, .95vw, 14px);
-    pointer-events: none;
-    box-shadow: 0 0 0 2px rgba(255,255,255,.7);
-  }
-  .switch-marker.active { background: rgba(30,136,229,.32); }
-
-  /* Move/resize these after you define the exact switch boxes */
-  #mk-power { left: 48.8%; top: 14.5%; }
-  #mk-throttle { left: 25.5%; top: 66%; }
-  #mk-leftGear { left: 38.2%; top: 86%; }
-  #mk-rightGear { left: 66.2%; top: 80%; }
-  #mk-valve { left: 81.8%; top: 74%; }
-
   .panel {
     background: var(--panel-bg);
     color: white;
@@ -233,13 +211,6 @@
       <div class="lamp red" id="redLamp"></div>
       <div class="lamp green" id="greenLamp"></div>
       <div class="horn-badge" id="hornBadge">HORN</div>
-
-      <!-- Blue placeholders so you can define switch locations cleanly -->
-      <div class="switch-marker" id="mk-power">POWER</div>
-      <div class="switch-marker" id="mk-throttle">THROTTLE</div>
-      <div class="switch-marker" id="mk-leftGear">LEFT GEAR</div>
-      <div class="switch-marker" id="mk-rightGear">RIGHT GEAR</div>
-      <div class="switch-marker" id="mk-valve">VALVE</div>
 
       <svg class="overlay" viewBox="0 0 1600 968" preserveAspectRatio="none">
         <!-- Real mapped animated paths from your F12 points -->
@@ -417,15 +388,6 @@ function updateButtons() {
   });
 }
 
-function updateMarkers() {
-  document.querySelectorAll(".switch-marker").forEach(m => m.classList.remove("active"));
-  document.getElementById("mk-power").classList.toggle("active", state.power === "on");
-  document.getElementById("mk-throttle").classList.toggle("active", state.throttle === "retarded");
-  document.getElementById("mk-leftGear").classList.toggle("active", state.leftGear === "down");
-  document.getElementById("mk-rightGear").classList.toggle("active", state.rightGear === "down");
-  document.getElementById("mk-valve").classList.toggle("active", state.valve === "neutral");
-}
-
 function renderSwitches() {
   els.swLeftGear.setAttribute("d",
     state.leftGear === "down"
@@ -519,7 +481,6 @@ function render() {
   else els.modeStatus.textContent = "Unsafe / Transit";
 
   updateButtons();
-  updateMarkers();
   renderSwitches();
 }
 
