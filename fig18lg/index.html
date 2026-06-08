@@ -246,9 +246,12 @@
         <path id="pathGreenDown" class="path green" d="M758 93 L753 154 L755 193 L1304 191 L1368 238 L1376 645 L1297 649 L1259 691 L1261 741 L1017 748 L978 803 L580 805 L547 853 L357 856 L355 889" />
         <path id="pathRedUnsafe" class="path red" d="M758 93 L756 199 L297 205 L227 249 L232 814 L516 814 L549 855 L353 856 L353 891" />
         <path id="pathRedMismatchRightUp" class="path red" d="M755 93 L755 199 L297 207 L228 252 L230 817 L513 814 L513 661 L926 655 L923 745 L978 803 L585 806 L549 855 L350 856 L350 887" />
-        <path id="pathHornLeftOrBothUp" class="path yellow" d="M808 230 L758 94 L761 193 L755 430 L706 433 L705 475 L759 475 L756 600 L419 602 L419 663 L516 663 L513 811 L550 859 L353 855 L350 889" />
+        <path id="pathHornLeftOrBothUp" class="path yellow" d="M755 94 L761 193 L755 430 L706 433 L705 475 L759 475 L756 600 L419 602 L419 663 L516 663 L513 811 L550 859 L353 855 L350 889" />
         <path id="pathHornRightUp" class="path yellow" d="M755 94 L758 199 L758 435 L702 435 L705 477 L756 472 L756 594 L422 603 L421 658 L925 653 L926 750 L981 805 L581 806 L550 856 L353 856 L353 887" />
+        <path id="pathRedPushTest" class="path red" d="M758 93 L756 199 L297 205 L211 192 L107 188 L102 233" />
+        <path id="pathGreenPushTest" class="path green" d="M758 93 L753 154 L755 193 L1306 196 L1384 174 L1498 174 L1496 220" />
 
+        
         <!-- Blue switch arms from your switch points -->
         <path id="swLeftGear" class="switch-arm" d="" />
         <path id="swRightGear" class="switch-arm" d="" />
@@ -273,20 +276,20 @@
     </div>
 
     <div class="control">
-      <label>Red Push-to-Test</label>
-      <div class="btnrow">
-        <button data-set="redTest" data-value="regular">REGULAR</button>
-        <button data-set="redTest" data-value="activated">PUSH</button>
-      </div>
-    </div>
+  <label>Red Push To Test</label>
+  <div class="btnrow">
+    <button data-set="redPush" data-value="normal">NORMAL</button>
+    <button data-set="redPush" data-value="pressed">PRESS</button>
+  </div>
+</div>
 
-    <div class="control">
-      <label>Green Push-to-Test</label>
-      <div class="btnrow">
-        <button data-set="greenTest" data-value="regular">REGULAR</button>
-        <button data-set="greenTest" data-value="activated">PUSH</button>
-      </div>
-    </div>
+<div class="control">
+  <label>Green Push To Test</label>
+  <div class="btnrow">
+    <button data-set="greenPush" data-value="normal">NORMAL</button>
+    <button data-set="greenPush" data-value="pressed">PRESS</button>
+  </div>
+</div>
 
     <div class="control">
       <label>Gear Selector</label>
@@ -350,6 +353,8 @@ const state = {
   rightGear: "down",
   redTest: "regular",
   greenTest: "regular"
+  redPush: "normal",
+  greenPush: "normal",
 };
 
 const els = {
@@ -362,6 +367,8 @@ const els = {
   redMismatchRightUpPath: document.getElementById("pathRedMismatchRightUp"),
   hornLeftOrBothUpPath: document.getElementById("pathHornLeftOrBothUp"),
   hornRightUpPath: document.getElementById("pathHornRightUp"),
+  redPushPath: document.getElementById("pathRedPushTest"),
+  greenPushPath: document.getElementById("pathGreenPushTest"),
 
   swLeftGear: document.getElementById("swLeftGear"),
   swRightGear: document.getElementById("swRightGear"),
@@ -482,7 +489,8 @@ function render() {
   const redTestOn = powerOn && state.redTest === "activated";
   const redUnsafe = isUnsafe();
   const hornOn = hornShouldSound();
-
+  const redPushTest = state.redPush === "pressed";
+  const greenPushTest = state.greenPush === "pressed";
   const rightUpOnly = state.rightGear === "up" && state.leftGear === "down";
   const leftUpOrBothUp = state.leftGear === "up";
 
@@ -490,6 +498,8 @@ function render() {
   setOn(els.redLamp, redUnsafe || redTestOn);
   setBlink(els.redLamp, hornOn || state.gear === "transit");
   setOn(els.hornBadge, hornOn);
+  setOn(els.redPushPath, redPushTest);
+  setOn(els.greenPushPath, greenPushTest);
 
   hideAllPaths();
 
