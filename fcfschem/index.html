@@ -208,6 +208,12 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
     });
   }
   function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
+  function selectedLabel(){
+    return { normal:'NORMAL', lh:'LEFT HAND', rh:'RIGHT HAND', crossfeed:'X-FEED' }[state.position] || state.position.toUpperCase();
+  }
+  function updateReadout(){
+    updateReadout();
+  }
 
   async function update(){
     const run = ++state.run;
@@ -217,7 +223,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
     clearPaths(); resetContacts(); clearLights();
 
     if(!state.powered){
-      readout.innerHTML = `<b>Status:</b> Power OFF<br><b>Switch:</b> ${state.position.toUpperCase()}<br>No paths active.`;
+      updateReadout();
       return;
     }
 
@@ -231,11 +237,11 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
 
     if(state.position === 'normal'){
       showPath('Norm');
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> NORMAL<br>PowerOn 0-4 active, Norm active, XFeedNormal active.`;
+      updateReadout();
     }
 
     if(state.position === 'rh'){
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>Drawing RH tank relay sequence...`;
+      updateReadout();
 
       // 1) Top-left selector is already moved by resetContacts() using state.position = 'rh'
       // 2) Draw the RH tank relay control path first
@@ -264,11 +270,11 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
       await drawPath('MainLightFeed', 650); if(run !== state.run) return;
       setLight('main', true);
 
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>RH logic: RHTankRelay drawn, RTS energized, PowerOn0 removed, sw15/sw11/sw12 moved, RHTankAfterRelay drawn, then sw13 moved.`;
+      updateReadout();
     }
 
     if(state.position === 'lh'){
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>Drawing LH tank relay sequence...`;
+      updateReadout();
 
       // 1) Top-left selector is already moved by resetContacts() using state.position = 'lh'
       // 2) Draw the LH tank relay control path first
@@ -282,6 +288,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
       // 4) Once LTS is energized, PowerOn0 drops out and the LH matching switch moves to Not Normal
       pathOn('PowerOn0', false);
       setContact('sw16','notNormal');
+      setContact('sw15','notNormal');
       await delay(250); if(run !== state.run) return;
 
       // 5) Fuel pressure valve switches move before/during the after-relay path drawing
@@ -294,14 +301,15 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
 
       // 7) Once that path is done, the LH matching cross switch moves to Not Normal
       setContact('sw14','notNormal');
+      setContact('sw13','notNormal');
       await drawPath('MainLightFeed', 650); if(run !== state.run) return;
       setLight('main', true);
 
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>LH logic: LHTankRelay drawn, LTS energized, PowerOn0 removed, sw16/sw11/sw12 moved, LHTankAfterRelay drawn, then sw14 moved.`;
+      updateReadout();
     }
 
     if(state.position === 'crossfeed'){
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>Drawing cross feed starter logic.`;
+      updateReadout();
       setContact('sw17','energized'); setContact('sw18','energized');
       await drawPath('XFeed', 850); if(run !== state.run) return;
       setContact('sw9','energized'); setContact('sw10','energized');
@@ -314,7 +322,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
       setLight('main', true);
       await drawPath('XFeedLightFeed', 650); if(run !== state.run) return;
       setLight('xfeed', true);
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>XFeedNormal removed; cross feed paths and valve switches moved.`;
+      updateReadout();
     }
   }
 
