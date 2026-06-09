@@ -219,6 +219,8 @@ drop-shadow(0 0 12px rgba(255,143,163,.95))
 
     if(!state.powered){
       readout.innerHTML = `<b>Status:</b> Power OFF<br><b>Switch:</b> ${state.position.toUpperCase()}<br>No paths active.`;
+      setContact('sw15','notNormal');
+      setContact('sw16','notNormal');
       return;
     }
 
