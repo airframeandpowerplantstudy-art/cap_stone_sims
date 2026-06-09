@@ -221,13 +221,18 @@
       setContact('sw15','notNormal');
       await delay(250); if(run !== state.run) return;
 
-      // 5) Then draw the RH tank after-relay path
+      // 5) Fuel pressure valve switches move before/during the after-relay path drawing
+      setContact('sw11','notNormal');
+      setContact('sw12','notNormal');
+      await delay(150); if(run !== state.run) return;
+
+      // 6) Then draw the RH tank after-relay path
       await drawPath('RHTankAfterRelay', 1500); if(run !== state.run) return;
 
-      // 6) Once that path is done, sw13 moves to Not Normal
+      // 7) Once that path is done, sw13 moves to Not Normal
       setContact('sw13','notNormal');
 
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>RH logic: RHTankRelay drawn, RTS energized, PowerOn0 removed, sw15 moved, RHTankAfterRelay drawn, then sw13 moved.`;
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>RH logic: RHTankRelay drawn, RTS energized, PowerOn0 removed, sw15/sw11/sw12 moved, RHTankAfterRelay drawn, then sw13 moved.`;
     }
 
     if(state.position === 'lh'){
