@@ -1,1 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fuel Cross Feed System Interactive Schematic</title>
+<style>
+  :root{
+    --panel:#172033;
+    --panel2:#222d44;
+    --text:#f5f8ff;
+    --muted:#b9c4d6;
+    --blue:#13a8ff;
+    --yellow:#ffd84d;
+    --green:#31d17c;
+    --red:#ff5a5f;
+    --trace:#ffcf33;
+    --ink:#101318;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#101521;
+    color:var(--text);
+  }
+
+  .app{
+    min-height:100vh;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 280px;
+    gap:14px;
+    padding:14px;
+  }
+
+  .stage-wrap{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .stage{
+    position:relative;
+    width:100%;
+    max-width:1081px;
+    aspect-ratio:1081 / 823;
+    margin:auto;
+    background-image:url("fcfschem.png");
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    background-position:center;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 14px 40px rgba(0,0,0,.35);
+  }
+
+  .overlay{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+  }
+
+  .hotspot{
+    cursor:crosshair;
+  }
+
+  .path{
+    fill:none;
+    stroke:var(--trace);
+    stroke-width:7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    opacity:0;
+    filter:drop-shadow(0 0 5px rgba(255,216,77,.8));
+    transition:opacity .18s ease;
+    pointer-events:none;
+  }
+  .path.on{opacity:.88;}
+  .path.dim{opacity:.28;}
+  .path.pulse{animation:pulse 1s ease-in-out infinite alternate;}
+  @keyframes pulse{from{opacity:.45}to{opacity:.95}}
+
+  .moving-contact{
+    stroke:#0b0b0b;
+    stroke-width:7;
+    stroke-linecap:round;
+    transition:all .22s ease;
+    filter:drop-shadow(0 0 2px rgba(255,255,255,.4));
+  }
+
+  .switch-dot{
+    fill:white;
+    stroke:#000;
+    stroke-width:3;
+    pointer-events:none;
+  }
+
+  .flag{
+    opacity:0;
+    transition:opacity .18s ease;
+    pointer-events:none;
+  }
+  .flag.on{opacity:1;}
+  .flag rect{fill:rgba(255,216,77,.92);stroke:#111;stroke-width:2;rx:8;}
+  .flag text{font:bold 17px Arial;fill:#111;dominant-baseline:middle;text-anchor:middle;}
+
+  .pilot-lamp{
+    opacity:0;
+    transition:opacity .18s ease, filter .18s ease;
+    mix-blend-mode:multiply;
+  }
+  .pilot-lamp.on{
+    opacity:.75;
+    filter:drop-shadow(0 0 18px currentColor);
+  }
+
+  .trace-preview{
+    fill:none;
+    stroke:#00e5ff;
+    stroke-width:4;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-dasharray:9 7;
+    pointer-events:none;
+  }
+  .trace-point{
+    fill:#00e5ff;
+    stroke:#001318;
+    stroke-width:2;
+    pointer-events:none;
+  }
+  .guide-point{
+    fill:rgba(19,168,255,.9);
+    stroke:#051524;
+    stroke-width:2;
+    opacity:0;
+    pointer-events:none;
+  }
+  .show-guides .guide-point{opacity:1;}
+
+  .side-panel{
+    background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+    padding:14px;
+    box-shadow:0 14px 40px rgba(0,0,0,.35);
+    align-self:start;
+    position:sticky;
+    top:14px;
+  }
+
+  h1{
+    font-size:18px;
+    margin:0 0 10px;
+  }
+  .small{font-size:12px;color:var(--muted);line-height:1.35;margin:6px 0 12px;}
+  .section-title{font-weight:700;margin:14px 0 8px;color:#fff;}
+
+  button{
+    width:100%;
+    border:0;
+    border-radius:9px;
+    padding:10px 12px;
+    margin:5px 0;
+    background:#33405f;
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button:hover{background:#405174;}
+  button.active{background:var(--blue);color:#06121e;}
+  button.power-on{background:var(--green);color:#07170e;}
+  button.power-off{background:#5a2530;color:#fff;}
+  button.warn{background:#57451f;}
+
+  .readout{
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:9px;
+    padding:10px;
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.4;
+    margin-top:10px;
+  }
+  .readout b{color:#fff;}
+  .row{display:flex;gap:8px;align-items:center;}
+  .row button{flex:1;}
+  label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin:8px 0;}
+
+  .trace-box{
+    background:#0d1220;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;
+    padding:10px;
+  }
+  textarea{
+    width:100%;
+    min-height:78px;
+    resize:vertical;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,.18);
+    background:#070a12;
+    color:#d9f6ff;
+    padding:8px;
+    font-family:Consolas, Monaco, monospace;
+    font-size:12px;
+  }
+
+  @media (max-width:980px){
+    .app{grid-template-columns:1fr;}
+    .side-panel{position:static;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="stage-wrap">
+    <div id="stage" class="stage">
+      <svg id="svg" class="overlay" viewBox="0 0 1081 823" preserveAspectRatio="none">
+        <rect id="clickCatcher" class="hotspot" x="0" y="0" width="1081" height="823" fill="transparent"></rect>
+
+        <!-- Sample energized bus / feed paths. These are easy to edit after tracing exact points. -->
+        <polyline id="path-bus" class="path" points="116,55 206,55 581,55 963,55" />
+        <polyline id="path-main-feed" class="path" points="206,55 206,194 206,683" />
+        <polyline id="path-fcf" class="path" points="963,55 963,609 963,680" />
+        <polyline id="path-lh" class="path" points="206,194 143,219 116,219 90,219 90,423 90,458" />
+        <polyline id="path-rh" class="path" points="206,194 143,219 207,219 207,651 208,683" />
+        <polyline id="path-crossfeed" class="path" points="206,194 116,219 90,219 90,624 297,624 297,571 741,571 963,609" />
+        <polyline id="path-pressure-valve" class="path" points="581,55 581,140 510,140 510,337 510,443 572,443" />
+        <polyline id="path-tank-valve" class="path" points="581,55 581,140 656,140 656,337 656,443 727,443" />
+
+        <!-- Fuel selector movable blade. Fixed pivot at blue 5 selector contact area. -->
+        <line id="selectorBlade" class="moving-contact" x1="115" y1="219" x2="143" y2="186" />
+        <circle class="switch-dot" cx="115" cy="219" r="6" />
+        <circle class="switch-dot" cx="143" cy="219" r="6" />
+        <circle class="switch-dot" cx="207" cy="219" r="6" />
+        <circle class="switch-dot" cx="206" cy="194" r="6" />
+
+        <!-- Valve / cockpit caution flags. -->
+        <g id="flagPressure" class="flag">
+          <rect x="438" y="445" width="135" height="70"></rect>
+          <text x="505" y="479">PRESSURE</text>
+          <text x="505" y="501">X-FEED OPEN</text>
+        </g>
+        <g id="flagTank" class="flag">
+          <rect x="593" y="445" width="135" height="70"></rect>
+          <text x="660" y="479">TANK</text>
+          <text x="660" y="501">X-FEED OPEN</text>
+        </g>
+
+        <!-- Approximate caution light glow area around cockpit caution box. -->
+        <circle id="lampPressure" class="pilot-lamp" cx="505" cy="480" r="54" style="color:#ffd84d; fill:#ffd84d;"></circle>
+        <circle id="lampTank" class="pilot-lamp" cx="660" cy="480" r="54" style="color:#ffd84d; fill:#ffd84d;"></circle>
+
+        <!-- Blue numbered guide points already visible in image. Toggle adds scalable dots for tracing. -->
+        <g id="guideLayer">
+          <circle class="guide-point" cx="29" cy="204" r="7"/><circle class="guide-point" cx="176" cy="230" r="7"/>
+          <circle class="guide-point" cx="95" cy="272" r="7"/><circle class="guide-point" cx="76" cy="174" r="7"/>
+          <circle class="guide-point" cx="177" cy="426" r="7"/><circle class="guide-point" cx="280" cy="426" r="7"/>
+          <circle class="guide-point" cx="178" cy="517" r="7"/><circle class="guide-point" cx="281" cy="516" r="7"/>
+          <circle class="guide-point" cx="179" cy="608" r="7"/><circle class="guide-point" cx="281" cy="609" r="7"/>
+          <circle class="guide-point" cx="184" cy="704" r="7"/><circle class="guide-point" cx="323" cy="703" r="7"/>
+          <circle class="guide-point" cx="548" cy="204" r="7"/><circle class="guide-point" cx="616" cy="204" r="7"/>
+          <circle class="guide-point" cx="508" cy="310" r="7"/><circle class="guide-point" cx="630" cy="310" r="7"/>
+          <circle class="guide-point" cx="847" cy="608" r="7"/><circle class="guide-point" cx="986" cy="607" r="7"/>
+          <circle class="guide-point" cx="803" cy="705" r="7"/><circle class="guide-point" cx="949" cy="704" r="7"/>
+        </g>
+
+        <g id="traceLayer"></g>
+      </svg>
+    </div>
+
+    <div class="trace-box">
+      <b>Tracing Script / Coordinate Finder</b>
+      <div class="small">Turn trace mode on, click points on the schematic, then copy the generated SVG points. Coordinates stay based on the original 1081 × 823 image, so they scale with zoom.</div>
+      <textarea id="traceOutput" readonly placeholder="Trace points will appear here..."></textarea>
+    </div>
+  </main>
+
+  <aside class="side-panel">
+    <h1>Fuel Cross Feed System</h1>
+    <div class="small">Background image: <b>fcfschem.png</b><br>Drawing starts with electrical power off.</div>
+
+    <div class="section-title">Electrical Power</div>
+    <button id="powerBtn" class="power-off">Power: OFF</button>
+
+    <div class="section-title">Fuel Selector Switch</div>
+    <button data-position="normal" class="posBtn active">NORMAL</button>
+    <button data-position="lh" class="posBtn">LEFT HAND</button>
+    <button data-position="rh" class="posBtn">RIGHT HAND</button>
+    <button data-position="crossfeed" class="posBtn">CROSS FEED</button>
+
+    <div class="readout" id="stateReadout"></div>
+
+    <div class="section-title">Overlay Helpers</div>
+    <label><input id="showGuides" type="checkbox"> Show scalable guide points</label>
+    <label><input id="traceMode" type="checkbox"> Trace mode</label>
+    <div class="row">
+      <button id="undoTrace" class="warn">Undo</button>
+      <button id="clearTrace" class="warn">Clear</button>
+    </div>
+    <button id="copyTrace">Copy Points</button>
+  </aside>
+</div>
+
+<script>
+(() => {
+  const svg = document.getElementById('svg');
+  const stage = document.getElementById('stage');
+  const powerBtn = document.getElementById('powerBtn');
+  const posBtns = [...document.querySelectorAll('.posBtn')];
+  const readout = document.getElementById('stateReadout');
+  const selectorBlade = document.getElementById('selectorBlade');
+  const traceMode = document.getElementById('traceMode');
+  const showGuides = document.getElementById('showGuides');
+  const traceLayer = document.getElementById('traceLayer');
+  const traceOutput = document.getElementById('traceOutput');
+
+  const paths = {
+    bus: document.getElementById('path-bus'),
+    main: document.getElementById('path-main-feed'),
+    fcf: document.getElementById('path-fcf'),
+    lh: document.getElementById('path-lh'),
+    rh: document.getElementById('path-rh'),
+    crossfeed: document.getElementById('path-crossfeed'),
+    pressure: document.getElementById('path-pressure-valve'),
+    tank: document.getElementById('path-tank-valve')
+  };
+
+  const flags = {
+    pressure: document.getElementById('flagPressure'),
+    tank: document.getElementById('flagTank'),
+    lampPressure: document.getElementById('lampPressure'),
+    lampTank: document.getElementById('lampTank')
+  };
+
+  let powered = false;
+  let position = 'normal';
+  let tracePoints = [];
+
+  // Movable selector blade endpoints. Tune these after tracing exact switch contacts.
+  const bladePositions = {
+    normal:   { x1:115, y1:219, x2:143, y2:186, text:'Selector in NORMAL. No cross-feed valve energized.' },
+    lh:       { x1:115, y1:219, x2:90,  y2:219, text:'Selector in LEFT HAND. LH selector side is shown energized when power is ON.' },
+    rh:       { x1:115, y1:219, x2:143, y2:219, text:'Selector in RIGHT HAND. RH selector side is shown energized when power is ON.' },
+    crossfeed:{ x1:115, y1:219, x2:206, y2:194, text:'Selector in CROSS FEED. Cross-feed valve paths and caution lights are shown when power is ON.' }
+  };
+
+  function setPath(name, on, pulse=false){
+    paths[name].classList.toggle('on', !!on);
+    paths[name].classList.toggle('pulse', !!pulse);
+  }
+
+  function setFlag(name, on){
+    flags[name].classList.toggle('on', !!on);
+  }
+
+  function update(){
+    powerBtn.textContent = powered ? 'Power: ON' : 'Power: OFF';
+    powerBtn.classList.toggle('power-on', powered);
+    powerBtn.classList.toggle('power-off', !powered);
+
+    posBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.position === position));
+
+    const b = bladePositions[position];
+    selectorBlade.setAttribute('x1', b.x1);
+    selectorBlade.setAttribute('y1', b.y1);
+    selectorBlade.setAttribute('x2', b.x2);
+    selectorBlade.setAttribute('y2', b.y2);
+
+    Object.keys(paths).forEach(k => setPath(k, false));
+    ['pressure','tank','lampPressure','lampTank'].forEach(k => setFlag(k, false));
+
+    if(powered){
+      setPath('bus', true);
+      setPath('main', true);
+      setPath('fcf', true);
+
+      if(position === 'lh') setPath('lh', true);
+      if(position === 'rh') setPath('rh', true);
+      if(position === 'crossfeed'){
+        setPath('crossfeed', true, true);
+        setPath('pressure', true);
+        setPath('tank', true);
+        setFlag('pressure', true);
+        setFlag('tank', true);
+        setFlag('lampPressure', true);
+        setFlag('lampTank', true);
+      }
+    }
+
+    readout.innerHTML = `<b>Status:</b> ${powered ? 'Power ON' : 'Power OFF'}<br><b>Switch:</b> ${position.toUpperCase()}<br>${b.text}`;
+  }
+
+  powerBtn.addEventListener('click', () => { powered = !powered; update(); });
+  posBtns.forEach(btn => btn.addEventListener('click', () => { position = btn.dataset.position; update(); }));
+  showGuides.addEventListener('change', () => stage.classList.toggle('show-guides', showGuides.checked));
+
+  function svgPoint(evt){
+    const pt = svg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    const converted = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return { x: Math.round(converted.x), y: Math.round(converted.y) };
+  }
+
+  function renderTrace(){
+    traceLayer.innerHTML = '';
+    if(tracePoints.length){
+      const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      poly.setAttribute('class','trace-preview');
+      poly.setAttribute('points', tracePoints.map(p => `${p.x},${p.y}`).join(' '));
+      traceLayer.appendChild(poly);
+    }
+    tracePoints.forEach((p, idx) => {
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('class','trace-point');
+      c.setAttribute('cx', p.x);
+      c.setAttribute('cy', p.y);
+      c.setAttribute('r', 6);
+      traceLayer.appendChild(c);
+
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', p.x + 9);
+      t.setAttribute('y', p.y - 9);
+      t.setAttribute('fill', '#001318');
+      t.setAttribute('stroke', '#fff');
+      t.setAttribute('stroke-width', '4');
+      t.setAttribute('paint-order', 'stroke');
+      t.setAttribute('font-size', '16');
+      t.setAttribute('font-weight', '700');
+      t.textContent = idx + 1;
+      traceLayer.appendChild(t);
+    });
+    const pointsString = tracePoints.map(p => `${p.x},${p.y}`).join(' ');
+    traceOutput.value = pointsString ? `points="${pointsString}"` : '';
+  }
+
+  svg.addEventListener('click', (evt) => {
+    if(!traceMode.checked) return;
+    const p = svgPoint(evt);
+    tracePoints.push(p);
+    renderTrace();
+  });
+
+  document.getElementById('undoTrace').addEventListener('click', () => {
+    tracePoints.pop();
+    renderTrace();
+  });
+  document.getElementById('clearTrace').addEventListener('click', () => {
+    tracePoints = [];
+    renderTrace();
+  });
+  document.getElementById('copyTrace').addEventListener('click', async () => {
+    try{
+      await navigator.clipboard.writeText(traceOutput.value);
+      document.getElementById('copyTrace').textContent = 'Copied!';
+      setTimeout(() => document.getElementById('copyTrace').textContent = 'Copy Points', 900);
+    }catch(e){
+      traceOutput.select();
+      document.execCommand('copy');
+    }
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
 
