@@ -3,217 +3,33 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fuel Cross Feed System Interactive Schematic</title>
+<title>Fuel Cross Feed Interactive Schematic</title>
 <style>
   :root{
-    --panel:#172033;
-    --panel2:#222d44;
-    --text:#f5f8ff;
-    --muted:#b9c4d6;
-    --blue:#13a8ff;
-    --yellow:#ffd84d;
-    --green:#31d17c;
-    --red:#ff5a5f;
-    --trace:#ffcf33;
-    --ink:#101318;
+    --panel:#172033; --panel2:#222d44; --text:#f5f8ff; --muted:#b9c4d6;
+    --blue:#13a8ff; --yellow:#ffd84d; --green:#31d17c; --red:#ff5a5f; --trace:#ffcf33;
   }
-
   *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:Arial, Helvetica, sans-serif;
-    background:#101521;
-    color:var(--text);
-  }
-
-  .app{
-    min-height:100vh;
-    display:grid;
-    grid-template-columns:minmax(0,1fr) 280px;
-    gap:14px;
-    padding:14px;
-  }
-
-  .stage-wrap{
-    min-width:0;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-
-  .stage{
-    position:relative;
-    width:100%;
-    max-width:1081px;
-    aspect-ratio:1081 / 823;
-    margin:auto;
-    background-image:url("fcfschem.png");
-    background-repeat:no-repeat;
-    background-size:100% 100%;
-    background-position:center;
-    border-radius:8px;
-    overflow:hidden;
-    box-shadow:0 14px 40px rgba(0,0,0,.35);
-  }
-
-  .overlay{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-  }
-
-  .hotspot{
-    cursor:crosshair;
-  }
-
-  .path{
-    fill:none;
-    stroke:var(--trace);
-    stroke-width:7;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    opacity:0;
-    filter:drop-shadow(0 0 5px rgba(255,216,77,.8));
-    transition:opacity .18s ease;
-    pointer-events:none;
-  }
-  .path.on{opacity:.88;}
-  .path.dim{opacity:.28;}
-  .path.pulse{animation:pulse 1s ease-in-out infinite alternate;}
-  @keyframes pulse{from{opacity:.45}to{opacity:.95}}
-
-  .moving-contact{
-    stroke:#0b0b0b;
-    stroke-width:7;
-    stroke-linecap:round;
-    transition:all .22s ease;
-    filter:drop-shadow(0 0 2px rgba(255,255,255,.4));
-  }
-
-  .switch-dot{
-    fill:white;
-    stroke:#000;
-    stroke-width:3;
-    pointer-events:none;
-  }
-
-  .flag{
-    opacity:0;
-    transition:opacity .18s ease;
-    pointer-events:none;
-  }
-  .flag.on{opacity:1;}
-  .flag rect{fill:rgba(255,216,77,.92);stroke:#111;stroke-width:2;rx:8;}
-  .flag text{font:bold 17px Arial;fill:#111;dominant-baseline:middle;text-anchor:middle;}
-
-  .pilot-lamp{
-    opacity:0;
-    transition:opacity .18s ease, filter .18s ease;
-    mix-blend-mode:multiply;
-  }
-  .pilot-lamp.on{
-    opacity:.75;
-    filter:drop-shadow(0 0 18px currentColor);
-  }
-
-  .trace-preview{
-    fill:none;
-    stroke:#00e5ff;
-    stroke-width:4;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    stroke-dasharray:9 7;
-    pointer-events:none;
-  }
-  .trace-point{
-    fill:#00e5ff;
-    stroke:#001318;
-    stroke-width:2;
-    pointer-events:none;
-  }
-  .guide-point{
-    fill:rgba(19,168,255,.9);
-    stroke:#051524;
-    stroke-width:2;
-    opacity:0;
-    pointer-events:none;
-  }
-  .show-guides .guide-point{opacity:1;}
-
-  .side-panel{
-    background:linear-gradient(180deg,var(--panel),var(--panel2));
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:12px;
-    padding:14px;
-    box-shadow:0 14px 40px rgba(0,0,0,.35);
-    align-self:start;
-    position:sticky;
-    top:14px;
-  }
-
-  h1{
-    font-size:18px;
-    margin:0 0 10px;
-  }
-  .small{font-size:12px;color:var(--muted);line-height:1.35;margin:6px 0 12px;}
-  .section-title{font-weight:700;margin:14px 0 8px;color:#fff;}
-
-  button{
-    width:100%;
-    border:0;
-    border-radius:9px;
-    padding:10px 12px;
-    margin:5px 0;
-    background:#33405f;
-    color:white;
-    font-weight:700;
-    cursor:pointer;
-  }
-  button:hover{background:#405174;}
-  button.active{background:var(--blue);color:#06121e;}
-  button.power-on{background:var(--green);color:#07170e;}
-  button.power-off{background:#5a2530;color:#fff;}
-  button.warn{background:#57451f;}
-
-  .readout{
-    background:rgba(0,0,0,.25);
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:9px;
-    padding:10px;
-    font-size:13px;
-    color:var(--muted);
-    line-height:1.4;
-    margin-top:10px;
-  }
-  .readout b{color:#fff;}
-  .row{display:flex;gap:8px;align-items:center;}
-  .row button{flex:1;}
-  label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin:8px 0;}
-
-  .trace-box{
-    background:#0d1220;
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:10px;
-    padding:10px;
-  }
-  textarea{
-    width:100%;
-    min-height:78px;
-    resize:vertical;
-    border-radius:8px;
-    border:1px solid rgba(255,255,255,.18);
-    background:#070a12;
-    color:#d9f6ff;
-    padding:8px;
-    font-family:Consolas, Monaco, monospace;
-    font-size:12px;
-  }
-
-  @media (max-width:980px){
-    .app{grid-template-columns:1fr;}
-    .side-panel{position:static;}
-  }
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#101521;color:var(--text)}
+  .app{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px;padding:14px}
+  .stage-wrap{min-width:0;display:flex;flex-direction:column;gap:10px}
+  .stage{position:relative;width:100%;max-width:1081px;aspect-ratio:1081/823;margin:auto;background-image:url("fcfschem.png");background-repeat:no-repeat;background-size:100% 100%;background-position:center;border-radius:8px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.35)}
+  .overlay{position:absolute;inset:0;width:100%;height:100%}
+  .hotspot{cursor:crosshair}
+  .path{fill:none;stroke:var(--trace);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:drop-shadow(0 0 5px rgba(255,216,77,.8));pointer-events:none;transition:opacity .15s ease}
+  .path.on{opacity:.88}
+  .path.drawing{opacity:.88;animation:none}
+  .moving-contact{stroke:#080808;stroke-width:7;stroke-linecap:round;transition:all .28s ease;filter:drop-shadow(0 0 2px rgba(255,255,255,.55));pointer-events:none}
+  .moving-contact.hot{stroke:#101010;filter:drop-shadow(0 0 5px rgba(255,216,77,.8))}
+  .switch-dot{fill:white;stroke:#000;stroke-width:3;pointer-events:none}
+  .trace-preview{fill:none;stroke:#00e5ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:9 7;pointer-events:none}
+  .trace-point{fill:#00e5ff;stroke:#001318;stroke-width:2;pointer-events:none}
+  .side-panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;box-shadow:0 14px 40px rgba(0,0,0,.35);align-self:start;position:sticky;top:14px}
+  h1{font-size:18px;margin:0 0 10px}.small{font-size:12px;color:var(--muted);line-height:1.35;margin:6px 0 12px}.section-title{font-weight:700;margin:14px 0 8px;color:#fff}
+  button{width:100%;border:0;border-radius:9px;padding:10px 12px;margin:5px 0;background:#33405f;color:white;font-weight:700;cursor:pointer} button:hover{background:#405174} button.active{background:var(--blue);color:#06121e}.power-on{background:var(--green)!important;color:#07170e!important}.power-off{background:#5a2530!important;color:#fff!important}.warn{background:#57451f!important}
+  .readout{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px;font-size:13px;color:var(--muted);line-height:1.4;margin-top:10px}.readout b{color:#fff}.row{display:flex;gap:8px}.row button{flex:1}label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin:8px 0}
+  .trace-box{background:#0d1220;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px} textarea{width:100%;min-height:78px;resize:vertical;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:#070a12;color:#d9f6ff;padding:8px;font-family:Consolas,Monaco,monospace;font-size:12px}
+  @media(max-width:980px){.app{grid-template-columns:1fr}.side-panel{position:static}}
 </style>
 </head>
 <body>
@@ -221,88 +37,67 @@
   <main class="stage-wrap">
     <div id="stage" class="stage">
       <svg id="svg" class="overlay" viewBox="0 0 1081 823" preserveAspectRatio="none">
-        <rect id="clickCatcher" class="hotspot" x="0" y="0" width="1081" height="823" fill="transparent"></rect>
+        <rect class="hotspot" x="0" y="0" width="1081" height="823" fill="transparent"></rect>
 
-        <!-- Sample energized bus / feed paths. These are easy to edit after tracing exact points. -->
-        <polyline id="path-bus" class="path" points="116,55 206,55 581,55 963,55" />
-        <polyline id="path-main-feed" class="path" points="206,55 206,194 206,683" />
-        <polyline id="path-fcf" class="path" points="963,55 963,609 963,680" />
-        <polyline id="path-lh" class="path" points="206,194 143,219 116,219 90,219 90,423 90,458" />
-        <polyline id="path-rh" class="path" points="206,194 143,219 207,219 207,651 208,683" />
-        <polyline id="path-crossfeed" class="path" points="206,194 116,219 90,219 90,624 297,624 297,571 741,571 963,609" />
-        <polyline id="path-pressure-valve" class="path" points="581,55 581,140 510,140 510,337 510,443 572,443" />
-        <polyline id="path-tank-valve" class="path" points="581,55 581,140 656,140 656,337 656,443 727,443" />
-
-        <!-- Fuel selector movable blade. Fixed pivot at blue 5 selector contact area. -->
-        <line id="selectorBlade" class="moving-contact" x1="115" y1="219" x2="143" y2="186" />
-        <circle class="switch-dot" cx="115" cy="219" r="6" />
-        <circle class="switch-dot" cx="143" cy="219" r="6" />
-        <circle class="switch-dot" cx="207" cy="219" r="6" />
-        <circle class="switch-dot" cx="206" cy="194" r="6" />
-
-        <!-- Valve / cockpit caution flags. -->
-        <g id="flagPressure" class="flag">
-          <rect x="438" y="445" width="135" height="70"></rect>
-          <text x="505" y="479">PRESSURE</text>
-          <text x="505" y="501">X-FEED OPEN</text>
-        </g>
-        <g id="flagTank" class="flag">
-          <rect x="593" y="445" width="135" height="70"></rect>
-          <text x="660" y="479">TANK</text>
-          <text x="660" y="501">X-FEED OPEN</text>
+        <g id="paths">
+          <polyline id="PowerOn0" class="path" points="206,55 206,423 197,423 197,460 206,460 206,520 197,520 197,556 206,556 206,606 197,606 197,640 206,640 206,710 181,735 181,765 404,763 404,314 409,308 417,314 423,308 429,314 429,351" />
+          <polyline id="PowerOn1" class="path" points="206,55 206,193 138,193 114,220" />
+          <polyline id="PowerOn2" class="path" points="580,55 580,140 507,140 507,200" />
+          <polyline id="PowerOn3" class="path" points="580,55 580,140 655,140 655,200" />
+          <polyline id="PowerOn4" class="path" points="961,55 961,645 953,705 978,734 978,765 757,765 757,346 757,314 749,310 744,316 737,310 732,316 732,353" />
+          <polyline id="Norm" class="path" points="114,220 114,183" />
+          <polyline id="RHTankRelay" class="path" points="114,219 157,219 157,520 154,556 146,551 138,556 134,551" />
+          <polyline id="RHTankAfterRelay" class="path" points="206,55 206,422 197,422 197,457 205,457 205,489 241,493 241,519 252,517 252,554 243,554 243,572 295,572 297,711 311,729 378,728 380,239 380,211 375,205 369,211 361,205 355,213 355,245" />
+          <polyline id="LHTankRelay" class="path" points="114,219 114,451 109,459 101,454 94,460 89,454 89,411" />
+          <polyline id="LHTankAfterRelay" class="path" points="206,55 206,405 243,406 243,423 254,423 252,459 423,460 243,474 297,474 297,708 311,729 378,728 380,239 380,211 375,205 369,211 361,205 355,213 355,245" />
+          <polyline id="XFeed" class="path" points="114,219 71,219 71,642 66,648 57,642 51,648 46,642 45,600" />
+          <polyline id="XFeedAfterRelay" class="path" points="206,55 206,422 195,422 197,457 206,459 206,519 197,517 197,552 206,554 206,585 243,586 243,606 252,606 252,643 243,643 260,659 297,659 298,709 311,729 378,728 380,239 380,211 375,205 369,211 361,205 355,213 355,245" />
+          <polyline id="XFeedNormal" class="path" points="960,56 963,606 953,606 953,642 963,643 953,703 953,711 978,734 978,763 755,763 755,317 750,310 744,316 737,310 732,316 730,349" />
+          <polyline id="XFeedNotNormal" class="path" points="961,56 961,572 866,572 866,606 875,606 875,643 866,643 863,708 844,728 781,728 781,214 786,205 793,211 800,205 806,214 806,250" />
         </g>
 
-        <!-- Approximate caution light glow area around cockpit caution box. -->
-        <circle id="lampPressure" class="pilot-lamp" cx="505" cy="480" r="54" style="color:#ffd84d; fill:#ffd84d;"></circle>
-        <circle id="lampTank" class="pilot-lamp" cx="660" cy="480" r="54" style="color:#ffd84d; fill:#ffd84d;"></circle>
-
-        <!-- Blue numbered guide points already visible in image. Toggle adds scalable dots for tracing. -->
-        <g id="guideLayer">
-          <circle class="guide-point" cx="29" cy="204" r="7"/><circle class="guide-point" cx="176" cy="230" r="7"/>
-          <circle class="guide-point" cx="95" cy="272" r="7"/><circle class="guide-point" cx="76" cy="174" r="7"/>
-          <circle class="guide-point" cx="177" cy="426" r="7"/><circle class="guide-point" cx="280" cy="426" r="7"/>
-          <circle class="guide-point" cx="178" cy="517" r="7"/><circle class="guide-point" cx="281" cy="516" r="7"/>
-          <circle class="guide-point" cx="179" cy="608" r="7"/><circle class="guide-point" cx="281" cy="609" r="7"/>
-          <circle class="guide-point" cx="184" cy="704" r="7"/><circle class="guide-point" cx="323" cy="703" r="7"/>
-          <circle class="guide-point" cx="548" cy="204" r="7"/><circle class="guide-point" cx="616" cy="204" r="7"/>
-          <circle class="guide-point" cx="508" cy="310" r="7"/><circle class="guide-point" cx="630" cy="310" r="7"/>
-          <circle class="guide-point" cx="847" cy="608" r="7"/><circle class="guide-point" cx="986" cy="607" r="7"/>
-          <circle class="guide-point" cx="803" cy="705" r="7"/><circle class="guide-point" cx="949" cy="704" r="7"/>
+        <g id="contacts">
+          <line id="selector" class="moving-contact" x1="114" y1="218" x2="114" y2="183" />
+          <line id="sw5"  class="moving-contact" x1="197" y1="417" x2="197" y2="467" />
+          <line id="sw6"  class="moving-contact" x1="260" y1="417" x2="260" y2="467" />
+          <line id="sw7"  class="moving-contact" x1="197" y1="512" x2="197" y2="562" />
+          <line id="sw8"  class="moving-contact" x1="260" y1="512" x2="260" y2="562" />
+          <line id="sw9"  class="moving-contact" x1="197" y1="600" x2="197" y2="550" />
+          <line id="sw10" class="moving-contact" x1="260" y1="600" x2="260" y2="550" />
+          <line id="sw11" class="moving-contact" x1="208" y1="711" x2="185" y2="734" />
+          <line id="sw12" class="moving-contact" x1="297" y1="711" x2="292" y2="745" />
+          <line id="sw13" class="moving-contact" x1="525" y1="190" x2="525" y2="240" />
+          <line id="sw14" class="moving-contact" x1="635" y1="190" x2="635" y2="240" />
+          <line id="sw15" class="moving-contact" x1="490" y1="295" x2="490" y2="345" />
+          <line id="sw16" class="moving-contact" x1="675" y1="300" x2="675" y2="350" />
+          <line id="sw17" class="moving-contact" x1="885" y1="600" x2="885" y2="650" />
+          <line id="sw18" class="moving-contact" x1="955" y1="600" x2="955" y2="650" />
+          <line id="sw19" class="moving-contact" x1="865" y1="710" x2="870" y2="745" />
+          <line id="sw20" class="moving-contact" x1="952" y1="709" x2="973" y2="729" />
         </g>
-
         <g id="traceLayer"></g>
       </svg>
     </div>
-
     <div class="trace-box">
       <b>Tracing Script / Coordinate Finder</b>
-      <div class="small">Turn trace mode on, click points on the schematic, then copy the generated SVG points. Coordinates stay based on the original 1081 × 823 image, so they scale with zoom.</div>
-      <textarea id="traceOutput" readonly placeholder="Trace points will appear here..."></textarea>
+      <div class="small">Turn trace mode on and click points. The points print in the F12 Console and also show below.</div>
+      <textarea id="traceOutput" readonly placeholder="F12 Console will also show clicked coordinates..."></textarea>
     </div>
   </main>
 
   <aside class="side-panel">
     <h1>Fuel Cross Feed System</h1>
-    <div class="small">Background image: <b>fcfschem.png</b><br>Drawing starts with electrical power off.</div>
-
-    <div class="section-title">Electrical Power</div>
-    <button id="powerBtn" class="power-off">Power: OFF</button>
-
+    <div class="small">Background: <b>fcfschem.png</b><br>Drawing starts with electrical power off.</div>
+    <div class="section-title">Electrical Power</div><button id="powerBtn" class="power-off">Power: OFF</button>
     <div class="section-title">Fuel Selector Switch</div>
     <button data-position="normal" class="posBtn active">NORMAL</button>
     <button data-position="lh" class="posBtn">LEFT HAND</button>
     <button data-position="rh" class="posBtn">RIGHT HAND</button>
     <button data-position="crossfeed" class="posBtn">CROSS FEED</button>
-
     <div class="readout" id="stateReadout"></div>
-
-    <div class="section-title">Overlay Helpers</div>
-    <label><input id="showGuides" type="checkbox"> Show scalable guide points</label>
+    <div class="section-title">Trace Tools</div>
     <label><input id="traceMode" type="checkbox"> Trace mode</label>
-    <div class="row">
-      <button id="undoTrace" class="warn">Undo</button>
-      <button id="clearTrace" class="warn">Clear</button>
-    </div>
+    <div class="row"><button id="undoTrace" class="warn">Undo</button><button id="clearTrace" class="warn">Clear</button></div>
     <button id="copyTrace">Copy Points</button>
   </aside>
 </div>
@@ -310,210 +105,157 @@
 <script>
 (() => {
   const svg = document.getElementById('svg');
-  const stage = document.getElementById('stage');
   const powerBtn = document.getElementById('powerBtn');
   const posBtns = [...document.querySelectorAll('.posBtn')];
   const readout = document.getElementById('stateReadout');
-  const selectorBlade = document.getElementById('selectorBlade');
   const traceMode = document.getElementById('traceMode');
-  const showGuides = document.getElementById('showGuides');
   const traceLayer = document.getElementById('traceLayer');
   const traceOutput = document.getElementById('traceOutput');
 
-  const paths = {
-    bus: document.getElementById('path-bus'),
-    main: document.getElementById('path-main-feed'),
-    fcf: document.getElementById('path-fcf'),
-    lh: document.getElementById('path-lh'),
-    rh: document.getElementById('path-rh'),
-    crossfeed: document.getElementById('path-crossfeed'),
-    pressure: document.getElementById('path-pressure-valve'),
-    tank: document.getElementById('path-tank-valve')
+  const state = { powered:false, position:'normal', run:0, tracePoints:[] };
+  const pathNames = ['PowerOn0','PowerOn1','PowerOn2','PowerOn3','PowerOn4','Norm','RHTankRelay','RHTankAfterRelay','LHTankRelay','LHTankAfterRelay','XFeed','XFeedAfterRelay','XFeedNormal','XFeedNotNormal'];
+  const paths = Object.fromEntries(pathNames.map(id => [id, document.getElementById(id)]));
+  const contacts = Object.fromEntries([...document.querySelectorAll('#contacts line')].map(el => [el.id, el]));
+
+  const pos = {
+    selector:{ normal:[114,218,114,183], lh:[114,218,142,218], rh:[114,218,114,251], crossfeed:[114,218,91,218] },
+    sw5:{ normal:[197,417,197,467], energized:[187,417,187,467] },
+    sw6:{ normal:[260,417,260,467], energized:[250,417,250,467] },
+    sw7:{ normal:[197,512,197,562], energized:[187,512,187,562] },
+    sw8:{ normal:[260,512,260,562], energized:[250,512,250,562] },
+    sw9:{ normal:[197,600,197,550], energized:[187,600,187,550] },
+    sw10:{ normal:[260,600,260,550], energized:[250,600,250,550] },
+    sw11:{ normal:[208,711,185,734], notNormal:[208,711,208,740] },
+    sw12:{ normal:[297,711,292,745], notNormal:[297,711,317,745] },
+    sw13:{ normal:[525,190,525,240], notNormal:[515,190,515,240] },
+    sw14:{ normal:[635,190,635,240], notNormal:[645,190,645,240] },
+    sw15:{ normal:[490,295,490,345], notNormal:[500,295,500,345] },
+    sw16:{ normal:[675,300,675,350], notNormal:[665,300,665,350] },
+    sw17:{ energized:[875,600,875,650], normal:[885,600,885,650] },
+    sw18:{ energized:[945,600,945,650], normal:[955,600,955,650] },
+    sw19:{ normal:[865,710,870,745], notNormal:[865,710,846,740] },
+    sw20:{ normal:[952,709,973,729], notNormal:[952,709,950,742] }
   };
 
-  const flags = {
-    pressure: document.getElementById('flagPressure'),
-    tank: document.getElementById('flagTank'),
-    lampPressure: document.getElementById('lampPressure'),
-    lampTank: document.getElementById('lampTank')
-  };
-
-  let powered = false;
-  let position = 'normal';
-  let tracePoints = [];
-
-  // Movable selector blade endpoints. Tune these after tracing exact switch contacts.
-  const bladePositions = {
-    normal:   { x1:115, y1:219, x2:143, y2:186, text:'Selector in NORMAL. No cross-feed valve energized.' },
-    lh:       { x1:115, y1:219, x2:90,  y2:219, text:'Selector in LEFT HAND. LH selector side is shown energized when power is ON.' },
-    rh:       { x1:115, y1:219, x2:143, y2:219, text:'Selector in RIGHT HAND. RH selector side is shown energized when power is ON.' },
-    crossfeed:{ x1:115, y1:219, x2:206, y2:194, text:'Selector in CROSS FEED. Cross-feed valve paths and caution lights are shown when power is ON.' }
-  };
-
-  function setPath(name, on, pulse=false){
-    paths[name].classList.toggle('on', !!on);
-    paths[name].classList.toggle('pulse', !!pulse);
+  function setContact(id, key){
+    const a = pos[id][key];
+    const el = contacts[id];
+    if(!a || !el) return;
+    ['x1','y1','x2','y2'].forEach((attr,i)=>el.setAttribute(attr,a[i]));
+    el.classList.toggle('hot', key !== 'normal');
   }
-
-  function setFlag(name, on){
-    flags[name].classList.toggle('on', !!on);
+  function resetContacts(){
+    setContact('selector', state.position);
+    ['sw5','sw6','sw7','sw8','sw9','sw10','sw11','sw12','sw13','sw14','sw15','sw16','sw17','sw18','sw19','sw20'].forEach(id => setContact(id,'normal'));
   }
-
-  function update(){
-    powerBtn.textContent = powered ? 'Power: ON' : 'Power: OFF';
-    powerBtn.classList.toggle('power-on', powered);
-    powerBtn.classList.toggle('power-off', !powered);
-
-    posBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.position === position));
-
-    const b = bladePositions[position];
-    selectorBlade.setAttribute('x1', b.x1);
-    selectorBlade.setAttribute('y1', b.y1);
-    selectorBlade.setAttribute('x2', b.x2);
-    selectorBlade.setAttribute('y2', b.y2);
-
-    Object.keys(paths).forEach(k => setPath(k, false));
-    ['pressure','tank','lampPressure','lampTank'].forEach(k => setFlag(k, false));
-
-    if(powered){
-      setPath('bus', true);
-      setPath('main', true);
-      setPath('fcf', true);
-
-      if(position === 'lh') setPath('lh', true);
-      if(position === 'rh') setPath('rh', true);
-      if(position === 'crossfeed'){
-        setPath('crossfeed', true, true);
-        setPath('pressure', true);
-        setPath('tank', true);
-        setFlag('pressure', true);
-        setFlag('tank', true);
-        setFlag('lampPressure', true);
-        setFlag('lampTank', true);
-      }
-    }
-
-    readout.innerHTML = `<b>Status:</b> ${powered ? 'Power ON' : 'Power OFF'}<br><b>Switch:</b> ${position.toUpperCase()}<br>${b.text}`;
-  }
-
-  powerBtn.addEventListener('click', () => { powered = !powered; update(); });
-  posBtns.forEach(btn => btn.addEventListener('click', () => { position = btn.dataset.position; update(); }));
-  showGuides.addEventListener('change', () => stage.classList.toggle('show-guides', showGuides.checked));
-
-  function svgPoint(evt){
-    const pt = svg.createSVGPoint();
-    pt.x = evt.clientX;
-    pt.y = evt.clientY;
-    const converted = pt.matrixTransform(svg.getScreenCTM().inverse());
-    return { x: Math.round(converted.x), y: Math.round(converted.y) };
-  }
-
-  function renderTrace(){
-    traceLayer.innerHTML = '';
-    if(tracePoints.length){
-      const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-      poly.setAttribute('class','trace-preview');
-      poly.setAttribute('points', tracePoints.map(p => `${p.x},${p.y}`).join(' '));
-      traceLayer.appendChild(poly);
-    }
-    tracePoints.forEach((p, idx) => {
-      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      c.setAttribute('class','trace-point');
-      c.setAttribute('cx', p.x);
-      c.setAttribute('cy', p.y);
-      c.setAttribute('r', 6);
-      traceLayer.appendChild(c);
-
-      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x', p.x + 9);
-      t.setAttribute('y', p.y - 9);
-      t.setAttribute('fill', '#001318');
-      t.setAttribute('stroke', '#fff');
-      t.setAttribute('stroke-width', '4');
-      t.setAttribute('paint-order', 'stroke');
-      t.setAttribute('font-size', '16');
-      t.setAttribute('font-weight', '700');
-      t.textContent = idx + 1;
-      traceLayer.appendChild(t);
+  function pathOn(id, on=true){ paths[id].classList.toggle('on', on); }
+  function clearPaths(){ pathNames.forEach(id => { paths[id].classList.remove('on','drawing'); paths[id].style.strokeDasharray=''; paths[id].style.strokeDashoffset=''; }); }
+  function showPath(id){ pathOn(id,true); }
+  function drawPath(id, ms=950){
+    return new Promise(resolve => {
+      const el = paths[id];
+      el.classList.add('drawing');
+      el.classList.remove('on');
+      const len = el.getTotalLength();
+      el.style.strokeDasharray = len;
+      el.style.strokeDashoffset = len;
+      el.getBoundingClientRect();
+      el.style.transition = `stroke-dashoffset ${ms}ms linear, opacity .15s ease`;
+      el.style.strokeDashoffset = 0;
+      setTimeout(() => { el.classList.remove('drawing'); el.classList.add('on'); el.style.strokeDasharray=''; el.style.strokeDashoffset=''; el.style.transition='opacity .15s ease'; resolve(); }, ms + 40);
     });
-    const pointsString = tracePoints.map(p => `${p.x},${p.y}`).join(' ');
-    traceOutput.value = pointsString ? `points="${pointsString}"` : '';
+  }
+  function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+  async function update(){
+    const run = ++state.run;
+    powerBtn.textContent = state.powered ? 'Power: ON' : 'Power: OFF';
+    powerBtn.classList.toggle('power-on', state.powered); powerBtn.classList.toggle('power-off', !state.powered);
+    posBtns.forEach(b => b.classList.toggle('active', b.dataset.position === state.position));
+    clearPaths(); resetContacts();
+
+    if(!state.powered){
+      readout.innerHTML = `<b>Status:</b> Power OFF<br><b>Switch:</b> ${state.position.toUpperCase()}<br>No paths active.`;
+      return;
+    }
+
+    ['PowerOn0','PowerOn1','PowerOn2','PowerOn3','PowerOn4'].forEach(showPath);
+    if(state.position !== 'crossfeed') showPath('XFeedNormal');
+
+    if(state.position === 'normal'){
+      showPath('Norm');
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> NORMAL<br>PowerOn 0-4 active, Norm active, XFeedNormal active.`;
+    }
+
+    if(state.position === 'rh'){
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>Drawing RH tank relay sequence...`;
+      await drawPath('RHTankRelay', 850); if(run !== state.run) return;
+      setContact('sw7','energized'); setContact('sw8','energized'); await delay(250); if(run !== state.run) return;
+      setContact('sw11','notNormal'); setContact('sw12','notNormal');
+      await drawPath('RHTankAfterRelay', 1500); if(run !== state.run) return;
+      setContact('sw13','notNormal'); setContact('sw15','notNormal');
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>RHTankRelay then RHTankAfterRelay drawn. RTS, fuel pressure, and pressure cross switches moved.`;
+    }
+
+    if(state.position === 'lh'){
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>Drawing LH tank relay starter logic.`;
+      await drawPath('LHTankRelay', 850); if(run !== state.run) return;
+      setContact('sw5','energized'); setContact('sw6','energized');
+      setContact('sw11','notNormal'); setContact('sw12','notNormal');
+      await drawPath('LHTankAfterRelay', 1500); if(run !== state.run) return;
+      setContact('sw13','notNormal'); setContact('sw15','notNormal');
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>Starter LH logic added from your supplied paths.`;
+    }
+
+    if(state.position === 'crossfeed'){
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>Drawing cross feed starter logic.`;
+      setContact('sw17','energized'); setContact('sw18','energized');
+      await drawPath('XFeed', 850); if(run !== state.run) return;
+      setContact('sw9','energized'); setContact('sw10','energized');
+      setContact('sw11','notNormal'); setContact('sw12','notNormal');
+      setContact('sw19','notNormal'); setContact('sw20','notNormal');
+      await drawPath('XFeedAfterRelay', 1500); if(run !== state.run) return;
+      await drawPath('XFeedNotNormal', 1300); if(run !== state.run) return;
+      setContact('sw13','notNormal'); setContact('sw14','notNormal'); setContact('sw15','notNormal'); setContact('sw16','notNormal');
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>XFeedNormal removed; cross feed paths and valve switches moved.`;
+    }
   }
 
-  svg.addEventListener('click', (evt) => {
-    if(!traceMode.checked) return;
-    const p = svgPoint(evt);
-    tracePoints.push(p);
-    renderTrace();
-  });
+  powerBtn.addEventListener('click', () => { state.powered = !state.powered; update(); });
+  posBtns.forEach(btn => btn.addEventListener('click', () => { state.position = btn.dataset.position; update(); }));
 
-  document.getElementById('undoTrace').addEventListener('click', () => {
-    tracePoints.pop();
-    renderTrace();
-  });
-  document.getElementById('clearTrace').addEventListener('click', () => {
-    tracePoints = [];
-    renderTrace();
-  });
-  document.getElementById('copyTrace').addEventListener('click', async () => {
-    try{
-      await navigator.clipboard.writeText(traceOutput.value);
-      document.getElementById('copyTrace').textContent = 'Copied!';
-      setTimeout(() => document.getElementById('copyTrace').textContent = 'Copy Points', 900);
-    }catch(e){
-      traceOutput.select();
-      document.execCommand('copy');
+  function svgPoint(evt){ const pt = svg.createSVGPoint(); pt.x = evt.clientX; pt.y = evt.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+  function renderTrace(){
+    traceLayer.innerHTML='';
+    if(state.tracePoints.length){
+      const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      poly.setAttribute('class','trace-preview'); poly.setAttribute('points', state.tracePoints.map(p=>`${p.x},${p.y}`).join(' ')); traceLayer.appendChild(poly);
     }
+    state.tracePoints.forEach((p,i)=>{
+      const c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('class','trace-point'); c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c.setAttribute('r',6); traceLayer.appendChild(c);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',p.x+9); t.setAttribute('y',p.y-9); t.setAttribute('fill','#001318'); t.setAttribute('stroke','#fff'); t.setAttribute('stroke-width','4'); t.setAttribute('paint-order','stroke'); t.setAttribute('font-size','16'); t.setAttribute('font-weight','700'); t.textContent=i+1; traceLayer.appendChild(t);
+    });
+    const raw = state.tracePoints.map(p=>`${p.x} ${p.y}`).join('\n');
+    const svgPts = state.tracePoints.map(p=>`${p.x},${p.y}`).join(' ');
+    traceOutput.value = svgPts ? `points="${svgPts}"\n\n${raw}` : '';
+    console.clear();
+    console.log('TRACE POINTS raw x y:\n' + raw);
+    console.log('SVG polyline points="' + svgPts + '"');
+  }
+  svg.addEventListener('click', evt => {
+    if(!traceMode.checked) return;
+    const p = svgPoint(evt); const point = {x:Math.round(p.x), y:Math.round(p.y)};
+    state.tracePoints.push(point);
+    console.log(`Trace click ${state.tracePoints.length}: ${point.x} ${point.y}`);
+    renderTrace();
   });
+  document.getElementById('undoTrace').addEventListener('click',()=>{state.tracePoints.pop();renderTrace();});
+  document.getElementById('clearTrace').addEventListener('click',()=>{state.tracePoints=[];renderTrace();});
+  document.getElementById('copyTrace').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(traceOutput.value);document.getElementById('copyTrace').textContent='Copied!';setTimeout(()=>document.getElementById('copyTrace').textContent='Copy Points',900);}catch(e){traceOutput.select();document.execCommand('copy');}});
 
+  console.log('Fuel crossfeed trace tool ready. Turn on Trace mode, click schematic, and read points here in F12 Console.');
   update();
 })();
 </script>
-  <script>
-/* F12 MAPPER TOOL
-   Click the schematic image/SVG to print coordinates in DevTools Console.
-   Hold SHIFT while clicking to build a path.
-*/
-
-let mapPoints = [];
-
-document.addEventListener("click", function (e) {
-  const target = e.target;
-
-  if (!target.closest("svg")) return;
-
-  const svg = target.closest("svg");
-  const pt = svg.createSVGPoint();
-
-  pt.x = e.clientX;
-  pt.y = e.clientY;
-
-  const svgPoint = pt.matrixTransform(svg.getScreenCTM().inverse());
-
-  const x = Math.round(svgPoint.x);
-  const y = Math.round(svgPoint.y);
-
-  console.log(`POINT: x="${x}" y="${y}"`);
-
-  if (e.shiftKey) {
-    mapPoints.push({ x, y });
-
-    const d = mapPoints
-      .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
-      .join(" ");
-
-    console.log("PATH d=");
-    console.log(d);
-  }
-});
-
-function clearMappedPath() {
-  mapPoints = [];
-  console.clear();
-  console.log("Mapped path cleared.");
-}
-</script>
-
 </body>
 </html>
-
