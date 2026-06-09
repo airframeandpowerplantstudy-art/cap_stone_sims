@@ -19,8 +19,25 @@
   .path{fill:none;stroke:var(--trace);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:drop-shadow(0 0 5px rgba(255,216,77,.8));pointer-events:none;transition:opacity .15s ease}
   .path.on{opacity:.88}
   .path.drawing{opacity:.88;animation:none}
-  .moving-contact{stroke:#080808;stroke-width:7;stroke-linecap:round;transition:all .28s ease;filter:drop-shadow(0 0 2px rgba(255,255,255,.55));pointer-events:none}
-  .moving-contact.hot{stroke:#101010;filter:drop-shadow(0 0 5px rgba(255,216,77,.8))}
+  .moving-contact{
+  stroke:#4db8ff;
+  stroke-width:7;
+  stroke-linecap:round;
+  transition:all .28s ease;
+
+  filter:
+    drop-shadow(0 0 2px rgba(77,184,255,.9))
+    drop-shadow(0 0 7px rgba(77,184,255,.75));
+
+  pointer-events:none;
+}
+  .moving-contact.hot{
+  stroke:#8ed8ff;
+
+  filter:
+    drop-shadow(0 0 4px rgba(142,216,255,1))
+    drop-shadow(0 0 12px rgba(142,216,255,.95));
+}
   .switch-dot{fill:white;stroke:#000;stroke-width:3;pointer-events:none}
   .trace-preview{fill:none;stroke:#00e5ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:9 7;pointer-events:none}
   .trace-point{fill:#00e5ff;stroke:#001318;stroke-width:2;pointer-events:none}
@@ -118,7 +135,7 @@
   const contacts = Object.fromEntries([...document.querySelectorAll('#contacts line')].map(el => [el.id, el]));
 
   const pos = {
-    selector:{ normal:[114,218,114,183], lh:[114,218,142,218], rh:[114,218,114,251], crossfeed:[114,218,91,218] },
+    selector:{ normal:[114,218,114,183], lh:[114,218,114,251], rh:[114,218,142,218], crossfeed:[114,218,91,218] },
     sw5:{ normal:[197,417,197,467], energized:[187,417,187,467] },
     sw6:{ normal:[260,417,260,467], energized:[250,417,250,467] },
     sw7:{ normal:[197,512,197,562], energized:[187,512,187,562] },
