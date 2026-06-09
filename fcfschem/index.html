@@ -145,7 +145,7 @@
     sw11:{ normal:[208,711,185,734], notNormal:[208,711,208,740] },
     sw12:{ normal:[297,711,292,745], notNormal:[297,711,317,745] },
     sw13:{ normal:[525,190,525,240], notNormal:[515,190,515,240] },
-    sw14:{ normal:[635,190,635,240], notNormal:[645,190,645,240] },
+    sw14:{ normal:[635,190,635,240], notNormal:[647,190,647,240] },
     sw15:{ normal:[490,295,490,345], notNormal:[500,295,500,345] },
     sw16:{ normal:[675,300,675,350], notNormal:[665,300,665,350] },
     sw17:{ energized:[875,600,875,650], normal:[885,600,885,650] },
@@ -197,6 +197,7 @@
     }
 
     ['PowerOn0','PowerOn1','PowerOn2','PowerOn3','PowerOn4'].forEach(showPath);
+    if(state.position === 'crossfeed') pathOn('PowerOn0', false);
     if(state.position !== 'crossfeed') showPath('XFeedNormal');
 
     if(state.position === 'normal'){
