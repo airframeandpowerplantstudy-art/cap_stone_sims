@@ -19,26 +19,8 @@
   .path{fill:none;stroke:var(--trace);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:drop-shadow(0 0 5px rgba(255,216,77,.8));pointer-events:none;transition:opacity .15s ease}
   .path.on{opacity:.88}
   .path.drawing{opacity:.88;animation:none}
-  .moving-contact{
-  stroke:#4db8ff;
-  stroke-width:7;
-  stroke-linecap:round;
-  transition:all .28s ease;
-
-  filter:
-    drop-shadow(0 0 2px rgba(77,184,255,.9))
-    drop-shadow(0 0 7px rgba(77,184,255,.75));
-
-  pointer-events:none;
-}
-
-.moving-contact.hot{
-  stroke:#8ed8ff;
-
-  filter:
-    drop-shadow(0 0 4px rgba(142,216,255,1))
-    drop-shadow(0 0 12px rgba(142,216,255,.95));
-}
+  .moving-contact{stroke:#080808;stroke-width:7;stroke-linecap:round;transition:all .28s ease;filter:drop-shadow(0 0 2px rgba(255,255,255,.55));pointer-events:none}
+  .moving-contact.hot{stroke:#101010;filter:drop-shadow(0 0 5px rgba(255,216,77,.8))}
   .switch-dot{fill:white;stroke:#000;stroke-width:3;pointer-events:none}
   .trace-preview{fill:none;stroke:#00e5ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:9 7;pointer-events:none}
   .trace-point{fill:#00e5ff;stroke:#001318;stroke-width:2;pointer-events:none}
@@ -207,12 +189,28 @@
 
     if(state.position === 'rh'){
       readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>Drawing RH tank relay sequence...`;
+
+      // 1) Top-left selector is already moved by resetContacts() using state.position = 'rh'
+      // 2) Draw the RH tank relay control path first
       await drawPath('RHTankRelay', 850); if(run !== state.run) return;
-      setContact('sw7','energized'); setContact('sw8','energized'); await delay(250); if(run !== state.run) return;
-      setContact('sw11','notNormal'); setContact('sw12','notNormal');
+
+      // 3) After RHTankRelay finishes, energize the RTS relay switches
+      setContact('sw7','energized');
+      setContact('sw8','energized');
+      await delay(250); if(run !== state.run) return;
+
+      // 4) Once RTS is energized, PowerOn0 drops out and sw15 moves to Not Normal
+      pathOn('PowerOn0', false);
+      setContact('sw15','notNormal');
+      await delay(250); if(run !== state.run) return;
+
+      // 5) Then draw the RH tank after-relay path
       await drawPath('RHTankAfterRelay', 1500); if(run !== state.run) return;
-      setContact('sw13','notNormal'); setContact('sw15','notNormal');
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>RHTankRelay then RHTankAfterRelay drawn. RTS, fuel pressure, and pressure cross switches moved.`;
+
+      // 6) Once that path is done, sw13 moves to Not Normal
+      setContact('sw13','notNormal');
+
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>RH logic: RHTankRelay drawn, RTS energized, PowerOn0 removed, sw15 moved, RHTankAfterRelay drawn, then sw13 moved.`;
     }
 
     if(state.position === 'lh'){
