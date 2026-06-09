@@ -257,5 +257,50 @@
   update();
 })();
 </script>
+  <script>
+/* F12 MAPPER TOOL
+   Click the schematic image/SVG to print coordinates in DevTools Console.
+   Hold SHIFT while clicking to build a path.
+*/
+
+let mapPoints = [];
+
+document.addEventListener("click", function (e) {
+  const target = e.target;
+
+  if (!target.closest("svg")) return;
+
+  const svg = target.closest("svg");
+  const pt = svg.createSVGPoint();
+
+  pt.x = e.clientX;
+  pt.y = e.clientY;
+
+  const svgPoint = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+  const x = Math.round(svgPoint.x);
+  const y = Math.round(svgPoint.y);
+
+  console.log(`POINT: x="${x}" y="${y}"`);
+
+  if (e.shiftKey) {
+    mapPoints.push({ x, y });
+
+    const d = mapPoints
+      .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
+      .join(" ");
+
+    console.log("PATH d=");
+    console.log(d);
+  }
+});
+
+function clearMappedPath() {
+  mapPoints = [];
+  console.clear();
+  console.log("Mapped path cleared.");
+}
+</script>
+
 </body>
 </html>
