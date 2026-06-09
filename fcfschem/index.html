@@ -16,7 +16,9 @@
   .stage{position:relative;width:100%;max-width:1081px;aspect-ratio:1081/823;margin:auto;background-image:url("fcfschem2.png");background-repeat:no-repeat;background-size:100% 100%;background-position:center;border-radius:8px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.35)}
   .overlay{position:absolute;inset:0;width:100%;height:100%}
   .hotspot{cursor:crosshair}
-  .path{fill:none;stroke:var(--trace);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:drop-shadow(0 0 5px rgba(255,216,77,.8));pointer-events:none;transition:opacity .15s ease}
+  .path{fill:none;stroke:var(--trace);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:0;  drop-shadow(0 0 4px rgba(77,232,255,.9))
+  drop-shadow(0 0 10px rgba(77,232,255,.75));
+        pointer-events:none;transition:opacity .15s ease}
   .path.on{opacity:.88}
   .path.drawing{opacity:.88;animation:none}
   .moving-contact{
@@ -26,17 +28,17 @@
   transition:all .28s ease;
 
 filter:
-  drop-shadow(0 0 4px rgba(77,232,255,.9))
-  drop-shadow(0 0 10px rgba(77,232,255,.75));
+drop-shadow(0 0 2px rgba(255,77,109,.9))
+drop-shadow(0 0 8px rgba(255,77,109,.75))
 
   pointer-events:none;
 }
   .moving-contact.hot{
-  stroke:#8ed8ff;
+  stroke:##ff5a5f;
 
   filter:
-    drop-shadow(0 0 4px rgba(142,216,255,1))
-    drop-shadow(0 0 12px rgba(142,216,255,.95));
+drop-shadow(0 0 4px rgba(255,143,163,1))
+drop-shadow(0 0 12px rgba(255,143,163,.95))
 }
 
   .amber-light{
