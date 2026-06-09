@@ -7,40 +7,51 @@
 <style>
   :root{
     --panel:#172033; --panel2:#222d44; --text:#f5f8ff; --muted:#b9c4d6;
-    --blue:#13a8ff; --yellow:#ffd84d; --green:#31d17c; --red:#ff5a5f; --trace:#ffcf33;
+    --blue:#13a8ff; --yellow:#ffd84d; --green:#31d17c; --red:#ff5a5f; --trace:#4de8ff;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#101521;color:var(--text)}
   .app{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px;padding:14px}
   .stage-wrap{min-width:0;display:flex;flex-direction:column;gap:10px}
-  .stage{position:relative;width:100%;max-width:1081px;aspect-ratio:1081/823;margin:auto;background-image:url("fcfschem.png");background-repeat:no-repeat;background-size:100% 100%;background-position:center;border-radius:8px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.35)}
+  .stage{position:relative;width:100%;max-width:1081px;aspect-ratio:1081/823;margin:auto;background-image:url("fcfschem2.png");background-repeat:no-repeat;background-size:100% 100%;background-position:center;border-radius:8px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.35)}
   .overlay{position:absolute;inset:0;width:100%;height:100%}
   .hotspot{cursor:crosshair}
-  .path{fill:none;stroke:var(--trace);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:drop-shadow(0 0 5px rgba(255,216,77,.8));pointer-events:none;transition:opacity .15s ease}
+  .path{fill:none;stroke:var(--trace);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:none;
+        pointer-events:none;transition:opacity .15s ease}
   .path.on{opacity:.88}
   .path.drawing{opacity:.88;animation:none}
   .moving-contact{
-  stroke:#4db8ff;
+  stroke:#ff5a5f;
   stroke-width:7;
   stroke-linecap:round;
   transition:all .28s ease;
 
-  filter:
-    drop-shadow(0 0 2px rgba(77,184,255,.9))
-    drop-shadow(0 0 7px rgba(77,184,255,.75));
+filter:
+drop-shadow(0 0 2px rgba(255,77,109,.9))
+drop-shadow(0 0 8px rgba(255,77,109,.75));
 
   pointer-events:none;
 }
-
-.moving-contact.hot{
-  stroke:#8ed8ff;
+  .moving-contact.hot{
+  stroke:#ff5a5f;
 
   filter:
-    drop-shadow(0 0 4px rgba(142,216,255,1))
-    drop-shadow(0 0 12px rgba(142,216,255,.95));
+drop-shadow(0 0 4px rgba(255,143,163,1))
+drop-shadow(0 0 12px rgba(255,143,163,.95));
 }
+
+  .amber-light{
+    fill:#ffb000;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease;
+    filter:
+      drop-shadow(0 0 6px rgba(255,176,0,.95))
+      drop-shadow(0 0 16px rgba(255,176,0,.75));
+  }
+  .amber-light.on{opacity:.72}
   .switch-dot{fill:white;stroke:#000;stroke-width:3;pointer-events:none}
-  .trace-preview{fill:none;stroke:#00e5ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:9 7;pointer-events:none}
+  .trace-preview{fill:none;stroke:#7a3cff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8 6;pointer-events:none}
   .trace-point{fill:#00e5ff;stroke:#001318;stroke-width:2;pointer-events:none}
   .side-panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;box-shadow:0 14px 40px rgba(0,0,0,.35);align-self:start;position:sticky;top:14px}
   h1{font-size:18px;margin:0 0 10px}.small{font-size:12px;color:var(--muted);line-height:1.35;margin:6px 0 12px}.section-title{font-weight:700;margin:14px 0 8px;color:#fff}
@@ -82,8 +93,8 @@
           <line id="sw6"  class="moving-contact" x1="260" y1="417" x2="260" y2="467" />
           <line id="sw7"  class="moving-contact" x1="197" y1="512" x2="197" y2="562" />
           <line id="sw8"  class="moving-contact" x1="260" y1="512" x2="260" y2="562" />
-          <line id="sw9"  class="moving-contact" x1="197" y1="600" x2="197" y2="550" />
-          <line id="sw10" class="moving-contact" x1="260" y1="600" x2="260" y2="550" />
+          <line id="sw9"  class="moving-contact" x1="197" y1="600" x2="197" y2="650" />
+          <line id="sw10" class="moving-contact" x1="260" y1="600" x2="260" y2="650" />
           <line id="sw11" class="moving-contact" x1="208" y1="711" x2="185" y2="734" />
           <line id="sw12" class="moving-contact" x1="297" y1="711" x2="292" y2="745" />
           <line id="sw13" class="moving-contact" x1="525" y1="190" x2="525" y2="240" />
@@ -94,6 +105,11 @@
           <line id="sw18" class="moving-contact" x1="955" y1="600" x2="955" y2="650" />
           <line id="sw19" class="moving-contact" x1="865" y1="710" x2="870" y2="745" />
           <line id="sw20" class="moving-contact" x1="952" y1="709" x2="973" y2="729" />
+        </g>
+
+        <g id="lights">
+          <rect id="mainAmberLight" class="amber-light" x="440" y="444" width="130" height="68" rx="6" ry="6"></rect>
+          <rect id="xfeedAmberLight" class="amber-light" x="594" y="444" width="131" height="68" rx="6" ry="6"></rect>
         </g>
         <g id="traceLayer"></g>
       </svg>
@@ -136,19 +152,23 @@
   const pathNames = ['PowerOn0','PowerOn1','PowerOn2','PowerOn3','PowerOn4','Norm','RHTankRelay','RHTankAfterRelay','LHTankRelay','LHTankAfterRelay','XFeed','XFeedAfterRelay','XFeedNormal','XFeedNotNormal','MainLightFeed','XFeedLightFeed'];
   const paths = Object.fromEntries(pathNames.map(id => [id, document.getElementById(id)]));
   const contacts = Object.fromEntries([...document.querySelectorAll('#contacts line')].map(el => [el.id, el]));
+  const lights = {
+    main: document.getElementById('mainAmberLight'),
+    xfeed: document.getElementById('xfeedAmberLight')
+  };
 
   const pos = {
-    selector:{ normal:[114,218,114,183], lh:[114,218,142,218], rh:[114,218,114,251], crossfeed:[114,218,91,218] },
+    selector:{ normal:[114,218,114,183], lh:[114,218,114,251], rh:[114,218,142,218], crossfeed:[114,218,91,218] },
     sw5:{ normal:[197,417,197,467], energized:[187,417,187,467] },
     sw6:{ normal:[260,417,260,467], energized:[250,417,250,467] },
     sw7:{ normal:[197,512,197,562], energized:[187,512,187,562] },
     sw8:{ normal:[260,512,260,562], energized:[250,512,250,562] },
-    sw9:{ normal:[197,600,197,550], energized:[187,600,187,550] },
-    sw10:{ normal:[260,600,260,550], energized:[250,600,250,550] },
+    sw9:{ normal:[197,600,197,650], energized:[187,600,187,650] },
+    sw10:{ normal:[260,600,260,650], energized:[250,600,250,650] },
     sw11:{ normal:[208,711,185,734], notNormal:[208,711,208,740] },
     sw12:{ normal:[297,711,292,745], notNormal:[297,711,317,745] },
     sw13:{ normal:[525,190,525,240], notNormal:[515,190,515,240] },
-    sw14:{ normal:[635,190,635,240], notNormal:[645,190,645,240] },
+    sw14:{ normal:[635,190,635,240], notNormal:[647,190,647,240] },
     sw15:{ normal:[490,295,490,345], notNormal:[500,295,500,345] },
     sw16:{ normal:[675,300,675,350], notNormal:[665,300,665,350] },
     sw17:{ energized:[875,600,875,650], normal:[885,600,885,650] },
@@ -168,6 +188,8 @@
     setContact('selector', state.position);
     ['sw5','sw6','sw7','sw8','sw9','sw10','sw11','sw12','sw13','sw14','sw15','sw16','sw17','sw18','sw19','sw20'].forEach(id => setContact(id,'normal'));
   }
+  function setLight(id, on=true){ lights[id]?.classList.toggle('on', on); }
+  function clearLights(){ Object.values(lights).forEach(el => el.classList.remove('on')); }
   function pathOn(id, on=true){ paths[id].classList.toggle('on', on); }
   function clearPaths(){ pathNames.forEach(id => { paths[id].classList.remove('on','drawing'); paths[id].style.strokeDasharray=''; paths[id].style.strokeDashoffset=''; }); }
   function showPath(id){ pathOn(id,true); }
@@ -192,7 +214,7 @@
     powerBtn.textContent = state.powered ? 'Power: ON' : 'Power: OFF';
     powerBtn.classList.toggle('power-on', state.powered); powerBtn.classList.toggle('power-off', !state.powered);
     posBtns.forEach(b => b.classList.toggle('active', b.dataset.position === state.position));
-    clearPaths(); resetContacts();
+    clearPaths(); resetContacts(); clearLights();
 
     if(!state.powered){
       readout.innerHTML = `<b>Status:</b> Power OFF<br><b>Switch:</b> ${state.position.toUpperCase()}<br>No paths active.`;
@@ -200,6 +222,11 @@
     }
 
     ['PowerOn0','PowerOn1','PowerOn2','PowerOn3','PowerOn4'].forEach(showPath);
+    if(state.position === 'crossfeed'){
+      pathOn('PowerOn0', false);
+      pathOn('PowerOn4', false);
+      pathOn('XFeedNormal', false);
+    }
     if(state.position !== 'crossfeed') showPath('XFeedNormal');
 
     if(state.position === 'normal'){
@@ -209,22 +236,68 @@
 
     if(state.position === 'rh'){
       readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>Drawing RH tank relay sequence...`;
+
+      // 1) Top-left selector is already moved by resetContacts() using state.position = 'rh'
+      // 2) Draw the RH tank relay control path first
       await drawPath('RHTankRelay', 850); if(run !== state.run) return;
-      setContact('sw7','energized'); setContact('sw8','energized'); await delay(250); if(run !== state.run) return;
-      setContact('sw11','notNormal'); setContact('sw12','notNormal');
+
+      // 3) After RHTankRelay finishes, energize the RTS relay switches
+      setContact('sw7','energized');
+      setContact('sw8','energized');
+      await delay(250); if(run !== state.run) return;
+
+      // 4) Once RTS is energized, PowerOn0 drops out and sw15 moves to Not Normal
+      pathOn('PowerOn0', false);
+      setContact('sw15','notNormal');
+      await delay(250); if(run !== state.run) return;
+
+      // 5) Fuel pressure valve switches move before/during the after-relay path drawing
+      setContact('sw11','notNormal');
+      setContact('sw12','notNormal');
+      await delay(150); if(run !== state.run) return;
+
+      // 6) Then draw the RH tank after-relay path
       await drawPath('RHTankAfterRelay', 1500); if(run !== state.run) return;
-      setContact('sw13','notNormal'); setContact('sw15','notNormal');
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>RHTankRelay then RHTankAfterRelay drawn. RTS, fuel pressure, and pressure cross switches moved.`;
+
+      // 7) Once that path is done, sw13 moves to Not Normal
+      setContact('sw13','notNormal');
+      await drawPath('MainLightFeed', 650); if(run !== state.run) return;
+      setLight('main', true);
+
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>RH logic: RHTankRelay drawn, RTS energized, PowerOn0 removed, sw15/sw11/sw12 moved, RHTankAfterRelay drawn, then sw13 moved.`;
     }
 
     if(state.position === 'lh'){
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>Drawing LH tank relay starter logic.`;
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>Drawing LH tank relay sequence...`;
+
+      // 1) Top-left selector is already moved by resetContacts() using state.position = 'lh'
+      // 2) Draw the LH tank relay control path first
       await drawPath('LHTankRelay', 850); if(run !== state.run) return;
-      setContact('sw5','energized'); setContact('sw6','energized');
-      setContact('sw11','notNormal'); setContact('sw12','notNormal');
+
+      // 3) After LHTankRelay finishes, energize the LTS relay switches
+      setContact('sw5','energized');
+      setContact('sw6','energized');
+      await delay(250); if(run !== state.run) return;
+
+      // 4) Once LTS is energized, PowerOn0 drops out and the LH matching switch moves to Not Normal
+      pathOn('PowerOn0', false);
+      setContact('sw16','notNormal');
+      await delay(250); if(run !== state.run) return;
+
+      // 5) Fuel pressure valve switches move before/during the after-relay path drawing
+      setContact('sw11','notNormal');
+      setContact('sw12','notNormal');
+      await delay(150); if(run !== state.run) return;
+
+      // 6) Then draw the LH tank after-relay path
       await drawPath('LHTankAfterRelay', 1500); if(run !== state.run) return;
-      setContact('sw13','notNormal'); setContact('sw15','notNormal');
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>Starter LH logic added from your supplied paths.`;
+
+      // 7) Once that path is done, the LH matching cross switch moves to Not Normal
+      setContact('sw14','notNormal');
+      await drawPath('MainLightFeed', 650); if(run !== state.run) return;
+      setLight('main', true);
+
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>LH logic: LHTankRelay drawn, LTS energized, PowerOn0 removed, sw16/sw11/sw12 moved, LHTankAfterRelay drawn, then sw14 moved.`;
     }
 
     if(state.position === 'crossfeed'){
@@ -237,6 +310,10 @@
       await drawPath('XFeedAfterRelay', 1500); if(run !== state.run) return;
       await drawPath('XFeedNotNormal', 1300); if(run !== state.run) return;
       setContact('sw13','notNormal'); setContact('sw14','notNormal'); setContact('sw15','notNormal'); setContact('sw16','notNormal');
+      await drawPath('MainLightFeed', 650); if(run !== state.run) return;
+      setLight('main', true);
+      await drawPath('XFeedLightFeed', 650); if(run !== state.run) return;
+      setLight('xfeed', true);
       readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>XFeedNormal removed; cross feed paths and valve switches moved.`;
     }
   }
