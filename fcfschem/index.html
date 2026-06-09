@@ -268,6 +268,9 @@
     }
 
     if(state.position === 'crossfeed'){
+      pathOn('PowerOn0', false);
+  pathOn('PowerOn4', false);
+  pathOn('XFeedNormal', false);
       readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>Drawing cross feed starter logic.`;
       setContact('sw17','energized'); setContact('sw18','energized');
       await drawPath('XFeed', 850); if(run !== state.run) return;
