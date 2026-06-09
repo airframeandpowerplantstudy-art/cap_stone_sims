@@ -52,7 +52,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95))
   }
   .amber-light.on{opacity:.72}
   .switch-dot{fill:white;stroke:#000;stroke-width:3;pointer-events:none}
-  .trace-preview{fill:none;stroke:#00e5ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:9 7;pointer-events:none}
+  .trace-preview{fill:none;stroke:#5a2ca0;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8 6;pointer-events:none}
   .trace-point{fill:#00e5ff;stroke:#001318;stroke-width:2;pointer-events:none}
   .side-panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;box-shadow:0 14px 40px rgba(0,0,0,.35);align-self:start;position:sticky;top:14px}
   h1{font-size:18px;margin:0 0 10px}.small{font-size:12px;color:var(--muted);line-height:1.35;margin:6px 0 12px}.section-title{font-weight:700;margin:14px 0 8px;color:#fff}
@@ -282,7 +282,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95))
 
       // 4) Once LTS is energized, PowerOn0 drops out and the LH matching switch moves to Not Normal
       pathOn('PowerOn0', false);
-      setContact('sw16','notNormal');
+      setContact('sw15','notNormal');
       await delay(250); if(run !== state.run) return;
 
       // 5) Fuel pressure valve switches move before/during the after-relay path drawing
@@ -294,7 +294,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95))
       await drawPath('LHTankAfterRelay', 1500); if(run !== state.run) return;
 
       // 7) Once that path is done, the LH matching cross switch moves to Not Normal
-      setContact('sw14','notNormal');
+      setContact('sw13','notNormal');
       await drawPath('MainLightFeed', 650); if(run !== state.run) return;
       setLight('main', true);
 
