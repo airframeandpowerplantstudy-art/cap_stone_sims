@@ -525,7 +525,9 @@ function render() {
     powerOn &&
     gearDown &&
     valveNotNeutral &&
-    !throttleRetarded;
+    !throttleRetarded
+    state.leftGear === "down""&&
+      state.rightGear === "down";
 
   const redUnsafe =
     powerOn &&
@@ -577,7 +579,7 @@ function render() {
 
   // Gear-down + valve not neutral + throttle retarded
 setOn(els.valveNotNeutralPath, valveNotNeutralHorn);
-setOn(els.redValveNotNeutralPath, valveNotNeutralActive);
+setOn(els.redValveNotNeutralPath, valveNotNeutralActive && !rightUpOnly && !leftUpOrBothUp);
 
   // Gear-up + throttle retarded
   setOn(els.hornGearUpRetardedPath, gearUpRetardedHorn);
