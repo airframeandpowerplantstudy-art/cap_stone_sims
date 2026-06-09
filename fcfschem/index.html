@@ -79,8 +79,8 @@
           <line id="sw6"  class="moving-contact" x1="260" y1="417" x2="260" y2="467" />
           <line id="sw7"  class="moving-contact" x1="197" y1="512" x2="197" y2="562" />
           <line id="sw8"  class="moving-contact" x1="260" y1="512" x2="260" y2="562" />
-          <line id="sw9"  class="moving-contact" x1="197" y1="600" x2="197" y2="550" />
-          <line id="sw10" class="moving-contact" x1="260" y1="600" x2="260" y2="550" />
+          <line id="sw9"  class="moving-contact" x1="197" y1="600" x2="197" y2="650" />
+          <line id="sw10" class="moving-contact" x1="260" y1="600" x2="260" y2="650" />
           <line id="sw11" class="moving-contact" x1="208" y1="711" x2="185" y2="734" />
           <line id="sw12" class="moving-contact" x1="297" y1="711" x2="292" y2="745" />
           <line id="sw13" class="moving-contact" x1="525" y1="190" x2="525" y2="240" />
@@ -140,8 +140,8 @@
     sw6:{ normal:[260,417,260,467], energized:[250,417,250,467] },
     sw7:{ normal:[197,512,197,562], energized:[187,512,187,562] },
     sw8:{ normal:[260,512,260,562], energized:[250,512,250,562] },
-    sw9:{ normal:[197,600,197,550], energized:[187,600,187,550] },
-    sw10:{ normal:[260,600,260,550], energized:[250,600,250,550] },
+    sw9:{ normal:[197,600,197,650], energized:[187,600,187,650] },
+    sw10:{ normal:[260,600,260,650], energized:[250,600,250,650] },
     sw11:{ normal:[208,711,185,734], notNormal:[208,711,208,740] },
     sw12:{ normal:[297,711,292,745], notNormal:[297,711,317,745] },
     sw13:{ normal:[525,190,525,240], notNormal:[515,190,515,240] },
@@ -236,13 +236,34 @@
     }
 
     if(state.position === 'lh'){
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>Drawing LH tank relay starter logic.`;
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>Drawing LH tank relay sequence...`;
+
+      // 1) Top-left selector is already moved by resetContacts() using state.position = 'lh'
+      // 2) Draw the LH tank relay control path first
       await drawPath('LHTankRelay', 850); if(run !== state.run) return;
-      setContact('sw5','energized'); setContact('sw6','energized');
-      setContact('sw11','notNormal'); setContact('sw12','notNormal');
+
+      // 3) After LHTankRelay finishes, energize the LTS relay switches
+      setContact('sw5','energized');
+      setContact('sw6','energized');
+      await delay(250); if(run !== state.run) return;
+
+      // 4) Once LTS is energized, PowerOn0 drops out and the LH matching switch moves to Not Normal
+      pathOn('PowerOn0', false);
+      setContact('sw16','notNormal');
+      await delay(250); if(run !== state.run) return;
+
+      // 5) Fuel pressure valve switches move before/during the after-relay path drawing
+      setContact('sw11','notNormal');
+      setContact('sw12','notNormal');
+      await delay(150); if(run !== state.run) return;
+
+      // 6) Then draw the LH tank after-relay path
       await drawPath('LHTankAfterRelay', 1500); if(run !== state.run) return;
-      setContact('sw13','notNormal'); setContact('sw15','notNormal');
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>Starter LH logic added from your supplied paths.`;
+
+      // 7) Once that path is done, the LH matching cross switch moves to Not Normal
+      setContact('sw14','notNormal');
+
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>LH logic: LHTankRelay drawn, LTS energized, PowerOn0 removed, sw16/sw11/sw12 moved, LHTankAfterRelay drawn, then sw14 moved.`;
     }
 
     if(state.position === 'crossfeed'){
