@@ -16,7 +16,9 @@
   .stage{position:relative;width:100%;max-width:1081px;aspect-ratio:1081/823;margin:auto;background-image:url("fcfschem2.png");background-repeat:no-repeat;background-size:100% 100%;background-position:center;border-radius:8px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.35)}
   .overlay{position:absolute;inset:0;width:100%;height:100%}
   .hotspot{cursor:crosshair}
-  .path{fill:none;stroke:var(--trace);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:none;pointer-events:none;transition:opacity .15s ease}
+  .path{fill:none;stroke:var(--trace);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:0;  drop-shadow(0 0 4px rgba(77,232,255,.9))
+  drop-shadow(0 0 10px rgba(77,232,255,.75));
+        pointer-events:none;transition:opacity .15s ease}
   .path.on{opacity:.88}
   .path.drawing{opacity:.88;animation:none}
   .moving-contact{
@@ -27,16 +29,16 @@
 
 filter:
 drop-shadow(0 0 2px rgba(255,77,109,.9))
-drop-shadow(0 0 8px rgba(255,77,109,.75));
+drop-shadow(0 0 8px rgba(255,77,109,.75))
 
   pointer-events:none;
 }
   .moving-contact.hot{
-  stroke:#ff5a5f;
+  stroke:##ff5a5f;
 
   filter:
 drop-shadow(0 0 4px rgba(255,143,163,1))
-drop-shadow(0 0 12px rgba(255,143,163,.95));
+drop-shadow(0 0 12px rgba(255,143,163,.95))
 }
 
   .amber-light{
@@ -50,7 +52,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
   }
   .amber-light.on{opacity:.72}
   .switch-dot{fill:white;stroke:#000;stroke-width:3;pointer-events:none}
-  .trace-preview{fill:none;stroke:#5a2ca0;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8 6;pointer-events:none;filter:none}
+  .trace-preview{fill:none;stroke:#00e5ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:9 7;pointer-events:none}
   .trace-point{fill:#00e5ff;stroke:#001318;stroke-width:2;pointer-events:none}
   .side-panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;box-shadow:0 14px 40px rgba(0,0,0,.35);align-self:start;position:sticky;top:14px}
   h1{font-size:18px;margin:0 0 10px}.small{font-size:12px;color:var(--muted);line-height:1.35;margin:6px 0 12px}.section-title{font-weight:700;margin:14px 0 8px;color:#fff}
@@ -207,12 +209,6 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
     });
   }
   function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
-  function selectedLabel(){
-    return { normal:'NORMAL', lh:'LEFT HAND', rh:'RIGHT HAND', crossfeed:'X-FEED' }[state.position] || state.position.toUpperCase();
-  }
-  function updateReadout(){
-    updateReadout();
-  }
 
   async function update(){
     const run = ++state.run;
@@ -222,7 +218,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
     clearPaths(); resetContacts(); clearLights();
 
     if(!state.powered){
-      updateReadout();
+      readout.innerHTML = `<b>Status:</b> Power OFF<br><b>Switch:</b> ${state.position.toUpperCase()}<br>No paths active.`;
       return;
     }
 
@@ -236,11 +232,11 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
 
     if(state.position === 'normal'){
       showPath('Norm');
-      updateReadout();
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> NORMAL<br>PowerOn 0-4 active, Norm active, XFeedNormal active.`;
     }
 
     if(state.position === 'rh'){
-      updateReadout();
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>Drawing RH tank relay sequence...`;
 
       // 1) Top-left selector is already moved by resetContacts() using state.position = 'rh'
       // 2) Draw the RH tank relay control path first
@@ -269,11 +265,11 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
       await drawPath('MainLightFeed', 650); if(run !== state.run) return;
       setLight('main', true);
 
-      updateReadout();
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>RH logic: RHTankRelay drawn, RTS energized, PowerOn0 removed, sw15/sw11/sw12 moved, RHTankAfterRelay drawn, then sw13 moved.`;
     }
 
     if(state.position === 'lh'){
-      updateReadout();
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>Drawing LH tank relay sequence...`;
 
       // 1) Top-left selector is already moved by resetContacts() using state.position = 'lh'
       // 2) Draw the LH tank relay control path first
@@ -287,7 +283,6 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
       // 4) Once LTS is energized, PowerOn0 drops out and the LH matching switch moves to Not Normal
       pathOn('PowerOn0', false);
       setContact('sw16','notNormal');
-      setContact('sw15','notNormal');
       await delay(250); if(run !== state.run) return;
 
       // 5) Fuel pressure valve switches move before/during the after-relay path drawing
@@ -300,15 +295,14 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
 
       // 7) Once that path is done, the LH matching cross switch moves to Not Normal
       setContact('sw14','notNormal');
-      setContact('sw13','notNormal');
       await drawPath('MainLightFeed', 650); if(run !== state.run) return;
       setLight('main', true);
 
-      updateReadout();
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>LH logic: LHTankRelay drawn, LTS energized, PowerOn0 removed, sw16/sw11/sw12 moved, LHTankAfterRelay drawn, then sw14 moved.`;
     }
 
     if(state.position === 'crossfeed'){
-      updateReadout();
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>Drawing cross feed starter logic.`;
       setContact('sw17','energized'); setContact('sw18','energized');
       await drawPath('XFeed', 850); if(run !== state.run) return;
       setContact('sw9','energized'); setContact('sw10','energized');
@@ -321,7 +315,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
       setLight('main', true);
       await drawPath('XFeedLightFeed', 650); if(run !== state.run) return;
       setLight('xfeed', true);
-      updateReadout();
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>XFeedNormal removed; cross feed paths and valve switches moved.`;
     }
   }
 
