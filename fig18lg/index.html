@@ -507,7 +507,7 @@ function render() {
   const valveNotNeutralHorn =
     powerOn &&
     gearDown &&
-    valveNotNeutral
+    valveNotNeutral &&
     throttleRetarded;
 
   const leftDownRightUpRetarded =
@@ -568,7 +568,7 @@ function render() {
 
   // Lamps
   setOn(els.greenLamp, greenSafe);
-  setOn(els.redLamp, redUnsafe);
+  setOn(els.redLamp, redUnsafe || valveNotNeutralActive);
   setBlink(els.redLamp, anyHorn);
   setOn(els.hornBadge, anyHorn);
 
@@ -576,7 +576,7 @@ function render() {
   setOn(els.greenPath, greenSafe);
 
   // Gear-down + valve not neutral + throttle retarded
-setOn(els.valveNotNeutralPath, valveNotNeutralActive);
+setOn(els.valveNotNeutralPath, valveNotNeutralHorn);
 setOn(els.redValveNotNeutralPath, valveNotNeutralActive);
 
   // Gear-up + throttle retarded
