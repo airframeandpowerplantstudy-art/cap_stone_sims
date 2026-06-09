@@ -16,8 +16,7 @@
   .stage{position:relative;width:100%;max-width:1081px;aspect-ratio:1081/823;margin:auto;background-image:url("fcfschem2.png");background-repeat:no-repeat;background-size:100% 100%;background-position:center;border-radius:8px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.35)}
   .overlay{position:absolute;inset:0;width:100%;height:100%}
   .hotspot{cursor:crosshair}
-  .path{fill:none;stroke:var(--trace);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:none;
-        pointer-events:none;transition:opacity .15s ease}
+  .path{fill:none;stroke:var(--trace);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:none;pointer-events:none;transition:opacity .15s ease}
   .path.on{opacity:.88}
   .path.drawing{opacity:.88;animation:none}
   .moving-contact{
@@ -51,7 +50,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95));
   }
   .amber-light.on{opacity:.72}
   .switch-dot{fill:white;stroke:#000;stroke-width:3;pointer-events:none}
-  .trace-preview{fill:none;stroke:#7a3cff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8 6;pointer-events:none}
+  .trace-preview{fill:none;stroke:#5a2ca0;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8 6;pointer-events:none;filter:none}
   .trace-point{fill:#00e5ff;stroke:#001318;stroke-width:2;pointer-events:none}
   .side-panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;box-shadow:0 14px 40px rgba(0,0,0,.35);align-self:start;position:sticky;top:14px}
   h1{font-size:18px;margin:0 0 10px}.small{font-size:12px;color:var(--muted);line-height:1.35;margin:6px 0 12px}.section-title{font-weight:700;margin:14px 0 8px;color:#fff}
