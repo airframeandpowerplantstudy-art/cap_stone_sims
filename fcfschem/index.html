@@ -19,8 +19,26 @@
   .path{fill:none;stroke:var(--trace);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:drop-shadow(0 0 5px rgba(255,216,77,.8));pointer-events:none;transition:opacity .15s ease}
   .path.on{opacity:.88}
   .path.drawing{opacity:.88;animation:none}
-  .moving-contact{stroke:#080808;stroke-width:7;stroke-linecap:round;transition:all .28s ease;filter:drop-shadow(0 0 2px rgba(255,255,255,.55));pointer-events:none}
-  .moving-contact.hot{stroke:#101010;filter:drop-shadow(0 0 5px rgba(255,216,77,.8))}
+  .moving-contact{
+  stroke:#4db8ff;
+  stroke-width:7;
+  stroke-linecap:round;
+  transition:all .28s ease;
+
+  filter:
+    drop-shadow(0 0 2px rgba(77,184,255,.9))
+    drop-shadow(0 0 7px rgba(77,184,255,.75));
+
+  pointer-events:none;
+}
+
+.moving-contact.hot{
+  stroke:#8ed8ff;
+
+  filter:
+    drop-shadow(0 0 4px rgba(142,216,255,1))
+    drop-shadow(0 0 12px rgba(142,216,255,.95));
+}
   .switch-dot{fill:white;stroke:#000;stroke-width:3;pointer-events:none}
   .trace-preview{fill:none;stroke:#00e5ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:9 7;pointer-events:none}
   .trace-point{fill:#00e5ff;stroke:#001318;stroke-width:2;pointer-events:none}
@@ -49,7 +67,7 @@
           <polyline id="RHTankRelay" class="path" points="114,219 157,219 157,520 154,556 146,551 138,556 134,551" />
           <polyline id="RHTankAfterRelay" class="path" points="206,55 206,422 197,422 197,457 205,457 205,489 241,493 241,519 252,517 252,554 243,554 243,572 295,572 297,711 311,729 378,728 380,239 380,211 375,205 369,211 361,205 355,213 355,245" />
           <polyline id="LHTankRelay" class="path" points="114,219 114,451 109,459 101,454 94,460 89,454 89,411" />
-          <polyline id="LHTankAfterRelay" class="path" points="206,55 206,405 243,406 243,423 254,423 252,459 423,460 243,474 297,474 297,708 311,729 378,728 380,239 380,211 375,205 369,211 361,205 355,213 355,245" />
+          <polyline id="LHTankAfterRelay" class="path" points="206,55 206,405 243,406 243,423 254,423 252,459 243,474 297,474 297,708 311,729 378,728 380,239 380,211 375,205 369,211 361,205 355,213 355,245" />
           <polyline id="XFeed" class="path" points="114,219 71,219 71,642 66,648 57,642 51,648 46,642 45,600" />
           <polyline id="XFeedAfterRelay" class="path" points="206,55 206,422 195,422 197,457 206,459 206,519 197,517 197,552 206,554 206,585 243,586 243,606 252,606 252,643 243,643 260,659 297,659 298,709 311,729 378,728 380,239 380,211 375,205 369,211 361,205 355,213 355,245" />
           <polyline id="XFeedNormal" class="path" points="960,56 963,606 953,606 953,642 963,643 953,703 953,711 978,734 978,763 755,763 755,317 750,310 744,316 737,310 732,316 730,349" />
