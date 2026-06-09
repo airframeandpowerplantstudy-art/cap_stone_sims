@@ -124,7 +124,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95))
 
   <aside class="side-panel">
     <h1>Fuel Cross Feed System</h1>
-    <div class="small">Background: <b>fcfschem.png</b><br>Drawing starts with electrical power off.</div>
+    <div class="small">Background: <br>Drawing starts with electrical power off.<br>Click through the switches to see how current flows!</div>
     <div class="section-title">Electrical Power</div><button id="powerBtn" class="power-off">Power: OFF</button>
     <div class="section-title">Fuel Selector Switch</div>
     <button data-position="normal" class="posBtn active">NORMAL</button>
@@ -232,7 +232,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95))
 
     if(state.position === 'normal'){
       showPath('Norm');
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> NORMAL<br>PowerOn 0-4 active, Norm active, XFeedNormal active.`;
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> NORMAL<br>`;
     }
 
     if(state.position === 'rh'){
@@ -265,7 +265,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95))
       await drawPath('MainLightFeed', 650); if(run !== state.run) return;
       setLight('main', true);
 
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND<br>RH logic: RHTankRelay drawn, RTS energized, PowerOn0 removed, sw15/sw11/sw12 moved, RHTankAfterRelay drawn, then sw13 moved.`;
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> RIGHT HAND`;
     }
 
     if(state.position === 'lh'){
@@ -298,11 +298,11 @@ drop-shadow(0 0 12px rgba(255,143,163,.95))
       await drawPath('MainLightFeed', 650); if(run !== state.run) return;
       setLight('main', true);
 
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND<br>LH logic: LHTankRelay drawn, LTS energized, PowerOn0 removed, sw16/sw11/sw12 moved, LHTankAfterRelay drawn, then sw14 moved.`;
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> LEFT HAND`;
     }
 
     if(state.position === 'crossfeed'){
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>Drawing cross feed starter logic.`;
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>Drawing cross feed logic.`;
       setContact('sw17','energized'); setContact('sw18','energized');
       await drawPath('XFeed', 850); if(run !== state.run) return;
       setContact('sw9','energized'); setContact('sw10','energized');
@@ -315,7 +315,7 @@ drop-shadow(0 0 12px rgba(255,143,163,.95))
       setLight('main', true);
       await drawPath('XFeedLightFeed', 650); if(run !== state.run) return;
       setLight('xfeed', true);
-      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED<br>XFeedNormal removed; cross feed paths and valve switches moved.`;
+      readout.innerHTML = `<b>Status:</b> Power ON<br><b>Switch:</b> CROSS FEED`;
     }
   }
 
