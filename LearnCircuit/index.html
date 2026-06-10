@@ -373,8 +373,9 @@ function showFormula() {
   `;
 }
 
-function line(x1,y1,x2,y2) {
-  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${BLUE}" stroke-width="3" filter="url(#glow)"/>`;
+function line(x1, y1, x2, y2) {
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+    stroke="${BLUE}" stroke-width="3" stroke-linecap="round" filter="url(#glow)" />`;
 }
 
 function drawCircuit() {
@@ -402,22 +403,25 @@ function drawCircuit() {
   svg.innerHTML += line(36,155,64,155);
   svg.innerHTML += line(42,165,58,165);
 
-  // multi-cell battery
-  svg.innerHTML += line(80,110,105,110);
+  // multi-cell battery (proper orientation)
+svg.innerHTML += line(80,110,105,110);
 
-  svg.innerHTML += line(105,75,105,145);
-  svg.innerHTML += line(125,90,125,130);
+// cell 1
+svg.innerHTML += line(105,90,105,130);   // short negative plate
+svg.innerHTML += line(125,75,125,145);   // long positive plate
 
-  svg.innerHTML += line(145,75,145,145);
-  svg.innerHTML += line(165,90,165,130);
+// cell 2
+svg.innerHTML += line(145,90,145,130);
+svg.innerHTML += line(165,75,165,145);
 
-  svg.innerHTML += line(185,75,185,145);
-  svg.innerHTML += line(205,90,205,130);
+// cell 3
+svg.innerHTML += line(185,90,185,130);
+svg.innerHTML += line(205,75,205,145);
 
-  svg.innerHTML += line(205,110,230,110);
+svg.innerHTML += line(205,110,230,110);
 
-  svg.innerHTML += `<text x="88" y="70" font-size="18">+</text>`;
-  svg.innerHTML += `<text x="212" y="70" font-size="18">−</text>`;
+svg.innerHTML += `<text x="88" y="70" font-size="18">−</text>`;
+svg.innerHTML += `<text x="212" y="70" font-size="18">+</text>`;
 
   let x = 230;
   let spacing = 610 / resistorCount;
@@ -430,7 +434,7 @@ function drawCircuit() {
 
       svg.innerHTML += line(x1,y,x1+20,y);
       svg.innerHTML += zigzag(x1+20, y, x2, y);
-      svg.innerHTML += `<text x="${(x1+x2)/2}" y="55" text-anchor="middle" font-size="18">R${i+1}</text>`;
+      svg.innerHTML += `<text x="${(x1+x2)/2}" y="55" text-anchor="middle" font-size="18"fill="${BLUE}">R${i+1}</text>`;
       svg.innerHTML += line(x2,y,end,y);
 
       x = end;
@@ -458,7 +462,7 @@ function drawCircuit() {
       svg.innerHTML += line(260,by,320,by);
       svg.innerHTML += zigzag(320, by, 780, by);
       svg.innerHTML += line(780,by,850,by);
-      svg.innerHTML += `<text x="550" y="${by-12}" text-anchor="middle" font-size="16">R${i+1}</text>`;
+      svg.innerHTML += `<text x="550" y="${by-12}" text-anchor="middle" font-size="16"fill="${BLUE}">R${i+1}</text>`;
     }
 
     svg.innerHTML += line(850,110,920,110);
@@ -483,7 +487,7 @@ function zigzag(x1, y1, x2, y2) {
 
   path += ` L ${x2} ${y2}`;
 
-  return `<path d="${path}" fill="none" stroke="${BLUE}" stroke-width="3" filter="url(#glow)"/>`;
+  return `<path d="${path}" fill="none" stroke="${BLUE}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" />`;
 }
 
 newGame();
