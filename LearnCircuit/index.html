@@ -4,111 +4,120 @@
 <meta charset="UTF-8" />
 <title>PEIR Circuit Trainer</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #eef2f5;
-    margin: 0;
-    color: #0b2b40;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background: #061522;
+  margin: 0;
+  color: #e8f3ff;
+}
 
-  .wrap {
-    max-width: 1100px;
-    margin: auto;
-    padding: 20px;
-  }
+.wrap {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
 
-  h1 {
-    text-align: center;
-  }
+h1 { text-align: center; }
 
-  .controls, .game {
-    background: white;
-    border-radius: 12px;
-    padding: 18px;
-    margin-bottom: 18px;
-    box-shadow: 0 3px 12px rgba(0,0,0,.15);
-  }
+.controls, .game {
+  background: #0b2236;
+  border: 1px solid #1d4d73;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 0 18px rgba(0,140,255,.18);
+}
 
-  label {
-    margin-right: 12px;
-    font-weight: bold;
-  }
+label {
+  margin-right: 12px;
+  font-weight: bold;
+}
 
-  select, button {
-    padding: 8px 12px;
-    margin: 5px;
-    border-radius: 6px;
-    border: 1px solid #888;
-    font-size: 15px;
-  }
+select, button {
+  padding: 8px 12px;
+  margin: 5px;
+  border-radius: 6px;
+  border: 1px solid #3ea6ff;
+  font-size: 15px;
+}
 
-  button {
-    background: #0b2b40;
-    color: white;
-    cursor: pointer;
-  }
+button {
+  background: #123a57;
+  color: white;
+  cursor: pointer;
+  transition: .2s;
+}
 
-  svg {
-    width: 100%;
-    height: 180px;
-    background: #fafafa;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-  }
+button:hover {
+  background: #1b567f;
+  box-shadow: 0 0 10px rgba(62,166,255,.6);
+}
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 18px;
-  }
+svg {
+  width: 100%;
+  height: 220px;
+  background: #08131f;
+  border: 1px solid #1d4d73;
+  border-radius: 8px;
+}
 
-  th {
-    background: #d0d0d0;
-    padding: 10px;
-    font-size: 18px;
-  }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 18px;
+}
 
-  td {
-    border: 1px solid #aaa;
-    padding: 8px;
-    text-align: center;
-  }
+th {
+  background: #12344d;
+  color: #9fd8ff;
+  padding: 10px;
+  font-size: 18px;
+}
 
-  input {
-    width: 85%;
-    padding: 8px;
-    font-size: 16px;
-    text-align: center;
-  }
+td {
+  border: 1px solid #214d70;
+  padding: 8px;
+  text-align: center;
+  background: #0c1c2b;
+}
 
-  input.locked {
-    background: #dcefff;
-    font-weight: bold;
-  }
+input {
+  width: 85%;
+  padding: 8px;
+  font-size: 16px;
+  text-align: center;
+  background: #16324a;
+  color: white;
+  border: 1px solid #3c7db0;
+  border-radius: 6px;
+}
 
-  input.correct {
-    background: #c8f7c5;
-  }
+input.locked {
+  background: #29597d;
+  color: #cfefff;
+  font-weight: bold;
+}
 
-  input.wrong {
-    background: #ffcccc;
-  }
+input.correct { background: #1f7a45; }
+input.wrong { background: #7a1f1f; }
 
-  .status {
-    font-size: 18px;
-    font-weight: bold;
-    margin-top: 12px;
-  }
+.status {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 12px;
+}
 
-  .hint {
-    background: #fff6c7;
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 10px;
-    display: none;
-  }
+.hint {
+  background: #14304a;
+  border: 1px solid #3ea6ff;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+  display: none;
+}
 </style>
 </head>
+
 <body>
 <div class="wrap">
   <h1>PEIR Circuit Trainer</h1>
@@ -156,6 +165,8 @@ let score = 10;
 let circuitType = "series";
 let resistorCount = 3;
 
+const BLUE = "#7fd3ff";
+
 for (let i = 1; i <= 10; i++) {
   document.getElementById("count").innerHTML += `<option value="${i}">${i}</option>`;
 }
@@ -183,8 +194,8 @@ function newGame() {
 
 function generateCircuit() {
   answerKey = [];
-
   let resistors = [];
+
   for (let i = 0; i < resistorCount; i++) {
     resistors.push(rand(2, 12));
   }
@@ -242,21 +253,18 @@ function buildChart() {
   const tbody = document.querySelector("#chart tbody");
   tbody.innerHTML = "";
 
-  answerKey.forEach((row, rowIndex) => {
+  answerKey.forEach(row => {
     let tr = document.createElement("tr");
 
     ["p", "e", "i", "r"].forEach(key => {
       let td = document.createElement("td");
       let input = document.createElement("input");
-
       input.dataset.answer = row[key];
 
       let reveal = false;
 
       if (key === "r" && row.label !== "TOTAL") reveal = true;
-
-      if (circuitType === "series" && row.label === "TOTAL" && key === "e") reveal = true;
-      if (circuitType === "parallel" && row.label === "TOTAL" && key === "e") reveal = true;
+      if (row.label === "TOTAL" && key === "e") reveal = true;
 
       if (reveal) {
         input.value = row[key];
@@ -315,15 +323,17 @@ function showHint() {
     box.innerHTML = `
       <b>Series Hint:</b><br>
       Current stays the same through every resistor.<br>
-      Total resistance adds.<br>
-      Total voltage is divided across the resistors.
+      Resistance adds.<br>
+      Voltage adds.<br>
+      Power adds.
     `;
   } else {
     box.innerHTML = `
       <b>Parallel Hint:</b><br>
       Voltage stays the same across every branch.<br>
-      Total current adds.<br>
-      Total resistance is found using reciprocal resistance.
+      Current adds.<br>
+      Power adds.<br>
+      Resistance uses reciprocal resistance.
     `;
   }
 }
@@ -337,53 +347,59 @@ function showFormula() {
     E = I × R<br>
     I = E ÷ R<br>
     R = E ÷ I<br>
-    P = I × E
+    P = I × E<br>
+    Series RT = R1 + R2 + R3...<br>
+    Parallel RT = 1 ÷ (1/R1 + 1/R2 + 1/R3...)
   `;
+}
+
+function line(x1,y1,x2,y2) {
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${BLUE}" stroke-width="3" filter="url(#glow)"/>`;
 }
 
 function drawCircuit() {
   const svg = document.getElementById("circuit");
-  svg.innerHTML = "";
-
-  let width = 1000;
-  let y = 90;
-  let startX = 80;
-  let spacing = 800 / resistorCount;
-
-  svg.setAttribute("viewBox", "0 0 1000 180");
-
-  // ground left
-  svg.innerHTML += `
-    <line x1="50" y1="90" x2="80" y2="90" stroke="black" stroke-width="3"/>
-    <line x1="50" y1="90" x2="50" y2="125" stroke="black" stroke-width="3"/>
-    <line x1="30" y1="125" x2="70" y2="125" stroke="black" stroke-width="3"/>
-    <line x1="36" y1="135" x2="64" y2="135" stroke="black" stroke-width="3"/>
-    <line x1="42" y1="145" x2="58" y2="145" stroke="black" stroke-width="3"/>
+  svg.setAttribute("viewBox", "0 0 1000 220");
+  svg.innerHTML = `
+    <defs>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
   `;
 
-// battery - multiple cells, black schematic style
-svg.innerHTML += `
-  <line x1="80" y1="90" x2="105" y2="90" stroke="black" stroke-width="3"/>
+  let y = 110;
 
-  <!-- cell 1 -->
-  <line x1="105" y1="55" x2="105" y2="125" stroke="black" stroke-width="3"/>
-  <line x1="125" y1="70" x2="125" y2="110" stroke="black" stroke-width="3"/>
+  // left ground
+  svg.innerHTML += line(50,110,80,110);
+  svg.innerHTML += line(50,110,50,145);
+  svg.innerHTML += line(30,145,70,145);
+  svg.innerHTML += line(36,155,64,155);
+  svg.innerHTML += line(42,165,58,165);
 
-  <!-- cell 2 -->
-  <line x1="145" y1="55" x2="145" y2="125" stroke="black" stroke-width="3"/>
-  <line x1="165" y1="70" x2="165" y2="110" stroke="black" stroke-width="3"/>
+  // proper multi-cell battery
+  svg.innerHTML += line(80,110,105,110);
 
-  <!-- cell 3 -->
-  <line x1="185" y1="55" x2="185" y2="125" stroke="black" stroke-width="3"/>
-  <line x1="205" y1="70" x2="205" y2="110" stroke="black" stroke-width="3"/>
+  svg.innerHTML += line(105,75,105,145);
+  svg.innerHTML += line(125,90,125,130);
 
-  <line x1="205" y1="90" x2="230" y2="90" stroke="black" stroke-width="3"/>
+  svg.innerHTML += line(145,75,145,145);
+  svg.innerHTML += line(165,90,165,130);
 
-  <text x="90" y="50" font-size="16">+</text>
-  <text x="215" y="50" font-size="16">−</text>
-`;
+  svg.innerHTML += line(185,75,185,145);
+  svg.innerHTML += line(205,90,205,130);
+
+  svg.innerHTML += line(205,110,230,110);
+
+  svg.innerHTML += `<text x="88" y="70" fill="${BLUE}" font-size="18">+</text>`;
+  svg.innerHTML += `<text x="212" y="70" fill="${BLUE}" font-size="18">−</text>`;
 
   let x = 230;
+  let spacing = 610 / resistorCount;
 
   if (circuitType === "series") {
     for (let i = 0; i < resistorCount; i++) {
@@ -391,47 +407,44 @@ svg.innerHTML += `
       let x2 = x + spacing * 0.65;
       let end = x + spacing;
 
-      svg.innerHTML += `<line x1="${x1}" y1="${y}" x2="${x1+20}" y2="${y}" stroke="black" stroke-width="3"/>`;
+      svg.innerHTML += line(x1,y,x1+20,y);
       svg.innerHTML += zigzag(x1+20, y, x2, y);
-      svg.innerHTML += `<text x="${(x1+x2)/2}" y="35" text-anchor="middle" font-size="18">R${i+1}</text>`;
-      svg.innerHTML += `<line x1="${x2}" y1="${y}" x2="${end}" y2="${y}" stroke="black" stroke-width="3"/>`;
+      svg.innerHTML += `<text x="${(x1+x2)/2}" y="55" text-anchor="middle" fill="${BLUE}" font-size="18">R${i+1}</text>`;
+      svg.innerHTML += line(x2,y,end,y);
+
       x = end;
     }
 
-let groundX = x + 40;
+    let groundX = x + 20;
 
-svg.innerHTML += `
-  <line x1="${x}" y1="${y}" x2="${groundX}" y2="${y}" stroke="black" stroke-width="3"/>
-  <line x1="${groundX}" y1="90" x2="${groundX}" y2="125" stroke="black" stroke-width="3"/>
-  <line x1="${groundX-20}" y1="125" x2="${groundX+20}" y2="125" stroke="black" stroke-width="3"/>
-  <line x1="${groundX-14}" y1="135" x2="${groundX+14}" y2="135" stroke="black" stroke-width="3"/>
-  <line x1="${groundX-8}" y1="145" x2="${groundX+8}" y2="145" stroke="black" stroke-width="3"/>
-`;
+    svg.innerHTML += line(x,y,groundX,y);
+    svg.innerHTML += line(groundX,110,groundX,145);
+    svg.innerHTML += line(groundX-20,145,groundX+20,145);
+    svg.innerHTML += line(groundX-14,155,groundX+14,155);
+    svg.innerHTML += line(groundX-8,165,groundX+8,165);
   }
 
   if (circuitType === "parallel") {
-    svg.innerHTML += `<line x1="150" y1="90" x2="230" y2="90" stroke="black" stroke-width="3"/>`;
-    svg.innerHTML += `<line x1="230" y1="40" x2="230" y2="150" stroke="black" stroke-width="3"/>`;
-    svg.innerHTML += `<line x1="850" y1="40" x2="850" y2="150" stroke="black" stroke-width="3"/>`;
+    svg.innerHTML += line(230,110,260,110);
+    svg.innerHTML += line(260,50,260,170);
+    svg.innerHTML += line(850,50,850,170);
 
-    let branchGap = 110 / Math.max(resistorCount - 1, 1);
+    let branchGap = 120 / Math.max(resistorCount - 1, 1);
 
     for (let i = 0; i < resistorCount; i++) {
-      let by = resistorCount === 1 ? 90 : 40 + branchGap * i;
+      let by = resistorCount === 1 ? 110 : 50 + branchGap * i;
 
-      svg.innerHTML += `<line x1="230" y1="${by}" x2="300" y2="${by}" stroke="black" stroke-width="3"/>`;
-      svg.innerHTML += zigzag(300, by, 780, by);
-      svg.innerHTML += `<line x1="780" y1="${by}" x2="850" y2="${by}" stroke="black" stroke-width="3"/>`;
-      svg.innerHTML += `<text x="540" y="${by-12}" text-anchor="middle" font-size="16">R${i+1}</text>`;
+      svg.innerHTML += line(260,by,320,by);
+      svg.innerHTML += zigzag(320, by, 780, by);
+      svg.innerHTML += line(780,by,850,by);
+      svg.innerHTML += `<text x="550" y="${by-12}" text-anchor="middle" fill="${BLUE}" font-size="16">R${i+1}</text>`;
     }
 
-    svg.innerHTML += `
-      <line x1="850" y1="90" x2="950" y2="90" stroke="black" stroke-width="3"/>
-      <line x1="950" y1="90" x2="950" y2="125" stroke="black" stroke-width="3"/>
-      <line x1="930" y1="125" x2="970" y2="125" stroke="black" stroke-width="3"/>
-      <line x1="936" y1="135" x2="964" y2="135" stroke="black" stroke-width="3"/>
-      <line x1="942" y1="145" x2="958" y2="145" stroke="black" stroke-width="3"/>
-    `;
+    svg.innerHTML += line(850,110,920,110);
+    svg.innerHTML += line(920,110,920,145);
+    svg.innerHTML += line(900,145,940,145);
+    svg.innerHTML += line(906,155,934,155);
+    svg.innerHTML += line(912,165,928,165);
   }
 }
 
@@ -443,13 +456,13 @@ function zigzag(x1, y1, x2, y2) {
 
   for (let i = 1; i < steps; i++) {
     let x = x1 + step * i;
-    let y = i % 2 === 0 ? y1 + 22 : y1 - 22;
+    let y = i % 2 === 0 ? y1 + 18 : y1 - 18;
     path += ` L ${x} ${y}`;
   }
 
   path += ` L ${x2} ${y2}`;
 
-  return `<path d="${path}" fill="none" stroke="black" stroke-width="3"/>`;
+  return `<path d="${path}" fill="none" stroke="${BLUE}" stroke-width="3" filter="url(#glow)"/>`;
 }
 
 newGame();
