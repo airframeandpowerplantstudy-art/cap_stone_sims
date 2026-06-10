@@ -398,13 +398,15 @@ svg.innerHTML += `
       x = end;
     }
 
-    svg.innerHTML += `
-      <line x1="${x}" y1="${y}" x2="950" y2="${y}" stroke="black" stroke-width="3"/>
-      <line x1="950" y1="90" x2="950" y2="125" stroke="black" stroke-width="3"/>
-      <line x1="930" y1="125" x2="970" y2="125" stroke="black" stroke-width="3"/>
-      <line x1="936" y1="135" x2="964" y2="135" stroke="black" stroke-width="3"/>
-      <line x1="942" y1="145" x2="958" y2="145" stroke="black" stroke-width="3"/>
-    `;
+let groundX = x + 40;
+
+svg.innerHTML += `
+  <line x1="${x}" y1="${y}" x2="${groundX}" y2="${y}" stroke="black" stroke-width="3"/>
+  <line x1="${groundX}" y1="90" x2="${groundX}" y2="125" stroke="black" stroke-width="3"/>
+  <line x1="${groundX-20}" y1="125" x2="${groundX+20}" y2="125" stroke="black" stroke-width="3"/>
+  <line x1="${groundX-14}" y1="135" x2="${groundX+14}" y2="135" stroke="black" stroke-width="3"/>
+  <line x1="${groundX-8}" y1="145" x2="${groundX+8}" y2="145" stroke="black" stroke-width="3"/>
+`;
   }
 
   if (circuitType === "parallel") {
