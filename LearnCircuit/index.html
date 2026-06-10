@@ -444,13 +444,16 @@ function drawCircuit() {
 
   if (circuitType === "parallel") {
     svg.innerHTML += line(230,130,260,130);
-    svg.innerHTML += line(260,60,260,210);
-    svg.innerHTML += line(850,60,850,210);
+   let topY = 70;
+let bottomY = 350;
 
-    let branchGap = 150 / Math.max(resistorCount - 1, 1);
+svg.innerHTML += line(260, topY, 260, bottomY);
+svg.innerHTML += line(850, topY, 850, bottomY);
 
+let branchGap = (bottomY - topY) / Math.max(resistorCount - 1, 1);
+    
     for (let i = 0; i < resistorCount; i++) {
-      let by = resistorCount === 1 ? 130 : 60 + branchGap * i;
+      let by = resistorCount === 1 ? 130 : topY + branchGap * i;
 
       svg.innerHTML += line(260,by,320,by);
       svg.innerHTML += zigzag(320, by, 440, by);
