@@ -217,6 +217,7 @@ svg {
 
     <button id="powerBtn" onclick="togglePower()">Power: ON</button>
     <button id="gearBtn" onclick="toggleGear()">Gear: DOWN</button>
+    <button id="safetyBtn" onclick="toggleSafetySwitch()">Gear Safety: AIR / UP</button>
     <button id="throttleBtn" onclick="toggleThrottle()">Throttle: RETARD</button>
     <button id="testRedBtn" onclick="pushToTestRed()">Push-To-Test RED</button>
     <button id="testGreenBtn" onclick="pushToTestGreen()">Push-To-Test GREEN</button>
@@ -327,6 +328,7 @@ L 734 498
 <script>
 let powerOn = true;
 let gearUp = false;
+let gearSafetyAir = true;
 let throttleRetard = true;
 
 let pushTestRedActive = false;
@@ -358,6 +360,7 @@ const hornBox = document.getElementById("hornBox");
 
 const powerBtn = document.getElementById("powerBtn");
 const gearBtn = document.getElementById("gearBtn");
+const safetyBtn = document.getElementById("safetyBtn");
 const throttleBtn = document.getElementById("throttleBtn");
 const testRedBtn = document.getElementById("testRedBtn");
 const testGreenBtn = document.getElementById("testGreenBtn");
@@ -417,7 +420,7 @@ function updateSwitchAnimations() {
     moveSwitch("sw-up-limit-2", 152, 268, 186, 290);
   }
 
-  if (gearTransitioning || gearUp) {
+  if (gearSafetyAir) {
     moveSwitch("sw-gear-safety", 277, 201, 316, 186);
   } else {
     moveSwitch("sw-gear-safety", 277, 201, 318, 224);
@@ -478,6 +481,16 @@ function togglePower() {
 function toggleGear() {
   if (!powerOn || gearTransitioning) return;
 
+  // Gear safety switch interlock:
+  // If the safety switch is DOWN / on ground, block only the gear UP command.
+  // Gear DOWN is still allowed.
+  if (!gearUp && !gearSafetyAir) {
+    updateButtons();
+    updateSwitchAnimations();
+    statusBox.textContent = "Status: Gear safety switch DOWN / ON GROUND — gear UP command blocked";
+    return;
+  }
+
   if (gearTimer) clearTimeout(gearTimer);
   if (relayCloseTimer) clearTimeout(relayCloseTimer);
 
@@ -533,6 +546,15 @@ function toggleGear() {
       gearTimer = null;
       updateSystem();
     }, 10000);
+  }
+}
+
+function toggleSafetySwitch() {
+  gearSafetyAir = !gearSafetyAir;
+  updateSystem(false);
+
+  if (!gearSafetyAir && !gearUp && !gearTransitioning) {
+    statusBox.textContent = "Status: Gear safety switch DOWN / ON GROUND — gear UP is blocked";
   }
 }
 
@@ -653,10 +675,12 @@ function updateButtons() {
     ? (gearDirection === "up" ? "Gear: TRAVELING UP" : "Gear: TRAVELING DOWN")
     : (gearUp ? "Gear: UP" : "Gear: DOWN");
 
+  safetyBtn.textContent = gearSafetyAir ? "Gear Safety: AIR / UP" : "Gear Safety: GROUND / DOWN";
   throttleBtn.textContent = throttleRetard ? "Throttle: RETARD" : "Throttle: FORWARD";
 
   powerBtn.classList.toggle("active", powerOn);
   gearBtn.classList.toggle("active", gearUp || gearTransitioning);
+  safetyBtn.classList.toggle("active", gearSafetyAir);
   throttleBtn.classList.toggle("active", throttleRetard);
   testRedBtn.classList.toggle("warning-active", pushTestRedActive);
   testGreenBtn.classList.toggle("warning-active", pushTestGreenActive);
@@ -714,7 +738,9 @@ function updateSystem(animateMainWires = true) {
       ? "Status: Gear UP — red light and horn active"
       : "Status: Gear UP — red light active";
   } else {
-    statusBox.textContent = "Status: Gear DOWN — green light active";
+    statusBox.textContent = gearSafetyAir
+      ? "Status: Gear DOWN — green light active"
+      : "Status: Gear DOWN — green light active; gear safety switch blocks gear UP";
   }
 
   if (wireDelayActive) return;
