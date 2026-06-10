@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PEIR Circuit Trainer</title>
 
 <style>
@@ -40,9 +41,14 @@ button {
   cursor: pointer;
 }
 
+button:hover {
+  background: #1b567f;
+  box-shadow: 0 0 10px rgba(62,166,255,.6);
+}
+
 svg {
   width: 100%;
-  height: 240px;
+  height: 260px;
   background: #08131f;
   border: 1px solid #1d4d73;
   border-radius: 8px;
@@ -139,7 +145,7 @@ input.wrong { background: #7a1f1f; }
   </div>
 
   <div class="game">
-    <svg id="circuit" viewBox="120 40 760 170"></svg>
+    <svg id="circuit" viewBox="0 0 1000 260"></svg>
 
     <table id="chart">
       <thead>
@@ -375,79 +381,83 @@ function drawCircuit() {
   const svg = document.getElementById("circuit");
   svg.innerHTML = "";
 
-  let y = 120;
+  let y = 130;
 
   // left ground
-  svg.innerHTML += line(50,120,80,120);
-  svg.innerHTML += line(50,120,50,155);
-  svg.innerHTML += line(30,155,70,155);
-  svg.innerHTML += line(36,165,64,165);
-  svg.innerHTML += line(42,175,58,175);
+  svg.innerHTML += line(50,130,80,130);
+  svg.innerHTML += line(50,130,50,165);
+  svg.innerHTML += line(30,165,70,165);
+  svg.innerHTML += line(36,175,64,175);
+  svg.innerHTML += line(42,185,58,185);
 
   // battery: negative left, positive right
-  svg.innerHTML += line(80,120,105,120);
+  svg.innerHTML += line(80,130,105,130);
 
-  svg.innerHTML += line(105,100,105,140);
-  svg.innerHTML += line(125,85,125,155);
+  svg.innerHTML += line(105,110,105,150); // short -
+  svg.innerHTML += line(125,95,125,165);  // long +
 
-  svg.innerHTML += line(145,100,145,140);
-  svg.innerHTML += line(165,85,165,155);
+  svg.innerHTML += line(145,110,145,150);
+  svg.innerHTML += line(165,95,165,165);
 
-  svg.innerHTML += line(185,100,185,140);
-  svg.innerHTML += line(205,85,205,155);
+  svg.innerHTML += line(185,110,185,150);
+  svg.innerHTML += line(205,95,205,165);
 
-  svg.innerHTML += line(205,120,230,120);
+  svg.innerHTML += line(205,130,230,130);
 
-  svg.innerHTML += `<text x="88" y="82" font-size="20">−</text>`;
-  svg.innerHTML += `<text x="212" y="82" font-size="20">+</text>`;
-
-  let x = 230;
-  let spacing = 610 / resistorCount;
+  svg.innerHTML += `<text x="88" y="92" font-size="20">−</text>`;
+  svg.innerHTML += `<text x="212" y="92" font-size="20">+</text>`;
 
   if (circuitType === "series") {
+    let x = 230;
+    const resistorVisualWidth = 120;
+    let wireGap = resistorCount > 1
+      ? (610 - resistorVisualWidth * resistorCount) / resistorCount
+      : 120;
+
+    if (wireGap < 20) wireGap = 20;
+
     for (let i = 0; i < resistorCount; i++) {
-      let x1 = x;
-      let x2 = x + 140;
-      let end = x + spacing;
+      let leadStart = x;
+      let resistorStart = leadStart + wireGap;
+      let resistorEnd = resistorStart + resistorVisualWidth;
 
-      svg.innerHTML += line(x1,y,x1+20,y);
-      svg.innerHTML += zigzag(x1+20, y, x2+140, y);
-      svg.innerHTML += `<text x="${(x1+x2)/2}" y="70" text-anchor="middle" font-size="18">R${i+1}</text>`;
-      svg.innerHTML += line(x2,y,end,y);
+      svg.innerHTML += line(leadStart, y, resistorStart, y);
+      svg.innerHTML += zigzag(resistorStart, y, resistorEnd, y);
+      svg.innerHTML += `<text x="${(resistorStart + resistorEnd) / 2}" y="80" text-anchor="middle" font-size="18">R${i+1}</text>`;
 
-      x = end;
+      x = resistorEnd;
     }
 
-    let groundX = x + 25;
+    let groundX = x + wireGap + 25;
 
-    svg.innerHTML += line(x,y,groundX,y);
-    svg.innerHTML += line(groundX,120,groundX,155);
-    svg.innerHTML += line(groundX-20,155,groundX+20,155);
-    svg.innerHTML += line(groundX-14,165,groundX+14,165);
-    svg.innerHTML += line(groundX-8,175,groundX+8,175);
+    svg.innerHTML += line(x, y, groundX, y);
+    svg.innerHTML += line(groundX,130,groundX,165);
+    svg.innerHTML += line(groundX-20,165,groundX+20,165);
+    svg.innerHTML += line(groundX-14,175,groundX+14,175);
+    svg.innerHTML += line(groundX-8,185,groundX+8,185);
   }
 
   if (circuitType === "parallel") {
-    svg.innerHTML += line(230,120,260,120);
-    svg.innerHTML += line(260,60,260,180);
-    svg.innerHTML += line(850,60,850,180);
+    svg.innerHTML += line(230,130,260,130);
+    svg.innerHTML += line(260,60,260,210);
+    svg.innerHTML += line(850,60,850,210);
 
-    let branchGap = 120 / Math.max(resistorCount - 1, 1);
+    let branchGap = 150 / Math.max(resistorCount - 1, 1);
 
     for (let i = 0; i < resistorCount; i++) {
-      let by = resistorCount === 1 ? 120 : 60 + branchGap * i;
+      let by = resistorCount === 1 ? 130 : 60 + branchGap * i;
 
       svg.innerHTML += line(260,by,320,by);
-      svg.innerHTML += zigzag(320, by, 780, by);
-      svg.innerHTML += line(780,by,850,by);
-      svg.innerHTML += `<text x="550" y="${by-12}" text-anchor="middle" font-size="16">R${i+1}</text>`;
+      svg.innerHTML += zigzag(320, by, 440, by);
+      svg.innerHTML += line(440,by,850,by);
+      svg.innerHTML += `<text x="380" y="${by-18}" text-anchor="middle" font-size="16">R${i+1}</text>`;
     }
 
-    svg.innerHTML += line(850,120,920,120);
-    svg.innerHTML += line(920,120,920,155);
-    svg.innerHTML += line(900,155,940,155);
-    svg.innerHTML += line(906,165,934,165);
-    svg.innerHTML += line(912,175,928,175);
+    svg.innerHTML += line(850,130,920,130);
+    svg.innerHTML += line(920,130,920,165);
+    svg.innerHTML += line(900,165,940,165);
+    svg.innerHTML += line(906,175,934,175);
+    svg.innerHTML += line(912,185,928,185);
   }
 }
 
