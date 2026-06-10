@@ -48,7 +48,7 @@ button:hover {
 
 svg {
   width: 100%;
-  height: 260px;
+  height: 420px;
   background: #08131f;
   border: 1px solid #1d4d73;
   border-radius: 8px;
@@ -145,7 +145,7 @@ input.wrong { background: #7a1f1f; }
   </div>
 
   <div class="game">
-    <svg id="circuit" viewBox="0 0 1000 260"></svg>
+    <svg id="circuit" viewBox="0 0 1000 420"></svg>
 
     <table id="chart">
       <thead>
@@ -408,7 +408,7 @@ function drawCircuit() {
   svg.innerHTML += `<text x="212" y="92" font-size="20">+</text>`;
 
   if (circuitType === "series") {
-    let x = 250;
+    let x = 230;
 
     // Responsive resistor width:
     // Keeps resistors big when there are only a few,
