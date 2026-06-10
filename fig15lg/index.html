@@ -80,13 +80,8 @@ button {
   cursor: pointer;
 }
 
-button.active {
-  background: #2563eb;
-}
-
-button.warning-active {
-  background: #991b1b;
-}
+button.active { background: #2563eb; }
+button.warning-active { background: #991b1b; }
 
 .viewer {
   flex: 1;
@@ -144,13 +139,11 @@ svg {
 }
 
 .wire.draw-wire {
-  animation: drawWire 2.8s ease forwards;
+  animation: drawWire 3.6s ease forwards;
 }
 
 @keyframes drawWire {
-  to {
-    stroke-dashoffset: 0;
-  }
+  to { stroke-dashoffset: 0; }
 }
 
 .electron {
@@ -165,7 +158,7 @@ svg {
   stroke: #3b82f6;
   stroke-width: 4;
   stroke-linecap: round;
-  transition: all 1.2s ease;
+  transition: all 1.5s ease;
   filter: drop-shadow(0 0 4px #93c5fd);
 }
 
@@ -226,9 +219,7 @@ svg {
     </div>
 
     <div class="note">
-      
       Click the schematic to get map points.<br>
-    
     </div>
   </div>
 
@@ -339,6 +330,7 @@ let gearTimer = null;
 
 let relayClosed = false;
 let relayCloseTimer = null;
+let upStepTimer = null;
 
 let upSequenceStep = 0;
 // 0 = idle
@@ -351,6 +343,16 @@ let wireDelayTimer = null;
 
 let electronAnimationFrame = null;
 let electronFlows = [];
+
+// Timing controls
+// If you change the CSS drawWire animation, change WIRE_DRAW_MS to match.
+const WIRE_DRAW_MS = 3600;
+const GEAR_PATH_PAUSE_MS = 5000;
+const GEAR_STEP_MS = WIRE_DRAW_MS + GEAR_PATH_PAUSE_MS;
+const PUSH_TEST_MS = 5000;
+
+// Smaller number = slower electron movement.
+const ELECTRON_SPEED = 0.00008;
 
 const greenLamp = document.getElementById("greenLamp");
 const redLamp = document.getElementById("redLamp");
@@ -456,6 +458,16 @@ function startWireDelay(ms = 500) {
   }, ms);
 }
 
+function clearGearTimers() {
+  if (gearTimer) clearTimeout(gearTimer);
+  if (relayCloseTimer) clearTimeout(relayCloseTimer);
+  if (upStepTimer) clearTimeout(upStepTimer);
+
+  gearTimer = null;
+  relayCloseTimer = null;
+  upStepTimer = null;
+}
+
 function togglePower() {
   powerOn = !powerOn;
 
@@ -464,12 +476,14 @@ function togglePower() {
     pushTestGreenActive = false;
     relayClosed = false;
     wireDelayActive = false;
+    gearTransitioning = false;
+    gearDirection = null;
+    upSequenceStep = 0;
 
     if (wireDelayTimer) clearTimeout(wireDelayTimer);
-    if (relayCloseTimer) clearTimeout(relayCloseTimer);
+    clearGearTimers();
 
     wireDelayTimer = null;
-    relayCloseTimer = null;
   }
 
   updateSystem(false);
@@ -478,11 +492,8 @@ function togglePower() {
 function toggleGear() {
   if (!powerOn || gearTransitioning) return;
 
-  if (gearTimer) clearTimeout(gearTimer);
-  if (relayCloseTimer) clearTimeout(relayCloseTimer);
+  clearGearTimers();
 
-  gearTimer = null;
-  relayCloseTimer = null;
   relayClosed = false;
   wireDelayActive = false;
 
@@ -493,12 +504,12 @@ function toggleGear() {
     upSequenceStep = 1;
     updateSystem();
 
-    setTimeout(() => {
+    upStepTimer = setTimeout(() => {
       if (gearTransitioning && gearDirection === "up") {
         upSequenceStep = 2;
         updateSystem();
       }
-    }, 3000);
+    }, GEAR_STEP_MS);
 
     relayCloseTimer = setTimeout(() => {
       if (gearTransitioning && gearDirection === "up") {
@@ -506,7 +517,7 @@ function toggleGear() {
         upSequenceStep = 3;
         updateSystem();
       }
-    }, 6000);
+    }, GEAR_STEP_MS * 2);
 
     gearTimer = setTimeout(() => {
       gearUp = true;
@@ -514,17 +525,15 @@ function toggleGear() {
       gearDirection = null;
       relayClosed = false;
       upSequenceStep = 0;
-      gearTimer = null;
-      relayCloseTimer = null;
+      clearGearTimers();
       updateSystem();
-    }, 9000);
+    }, GEAR_STEP_MS * 3);
 
   } else {
     gearDirection = "down";
     gearTransitioning = true;
     relayClosed = false;
     upSequenceStep = 0;
-    startWireDelay(550);
     updateSystem();
 
     gearTimer = setTimeout(() => {
@@ -533,7 +542,7 @@ function toggleGear() {
       gearDirection = null;
       gearTimer = null;
       updateSystem();
-    }, 5000);
+    }, GEAR_STEP_MS);
   }
 }
 
@@ -554,7 +563,7 @@ function pushToTestRed() {
     pushTestRedActive = false;
     pushTestRedHasDrawn = false;
     updateSystem(false);
-  }, 3000);
+  }, PUSH_TEST_MS);
 }
 
 function pushToTestGreen() {
@@ -569,7 +578,7 @@ function pushToTestGreen() {
     pushTestGreenHasDrawn = false;
     pushTestGreenActive = false;
     updateSystem(false);
-  }, 3000);
+  }, PUSH_TEST_MS);
 }
 
 function clearPaths() {
@@ -626,7 +635,7 @@ function addElectronFlow(path) {
       dot: dot,
       length: length,
       offset: i * 0.25,
-      speed: 0.00018
+      speed: ELECTRON_SPEED
     });
   }
 
@@ -700,16 +709,14 @@ function updateSystem(animateMainWires = true) {
 
   if (gearTransitioning && gearDirection === "up") {
     if (upSequenceStep === 1) {
-      statusBox.textContent = "Status: Gear UP selected — selector circuit energizing";
+      statusBox.textContent = "Status: Gear UP selected — selector path drawing, then 5 second pause";
     } else if (upSequenceStep === 2) {
-      statusBox.textContent = "Status: Relay coil energizing";
+      statusBox.textContent = "Status: Relay coil path drawing, then 5 second pause";
     } else if (upSequenceStep === 3) {
-      statusBox.textContent = "Status: Relay closed — motor circuit energized";
+      statusBox.textContent = "Status: Relay closed — motor path drawing, then 5 second pause";
     }
   } else if (gearTransitioning && gearDirection === "down") {
-    statusBox.textContent = wireDelayActive
-      ? "Status: Switch moved — down circuit energizing..."
-      : "Status: Gear DOWN selected — down circuit energized for 5 seconds";
+    statusBox.textContent = "Status: Gear DOWN selected — down path drawing, then 5 second pause";
   } else if (gearUp) {
     statusBox.textContent = throttleRetard
       ? "Status: Gear UP — red light and horn active"
@@ -721,36 +728,36 @@ function updateSystem(animateMainWires = true) {
   if (wireDelayActive) return;
 
   if (pushTestRedActive) {
-  lightPath("path-push-test-red", "red-on", !pushTestRedHasDrawn, true);
-  pushTestRedHasDrawn = true;
-}
-
-if (pushTestGreenActive) {
-  lightPath("path-push-test-green", "green-on", !pushTestGreenHasDrawn, true);
-  pushTestGreenHasDrawn = true;
-}
-
- if (gearTransitioning && gearDirection === "up") {
-  if (upSequenceStep === 1) {
-    lightPath("path-select-gear-up", "power-on", true, true);
+    lightPath("path-push-test-red", "red-on", !pushTestRedHasDrawn, true);
+    pushTestRedHasDrawn = true;
   }
 
-  if (upSequenceStep > 1) {
-    lightPath("path-select-gear-up", "power-on", false, true);
+  if (pushTestGreenActive) {
+    lightPath("path-push-test-green", "green-on", !pushTestGreenHasDrawn, true);
+    pushTestGreenHasDrawn = true;
   }
 
-  if (upSequenceStep === 2) {
-    lightPath("path-select-up-initiate-relay", "power-on", true, true);
-  }
+  if (gearTransitioning && gearDirection === "up") {
+    if (upSequenceStep === 1) {
+      lightPath("path-select-gear-up", "power-on", true, true);
+    }
 
-  if (upSequenceStep > 2) {
-    lightPath("path-select-up-initiate-relay", "power-on", false, true);
-  }
+    if (upSequenceStep > 1) {
+      lightPath("path-select-gear-up", "power-on", false, true);
+    }
 
-  if (upSequenceStep === 3) {
-    lightPath("path-relay-closed-to-motor", "power-on", true, true);
+    if (upSequenceStep === 2) {
+      lightPath("path-select-up-initiate-relay", "power-on", true, true);
+    }
+
+    if (upSequenceStep > 2) {
+      lightPath("path-select-up-initiate-relay", "power-on", false, true);
+    }
+
+    if (upSequenceStep === 3) {
+      lightPath("path-relay-closed-to-motor", "power-on", true, true);
+    }
   }
-}
 
   if (!gearTransitioning && gearUp) {
     lightPath("path-gear-up-red", "red-on", animateMainWires, false);
