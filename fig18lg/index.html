@@ -485,6 +485,9 @@ function render() {
   const throttleRetarded = state.throttle === "retarded";
   const valveNotNeutral = state.valve === "notNeutral";
 
+  const leftGearDownClosed = state.leftGear === "down";
+  const rightGearDownClosed = state.rightGear === "down";
+
   const rightUpOnly =
     state.rightGear === "up" &&
     state.leftGear === "down";
@@ -495,19 +498,22 @@ function render() {
   const greenSafe =
     powerOn &&
     gearDown &&
-    state.leftGear === "down" &&
-    state.rightGear === "down" &&
+    leftGearDownClosed &&
+    rightGearDownClosed &&
     state.valve === "neutral";
 
-  const valveNotNeutralActive =
-  powerOn &&
-  gearDown &&
-  valveNotNeutral;
-  
-  const valveNotNeutralHorn =
+  // The not-neutral path is only available if both gear switches still
+  // complete that route to ground.
+  const canUseValveNotNeutralPath =
     powerOn &&
     gearDown &&
     valveNotNeutral &&
+    leftGearDownClosed &&
+    rightGearDownClosed;
+
+  // Horn on the not-neutral route still only happens with throttle retarded.
+  const valveNotNeutralHorn =
+    canUseValveNotNeutralPath &&
     throttleRetarded;
 
   const leftDownRightUpRetarded =
@@ -521,13 +527,11 @@ function render() {
     throttleRetarded &&
     !rightUpOnly;
 
+  // This is the quiet not-neutral condition: both gear switches still complete
+  // the not-neutral red path, but the throttle is open so the horn stays off.
   const silentValveNotNeutral =
-    powerOn &&
-    gearDown &&
-    valveNotNeutral &&
-    !throttleRetarded
-    state.leftGear === "down" &&
-      state.rightGear === "down";
+    canUseValveNotNeutralPath &&
+    !throttleRetarded;
 
   const redUnsafe =
     powerOn &&
@@ -559,8 +563,7 @@ function render() {
   const leftUpRetardedHorn =
     powerOn &&
     leftUpOrBothUp &&
-    throttleRetarded &&
-    !valveNotNeutral;
+    throttleRetarded;
 
   const anyHorn =
     valveNotNeutralHorn ||
@@ -568,18 +571,24 @@ function render() {
     leftDownRightUpRetarded ||
     leftUpRetardedHorn;
 
+  const redLampOn =
+    redUnsafe ||
+    canUseValveNotNeutralPath;
+
   // Lamps
   setOn(els.greenLamp, greenSafe);
-  setOn(els.redLamp, redUnsafe || valveNotNeutralActive);
+  setOn(els.redLamp, redLampOn);
   setBlink(els.redLamp, anyHorn);
   setOn(els.hornBadge, anyHorn);
 
   // Green safe path
   setOn(els.greenPath, greenSafe);
 
-  // Gear-down + valve not neutral + throttle retarded
-setOn(els.valveNotNeutralPath, valveNotNeutralHorn);
-setOn(els.redValveNotNeutralPath, valveNotNeutralActive && !rightUpOnly && !leftUpOrBothUp);
+  // Gear-down + valve not neutral.
+  // Red not-neutral path comes on only if that path can reach ground.
+  // Yellow horn path still only comes on if throttle is retarded.
+  setOn(els.valveNotNeutralPath, valveNotNeutralHorn);
+  setOn(els.redValveNotNeutralPath, canUseValveNotNeutralPath);
 
   // Gear-up + throttle retarded
   setOn(els.hornGearUpRetardedPath, gearUpRetardedHorn);
@@ -591,21 +600,24 @@ setOn(els.redValveNotNeutralPath, valveNotNeutralActive && !rightUpOnly && !left
   setOn(els.hornLeftOrBothUpPath, leftUpRetardedHorn);
   setOn(els.hornRightUpPath, false);
 
-  // Red unsafe paths
-  setOn(els.redPath, redUnsafe && !rightUpOnly && !valveNotNeutralHorn);
-  setOn(els.redMismatchRightUpPath, redUnsafe && rightUpOnly && !valveNotNeutralHorn);
+  // Red unsafe paths.
+  // If the valve-not-neutral route cannot complete because a gear switch moved,
+  // let the available mismatch red path take over.
+  setOn(els.redPath, redUnsafe && !rightUpOnly && !canUseValveNotNeutralPath);
+  setOn(els.redMismatchRightUpPath, redUnsafe && rightUpOnly && !canUseValveNotNeutralPath);
 
   els.greenStatus.textContent = greenSafe ? "ON" : "OFF";
-  els.redStatus.textContent = redUnsafe ? "ON" : "OFF";
+  els.redStatus.textContent = redLampOn ? "ON" : "OFF";
   els.hornStatus.textContent = anyHorn ? "ON" : "OFF";
 
   if (!powerOn) els.modeStatus.textContent = "Power Off";
   else if (greenSafe) els.modeStatus.textContent = "Gear Down Safe";
   else if (valveNotNeutralHorn) els.modeStatus.textContent = "Valve Not Neutral Horn";
+  else if (silentValveNotNeutral) els.modeStatus.textContent = "Valve Not Neutral / No Warning";
   else if (leftDownRightUpRetarded) els.modeStatus.textContent = "Right Gear Up Warning Horn";
   else if (leftUpRetardedHorn) els.modeStatus.textContent = "Left Gear Up Warning Horn";
   else if (gearUpRetardedHorn) els.modeStatus.textContent = "Gear Up Warning Horn";
-  else if (silentValveNotNeutral) els.modeStatus.textContent = "Valve Not Neutral / No Warning";
+  else if (valveNotNeutral) els.modeStatus.textContent = "Valve Not Neutral / Open Path";
   else els.modeStatus.textContent = "Unsafe Gear";
 
   updateButtons();
