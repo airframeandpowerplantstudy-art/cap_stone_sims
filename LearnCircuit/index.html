@@ -55,9 +55,9 @@ input.wrong{background:#7a1f1f}
         <p>Series, parallel, or complex circuits using kΩ, mA, and mW.</p>
       </div>
 
-      <div class="mode-card" onclick="alert('Challenge Mode is next.')">
+      <div class="mode-card" onclick="showChallenge()">
         <h3>Challenge Mode</h3>
-        <p>Fewer hints and harder hidden values later.</p>
+        <p>Random circuit type with random given PEIR values.</p>
       </div>
       <div class="mode-card" onclick="alert('Troubleshooting Mode is next.')">
         <h3>Troubleshooting Mode</h3>
@@ -149,10 +149,43 @@ input.wrong{background:#7a1f1f}
     </div>
   </div>
 
+  <div id="challengeMode" class="hidden">
+    <div class="controls">
+      <button onclick="backMenu()">Main Menu</button>
+      <button onclick="newChallengeGame()">New Challenge Circuit</button>
+      <button onclick="checkAnswers('challenge')">Check Answers</button>
+      <button onclick="showChallengeHint()">Hint (-1)</button>
+      <button onclick="showFormula('challenge')">Show Formula (-1)</button>
+    </div>
+
+    <div class="game">
+      <h2 id="challengeTitle">Challenge Mode</h2>
+      <p class="note">Random series, parallel, or complex circuit. Given values change every round.</p>
+
+      <svg id="challengeSvg" viewBox="0 0 1000 470"></svg>
+
+      <table>
+        <thead>
+          <tr>
+            <th>POWER</th>
+            <th>VOLTAGE</th>
+            <th>CURRENT</th>
+            <th>RESISTANCE</th>
+            <th>LOAD</th>
+          </tr>
+        </thead>
+        <tbody id="challengeBody"></tbody>
+      </table>
+
+      <div class="status" id="challengeScore">Score: 10/10</div>
+      <div class="hint" id="challengeHint"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-let learnRows=[],complexRows=[],electronicsRows=[],learnScore=10,complexScore=10,electronicsScore=10,sections=[],nextR=1;
+let learnRows=[],complexRows=[],electronicsRows=[],challengeRows=[],learnScore=10,complexScore=10,electronicsScore=10,challengeScore=10,sections=[],challengeType="",nextR=1;
 
 for(let i=1;i<=10;i++){document.getElementById("learnCount").innerHTML+=`<option value="${i}">${i}</option>`}
 document.getElementById("learnCount").value=3;
@@ -171,8 +204,9 @@ validateSectionCounts();
 function showLearn(){hideAll();document.getElementById("learnMode").classList.remove("hidden");newLearnGame()}
 function showComplex(){hideAll();document.getElementById("complexMode").classList.remove("hidden");newComplexGame()}
 function showElectronics(){hideAll();document.getElementById("electronicsMode").classList.remove("hidden");newElectronicsGame()}
+function showChallenge(){hideAll();document.getElementById("challengeMode").classList.remove("hidden");newChallengeGame()}
 function backMenu(){hideAll();document.getElementById("menu").classList.remove("hidden")}
-function hideAll(){["menu","learnMode","complexMode","electronicsMode"].forEach(id=>document.getElementById(id).classList.add("hidden"))}
+function hideAll(){["menu","learnMode","complexMode","electronicsMode","challengeMode"].forEach(id=>document.getElementById(id).classList.add("hidden"))}
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
 function round(num){return Math.round(num*100)/100}
 function line(x1,y1,x2,y2){return `<line class="wire" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`}
@@ -276,7 +310,7 @@ function buildTable(bodyId,rows){
     let tr=document.createElement("tr");if(row.kind==="total")tr.classList.add("circuit-total");
     ["p","e","i","r"].forEach(key=>{
       let td=document.createElement("td"),input=document.createElement("input");input.dataset.answer=row[key];
-      let reveal=(key==="r"&&row.revealR)||(key==="e"&&row.revealE);
+      let reveal=(key==="r"&&row.revealR)||(key==="e"&&row.revealE)||(key==="p"&&row.revealP)||(key==="i"&&row.revealI);
       if(reveal){input.value=row[key];input.readOnly=true;input.classList.add("locked")}
       td.appendChild(input);tr.appendChild(td);
     });
@@ -285,12 +319,12 @@ function buildTable(bodyId,rows){
 }
 
 function checkAnswers(mode){
-  let bodyId=mode==="learn"?"learnBody":mode==="complex"?"complexBody":"electronicsBody";
-  let scoreId=mode==="learn"?"learnScore":mode==="complex"?"complexScore":"electronicsScore";
-  let score=mode==="learn"?learnScore:mode==="complex"?complexScore:electronicsScore;
+  let bodyId=mode==="learn"?"learnBody":mode==="complex"?"complexBody":mode==="electronics"?"electronicsBody":"challengeBody";
+  let scoreId=mode==="learn"?"learnScore":mode==="complex"?"complexScore":mode==="electronics"?"electronicsScore":"challengeScore";
+  let score=mode==="learn"?learnScore:mode==="complex"?complexScore:mode==="electronics"?electronicsScore:challengeScore;
   let inputs=document.querySelectorAll(`#${bodyId} input:not(.locked)`),allCorrect=true;
   inputs.forEach(input=>{let user=Number(input.value),correct=Number(input.dataset.answer);input.classList.remove("correct","wrong");if(Math.abs(user-correct)<=0.05){input.classList.add("correct")}else{input.classList.add("wrong");allCorrect=false}});
-  if(!allCorrect){score=Math.max(1,score-1);if(mode==="learn")learnScore=score;else if(mode==="complex")complexScore=score;else electronicsScore=score;document.getElementById(scoreId).textContent=`Score: ${score}/10`}
+  if(!allCorrect){score=Math.max(1,score-1);if(mode==="learn")learnScore=score;else if(mode==="complex")complexScore=score;else if(mode==="electronics")electronicsScore=score;else challengeScore=score;document.getElementById(scoreId).textContent=`Score: ${score}/10`}
   else document.getElementById(scoreId).textContent=`Circuit Complete! Score: ${score}/10`;
 }
 
@@ -301,13 +335,315 @@ document.getElementById("learnScore").textContent=`Score: ${learnScore}/10`
 }else if(mode==="complex"){
 complexScore=Math.max(1,complexScore-1);
 document.getElementById("complexScore").textContent=`Score: ${complexScore}/10`
-}else{
+}else if(mode==="electronics"){
 electronicsScore=Math.max(1,electronicsScore-1);
 document.getElementById("electronicsScore").textContent=`Score: ${electronicsScore}/10`
+}else{
+challengeScore=Math.max(1,challengeScore-1);
+document.getElementById("challengeScore").textContent=`Score: ${challengeScore}/10`
 }}
 function showLearnHint(){losePoint("learn");let type=document.getElementById("learnType").value,box=document.getElementById("learnHint");box.style.display="block";box.innerHTML=type==="series"?`<b>Series Hint:</b><br>Current stays the same. Resistance, voltage, and power add.`:`<b>Parallel Hint:</b><br>Voltage stays the same. Current and power add. Total resistance uses reciprocal resistance.`}
 function showComplexHint(){losePoint("complex");let box=document.getElementById("complexHint");box.style.display="block";box.innerHTML=`<b>Complex PEIR Hint:</b><br>1. Zero-resistor sections are bypass wires with 0Ω resistance.<br>2. Each non-empty section has a hidden section resistance.<br>3. The four sections are connected in series, so hidden section resistances add.<br>4. Circuit current is the same through every section.<br>5. Inside a series section, current stays the same and voltage divides.<br>6. Inside a parallel section, voltage stays the same and current divides.`}
 function showFormula(mode){losePoint(mode);let box=document.getElementById(mode==="learn"?"learnHint":"complexHint");box.style.display="block";box.innerHTML=`<b>Formulas:</b><br>E = I × R<br>I = E ÷ R<br>R = E ÷ I<br>P = I × E<br><br><b>Series:</b> RT = R1 + R2 + R3<br><b>Parallel:</b> RT = 1 ÷ (1/R1 + 1/R2 + 1/R3)`}
+
+
+
+function newChallengeGame(){
+  challengeScore=10;
+  challengeRows=[];
+  document.getElementById("challengeScore").textContent="Score: 10/10";
+  document.getElementById("challengeHint").style.display="none";
+
+  const types=["series","parallel","complex"];
+  challengeType=types[rand(0,2)];
+  document.getElementById("challengeTitle").textContent="Challenge Mode - " + challengeType.toUpperCase();
+
+  let count=rand(2,4);
+  let resistors=[];
+  for(let i=0;i<count;i++) resistors.push(rand(2,15));
+
+  let allRows=[];
+
+  if(challengeType==="series"){
+    let current=rand(1,8);
+    let totalR=resistors.reduce((a,b)=>a+b,0);
+    let totalE=current*totalR;
+    let totalP=current*totalE;
+
+    resistors.forEach((r,i)=>{
+      let e=current*r;
+      allRows.push({
+        p:round(current*e),
+        e:round(e),
+        i:round(current),
+        r:round(r),
+        label:"R"+(i+1),
+        kind:"resistor"
+      });
+    });
+
+    allRows.push({
+      p:round(totalP),
+      e:round(totalE),
+      i:round(current),
+      r:round(totalR),
+      label:"CIRCUIT TOTAL",
+      kind:"total"
+    });
+
+    drawChallengeSimple("series",count);
+  }
+
+  if(challengeType==="parallel"){
+    let voltage=rand(12,48);
+    let totalI=0;
+    let totalP=0;
+
+    resistors.forEach((r,i)=>{
+      let current=voltage/r;
+      let power=voltage*current;
+      totalI+=current;
+      totalP+=power;
+
+      allRows.push({
+        p:round(power),
+        e:round(voltage),
+        i:round(current),
+        r:round(r),
+        label:"R"+(i+1),
+        kind:"resistor"
+      });
+    });
+
+    allRows.push({
+      p:round(totalP),
+      e:round(voltage),
+      i:round(totalI),
+      r:round(voltage/totalI),
+      label:"CIRCUIT TOTAL",
+      kind:"total"
+    });
+
+    drawChallengeSimple("parallel",count);
+  }
+
+  if(challengeType==="complex"){
+    // R1 in series with a parallel group. If 4 resistors, R2/R3/R4 are parallel.
+    let voltage=rand(24,60);
+    let r1=resistors[0];
+    let parallelList=resistors.slice(1);
+
+    let parallelR=1/parallelList.reduce((sum,r)=>sum+(1/r),0);
+    let totalR=r1+parallelR;
+    let totalI=voltage/totalR;
+    let totalP=voltage*totalI;
+
+    let e1=totalI*r1;
+    let ep=voltage-e1;
+
+    allRows.push({
+      p:round(e1*totalI),
+      e:round(e1),
+      i:round(totalI),
+      r:round(r1),
+      label:"R1 / Series",
+      kind:"resistor"
+    });
+
+    parallelList.forEach((r,idx)=>{
+      let branchI=ep/r;
+      allRows.push({
+        p:round(ep*branchI),
+        e:round(ep),
+        i:round(branchI),
+        r:round(r),
+        label:"R"+(idx+2)+" / Parallel",
+        kind:"resistor"
+      });
+    });
+
+    allRows.push({
+      p:round(totalP),
+      e:round(voltage),
+      i:round(totalI),
+      r:round(totalR),
+      label:"CIRCUIT TOTAL",
+      kind:"total"
+    });
+
+    drawChallengeComplex(count);
+  }
+
+  challengeRows=applyRandomGivens(allRows, challengeType);
+  buildTable("challengeBody", challengeRows);
+}
+
+function applyRandomGivens(rows,type){
+  // Start with no locked values.
+  rows.forEach(row=>{
+    row.revealP=false;
+    row.revealE=false;
+    row.revealI=false;
+    row.revealR=false;
+  });
+
+  const resistorRows=rows.filter(r=>r.kind!=="total");
+  const totalRow=rows.find(r=>r.kind==="total");
+
+  // Always give enough anchors, but not always the same anchors.
+  // Give all individual resistances most of the time, but sometimes hide one.
+  resistorRows.forEach(r=>r.revealR=true);
+
+  if(resistorRows.length>2 && Math.random()<0.35){
+    resistorRows[rand(0,resistorRows.length-1)].revealR=false;
+  }
+
+  // Total row gets one or two random givens.
+  const totalChoices=["p","e","i","r"];
+  revealRandomKeys(totalRow,totalChoices,rand(1,2));
+
+  if(type==="series"){
+    // Give one current somewhere OR one voltage/power clue.
+    if(Math.random()<0.65){
+      revealRandomKeys(resistorRows[rand(0,resistorRows.length-1)],["i"],1);
+    } else {
+      revealRandomKeys(resistorRows[rand(0,resistorRows.length-1)],["e","p"],1);
+    }
+  }
+
+  if(type==="parallel"){
+    // Give a voltage somewhere OR branch current/power clue.
+    if(Math.random()<0.65){
+      revealRandomKeys(resistorRows[rand(0,resistorRows.length-1)],["e"],1);
+    } else {
+      revealRandomKeys(resistorRows[rand(0,resistorRows.length-1)],["i","p"],1);
+    }
+  }
+
+  if(type==="complex"){
+    // Mix it up: one series-side clue and one branch clue.
+    revealRandomKeys(resistorRows[0],["e","i","p"],1);
+    if(resistorRows.length>1){
+      revealRandomKeys(resistorRows[rand(1,resistorRows.length-1)],["e","i","p"],1);
+    }
+  }
+
+  // Make sure at least 3 visible clues exist beyond labels.
+  let visible=rows.reduce((sum,r)=>sum+["p","e","i","r"].filter(k=>r["reveal"+k.toUpperCase()]).length,0);
+  while(visible<3){
+    let row=rows[rand(0,rows.length-1)];
+    revealRandomKeys(row,["p","e","i","r"],1);
+    visible=rows.reduce((sum,r)=>sum+["p","e","i","r"].filter(k=>r["reveal"+k.toUpperCase()]).length,0);
+  }
+
+  return rows;
+}
+
+function revealRandomKeys(row,keys,count){
+  let pool=[...keys];
+  for(let n=0;n<count && pool.length>0;n++){
+    let idx=rand(0,pool.length-1);
+    let key=pool.splice(idx,1)[0];
+    row["reveal"+key.toUpperCase()]=true;
+  }
+}
+
+function drawChallengeSimple(type,count){
+  const svg=document.getElementById("challengeSvg");
+  svg.innerHTML="";
+  let y=235;
+  drawSource(svg,y);
+
+  if(type==="series"){
+    let x=230;
+    const resistorW=Math.min(120,520/count);
+    let gap=count>1?(620-resistorW*count)/(count+1):120;
+    if(gap<12) gap=12;
+
+    for(let i=0;i<count;i++){
+      let rs=x+gap;
+      let re=rs+resistorW;
+      svg.innerHTML+=line(x,y,rs,y);
+      svg.innerHTML+=zigzag(rs,y,re,y);
+      svg.innerHTML+=`<text x="${(rs+re)/2}" y="${y-50}" text-anchor="middle" font-size="18">R${i+1}</text>`;
+      x=re;
+    }
+
+    let gx=x+gap+25;
+    svg.innerHTML+=line(x,y,gx,y);
+    drawGround(svg,gx,y);
+  }
+
+  if(type==="parallel"){
+    let leftBus=260;
+    let rightBus=850;
+    let topY=100;
+    let bottomY=360;
+
+    svg.innerHTML+=line(230,y,leftBus,y);
+    svg.innerHTML+=line(leftBus,topY,leftBus,bottomY);
+    svg.innerHTML+=line(rightBus,topY,rightBus,bottomY);
+
+    let branchGap=(bottomY-topY)/Math.max(count-1,1);
+
+    for(let i=0;i<count;i++){
+      let by=count===1?y:topY+branchGap*i;
+      svg.innerHTML+=line(leftBus,by,350,by);
+      svg.innerHTML+=zigzag(350,by,500,by);
+      svg.innerHTML+=line(500,by,rightBus,by);
+      svg.innerHTML+=`<text x="425" y="${by-18}" text-anchor="middle" font-size="16">R${i+1}</text>`;
+    }
+
+    svg.innerHTML+=line(rightBus,y,920,y);
+    drawGround(svg,920,y);
+  }
+}
+
+function drawChallengeComplex(count){
+  const svg=document.getElementById("challengeSvg");
+  svg.innerHTML="";
+  const y=235;
+
+  drawSource(svg,y);
+
+  svg.innerHTML+=line(230,y,320,y);
+  svg.innerHTML+=zigzag(320,y,430,y);
+  svg.innerHTML+=`<text x="375" y="${y-45}" text-anchor="middle" font-size="18">R1</text>`;
+  svg.innerHTML+=line(430,y,520,y);
+
+  let leftBus=520;
+  let rightBus=780;
+  let topY=120;
+  let bottomY=350;
+  let branchCount=count-1;
+
+  svg.innerHTML+=line(leftBus,topY,leftBus,bottomY);
+  svg.innerHTML+=line(rightBus,topY,rightBus,bottomY);
+
+  let branchGap=(bottomY-topY)/Math.max(branchCount-1,1);
+
+  for(let i=0;i<branchCount;i++){
+    let by=branchCount===1?y:topY+branchGap*i;
+    svg.innerHTML+=line(leftBus,by,575,by);
+    svg.innerHTML+=zigzag(575,by,685,by);
+    svg.innerHTML+=line(685,by,rightBus,by);
+    svg.innerHTML+=`<text x="630" y="${by-18}" text-anchor="middle" font-size="16">R${i+2}</text>`;
+  }
+
+  svg.innerHTML+=line(rightBus,y,920,y);
+  drawGround(svg,920,y);
+}
+
+function showChallengeHint(){
+  losePoint("challenge");
+  const box=document.getElementById("challengeHint");
+  box.style.display="block";
+  box.innerHTML=`<b>Challenge Hint:</b><br>
+  Use the circuit shape first, then the PEIR formulas.<br>
+  Series: current stays the same and resistance adds.<br>
+  Parallel: voltage stays the same and current adds.<br>
+  Complex: solve the series/parallel groups first, then solve total.`;
+}
 
 
 function newElectronicsGame(){
