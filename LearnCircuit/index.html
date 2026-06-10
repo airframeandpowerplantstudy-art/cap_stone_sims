@@ -126,7 +126,7 @@ input.wrong{background:#7a1f1f}
     </div>
 
     <div class="game">
-      <h2>Electronics Challenge</h2>
+      <h2 id="electronicsTitle">Electronics Challenge</h2>
       <p class="note">Random series, parallel, or complex circuits using ohms, mA, and mW.</p>
 
       <svg id="electronicsSvg" viewBox="0 0 1000 470"></svg>
@@ -318,6 +318,7 @@ function newElectronicsGame(){
 
   const types=["series","parallel","complex"];
   const type=types[rand(0,2)];
+  document.getElementById("electronicsTitle").textContent = "Electronics Challenge - " + type.toUpperCase();
 
   let resistors=[rand(1000,10000),rand(1000,10000),rand(1000,10000)];
 
@@ -340,7 +341,7 @@ function newElectronicsGame(){
       });
     });
 
-    drawLearnCircuit("series",3);
+    drawElectronicsSimple("series",3);
 
   } else if(type==="parallel"){
     totalV=rand(5,24);
@@ -366,7 +367,7 @@ function newElectronicsGame(){
 
     totalR=round(totalV/totalI);
 
-    drawLearnCircuit("parallel",3);
+    drawElectronicsSimple("parallel",3);
 
   } else {
     // simple complex
@@ -442,6 +443,57 @@ function showElectronicsHint(){
   Power is in mW.<br><br>
   Using these units:<br>
   Convert mA to amps before using E = I × R`;
+}
+
+
+function drawElectronicsSimple(type,count){
+  const svg=document.getElementById("electronicsSvg");
+  svg.innerHTML="";
+  let y=235;
+  drawSource(svg,y);
+
+  if(type==="series"){
+    let x=230;
+    const resistorW=120;
+    let gap=60;
+
+    for(let i=0;i<count;i++){
+      let rs=x+gap;
+      let re=rs+resistorW;
+      svg.innerHTML+=line(x,y,rs,y);
+      svg.innerHTML+=zigzag(rs,y,re,y);
+      svg.innerHTML+=`<text x="${(rs+re)/2}" y="${y-50}" text-anchor="middle" font-size="18">R${i+1}</text>`;
+      x=re;
+    }
+
+    let gx=x+gap+25;
+    svg.innerHTML+=line(x,y,gx,y);
+    drawGround(svg,gx,y);
+  }
+
+  if(type==="parallel"){
+    let leftBus=260;
+    let rightBus=850;
+    let topY=120;
+    let bottomY=350;
+
+    svg.innerHTML+=line(230,y,leftBus,y);
+    svg.innerHTML+=line(leftBus,topY,leftBus,bottomY);
+    svg.innerHTML+=line(rightBus,topY,rightBus,bottomY);
+
+    let branchGap=(bottomY-topY)/Math.max(count-1,1);
+
+    for(let i=0;i<count;i++){
+      let by=count===1?y:topY+branchGap*i;
+      svg.innerHTML+=line(leftBus,by,350,by);
+      svg.innerHTML+=zigzag(350,by,500,by);
+      svg.innerHTML+=line(500,by,rightBus,by);
+      svg.innerHTML+=`<text x="425" y="${by-18}" text-anchor="middle" font-size="16">R${i+1}</text>`;
+    }
+
+    svg.innerHTML+=line(rightBus,y,920,y);
+    drawGround(svg,920,y);
+  }
 }
 
 function drawElectronicsComplex(){
