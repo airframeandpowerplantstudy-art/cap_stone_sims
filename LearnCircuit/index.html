@@ -127,7 +127,7 @@ input.wrong{background:#7a1f1f}
 
     <div class="game">
       <h2>Electronics Challenge</h2>
-      <p class="note">Random series, parallel, or complex circuits using kΩ, mA, and mW.</p>
+      <p class="note">Random series, parallel, or complex circuits using ohms, mA, and mW.</p>
 
       <svg id="electronicsSvg" viewBox="0 0 1000 470"></svg>
 
@@ -137,7 +137,7 @@ input.wrong{background:#7a1f1f}
             <th>POWER (mW)</th>
             <th>VOLTAGE (V)</th>
             <th>CURRENT (mA)</th>
-            <th>RESISTANCE (kΩ)</th>
+            <th>RESISTANCE (Ω)</th>
             <th>LOAD</th>
           </tr>
         </thead>
@@ -319,20 +319,20 @@ function newElectronicsGame(){
   const types=["series","parallel","complex"];
   const type=types[rand(0,2)];
 
-  let resistors=[rand(1,10),rand(1,10),rand(1,10)];
+  let resistors=[rand(1000,10000),rand(1000,10000),rand(1000,10000)];
 
   let totalV,totalI,totalR,totalP;
 
   if(type==="series"){
     totalR=resistors[0]+resistors[1]+resistors[2];
-    totalI=round((rand(1,20))/10);
-    totalV=round(totalI*totalR);
+    totalI=round(rand(1,20));
+    totalV=round((totalI/1000)*totalR);
     totalP=round(totalV*totalI);
 
     resistors.forEach((r,i)=>{
       electronicsRows.push({
-        p:round(totalI*totalI*r),
-        e:round(totalI*r),
+        p:round(totalV*totalI),
+        e:round((totalI/1000)*r),
         i:round(totalI),
         r:round(r),
         label:"R"+(i+1),
@@ -349,7 +349,7 @@ function newElectronicsGame(){
     totalP=0;
 
     resistors.forEach((r,i)=>{
-      let cur=totalV/r;
+      let cur=(totalV/r)*1000;
       let p=totalV*cur;
       totalI+=cur;
       totalP+=p;
@@ -380,14 +380,14 @@ function newElectronicsGame(){
     totalR=round(r1+parallelR);
 
     totalV=rand(12,36);
-    totalI=round(totalV/totalR);
+    totalI=round((totalV/totalR)*1000);
     totalP=round(totalV*totalI);
 
-    const e1=round(totalI*r1);
+    const e1=round((totalI/1000)*r1);
     const ep=round(totalV-e1);
 
-    const i2=round(ep/r2);
-    const i3=round(ep/r3);
+    const i2=round((ep/r2)*1000);
+    const i3=round((ep/r3)*1000);
 
     electronicsRows.push({
       p:round(e1*totalI),
@@ -437,11 +437,11 @@ function showElectronicsHint(){
   const box=document.getElementById("electronicsHint");
   box.style.display="block";
   box.innerHTML=`<b>Electronics Hint:</b><br>
-  Resistance is in kΩ.<br>
+  Resistance is in Ω.<br>
   Current is in mA.<br>
   Power is in mW.<br><br>
   Using these units:<br>
-  V = mA × kΩ`;
+  Convert mA to amps before using E = I × R`;
 }
 
 function drawElectronicsComplex(){
