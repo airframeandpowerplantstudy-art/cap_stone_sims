@@ -408,13 +408,18 @@ function drawCircuit() {
   svg.innerHTML += `<text x="212" y="92" font-size="20">+</text>`;
 
   if (circuitType === "series") {
-    let x = 230;
-    const resistorVisualWidth = 120;
+    let x = 250;
+
+    // Responsive resistor width:
+    // Keeps resistors big when there are only a few,
+    // but shrinks them so 10 resistors never fall off the view.
+    const resistorVisualWidth = Math.min(120, 520 / resistorCount);
+
     let wireGap = resistorCount > 1
-      ? (610 - resistorVisualWidth * resistorCount) / resistorCount
+      ? (620 - resistorVisualWidth * resistorCount) / (resistorCount + 1)
       : 120;
 
-    if (wireGap < 20) wireGap = 20;
+    if (wireGap < 12) wireGap = 12;
 
     for (let i = 0; i < resistorCount; i++) {
       let leadStart = x;
