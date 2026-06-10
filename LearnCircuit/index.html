@@ -45,7 +45,6 @@ button {
   background: #123a57;
   color: white;
   cursor: pointer;
-  transition: .2s;
 }
 
 button:hover {
@@ -60,7 +59,8 @@ svg {
   border: 1px solid #1d4d73;
   border-radius: 8px;
 }
-  svg text {
+
+svg text {
   fill: #7fd3ff;
   font-weight: bold;
 }
@@ -188,6 +188,7 @@ function newGame() {
   score = 10;
   circuitType = document.getElementById("type").value;
   resistorCount = Number(document.getElementById("count").value);
+
   document.getElementById("hintBox").style.display = "none";
   document.getElementById("score").textContent = "Score: 10/10";
 
@@ -214,7 +215,14 @@ function generateCircuit() {
       let r = resistors[i];
       let e = current * r;
       let p = current * e;
-      answerKey.push({ p: round(p), e: round(e), i: round(current), r: round(r), label: "R" + (i+1) });
+
+      answerKey.push({
+        p: round(p),
+        e: round(e),
+        i: round(current),
+        r: round(r),
+        label: "R" + (i + 1)
+      });
     }
 
     answerKey.push({
@@ -235,10 +243,17 @@ function generateCircuit() {
       let r = resistors[i];
       let current = voltage / r;
       let power = voltage * current;
+
       totalCurrent += current;
       totalPower += power;
 
-      answerKey.push({ p: round(power), e: round(voltage), i: round(current), r: round(r), label: "R" + (i+1) });
+      answerKey.push({
+        p: round(power),
+        e: round(voltage),
+        i: round(current),
+        r: round(r),
+        label: "R" + (i + 1)
+      });
     }
 
     let totalResistance = voltage / totalCurrent;
@@ -263,6 +278,7 @@ function buildChart() {
     ["p", "e", "i", "r"].forEach(key => {
       let td = document.createElement("td");
       let input = document.createElement("input");
+
       input.dataset.answer = row[key];
 
       let reveal = false;
@@ -337,7 +353,7 @@ function showHint() {
       Voltage stays the same across every branch.<br>
       Current adds.<br>
       Power adds.<br>
-      Resistance uses reciprocal resistance.
+      Total resistance uses reciprocal resistance.
     `;
   }
 }
@@ -364,6 +380,7 @@ function line(x1,y1,x2,y2) {
 function drawCircuit() {
   const svg = document.getElementById("circuit");
   svg.setAttribute("viewBox", "0 0 1000 220");
+
   svg.innerHTML = `
     <defs>
       <filter id="glow">
@@ -385,7 +402,7 @@ function drawCircuit() {
   svg.innerHTML += line(36,155,64,155);
   svg.innerHTML += line(42,165,58,165);
 
-  // proper multi-cell battery
+  // multi-cell battery
   svg.innerHTML += line(80,110,105,110);
 
   svg.innerHTML += line(105,75,105,145);
@@ -399,8 +416,8 @@ function drawCircuit() {
 
   svg.innerHTML += line(205,110,230,110);
 
-  svg.innerHTML += `<text x="88" y="70" fill="${BLUE}" font-size="18">+</text>`;
-  svg.innerHTML += `<text x="212" y="70" fill="${BLUE}" font-size="18">−</text>`;
+  svg.innerHTML += `<text x="88" y="70" font-size="18">+</text>`;
+  svg.innerHTML += `<text x="212" y="70" font-size="18">−</text>`;
 
   let x = 230;
   let spacing = 610 / resistorCount;
@@ -413,13 +430,13 @@ function drawCircuit() {
 
       svg.innerHTML += line(x1,y,x1+20,y);
       svg.innerHTML += zigzag(x1+20, y, x2, y);
-      svg.innerHTML += `<text x="${(x1+x2)/2}" y="55" text-anchor="middle" fill="${BLUE}" font-size="18">R${i+1}</text>`;
+      svg.innerHTML += `<text x="${(x1+x2)/2}" y="55" text-anchor="middle" font-size="18">R${i+1}</text>`;
       svg.innerHTML += line(x2,y,end,y);
 
       x = end;
     }
 
-    let groundX = x + 20;
+    let groundX = x + 25;
 
     svg.innerHTML += line(x,y,groundX,y);
     svg.innerHTML += line(groundX,110,groundX,145);
@@ -441,7 +458,7 @@ function drawCircuit() {
       svg.innerHTML += line(260,by,320,by);
       svg.innerHTML += zigzag(320, by, 780, by);
       svg.innerHTML += line(780,by,850,by);
-      svg.innerHTML += `<text x="550" y="${by-12}" text-anchor="middle" fill="${BLUE}" font-size="16">R${i+1}</text>`;
+      svg.innerHTML += `<text x="550" y="${by-12}" text-anchor="middle" font-size="16">R${i+1}</text>`;
     }
 
     svg.innerHTML += line(850,110,920,110);
@@ -466,7 +483,7 @@ function zigzag(x1, y1, x2, y2) {
 
   path += ` L ${x2} ${y2}`;
 
-  return `<path d="${path}" fill="${BLUE}" stroke="${BLUE}" stroke-width="3" filter="url(#glow)"/>`;
+  return `<path d="${path}" fill="none" stroke="${BLUE}" stroke-width="3" filter="url(#glow)"/>`;
 }
 
 newGame();
