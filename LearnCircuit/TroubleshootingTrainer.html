@@ -34,6 +34,9 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 .wire{stroke:#7fd3ff;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px #7fd3ff)}
 .terminal{fill:white;stroke:#7fd3ff;stroke-width:3;cursor:pointer;transition:filter .12s ease,fill .12s ease}
 .terminal:hover{fill:#ffd166;filter:drop-shadow(0 0 7px #ffd166)}
+.wireLabel,.terminalLabel,.componentLabel{fill:#b9e7ff;stroke:#08131f;stroke-width:4;paint-order:stroke;font-size:12px;font-weight:bold;pointer-events:none}
+.terminalLabel{fill:#e8f3ff;font-size:12px}
+.componentLabel{fill:#7fd3ff;font-size:12px}
 .leadShadow{stroke:rgba(0,0,0,.5);stroke-width:10;fill:none;pointer-events:none;stroke-linecap:round;stroke-linejoin:round}
 .redLead{stroke:#e11e2f;stroke-width:6;fill:none;pointer-events:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(0,0,0,.55))}
 .blackLead{stroke:#050505;stroke-width:6;fill:none;pointer-events:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(0,0,0,.65))}
@@ -75,6 +78,7 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 <div class="row">
 <button onclick="newCircuit()">New Circuit</button>
 <label>Fault:</label><select id="faultType"><option value="open">Open</option><option value="added">Added Resistance</option><option value="short">Short / Bypass</option></select>
+<label>Circuit:</label><select id="circuitType" onchange="newCircuit()"><option value="series">Series</option><option value="parallel">Parallel</option></select>
 <button id="powerBtn" onclick="togglePower()">Switch: OPEN</button>
 <button onclick="resetMeter()">Replace Meter</button><button onclick="revealAnswer()">Reveal Answer</button>
 </div>
@@ -114,13 +118,15 @@ What that tells me: ______"></textarea>
 </div>
 
 <script>
-let powerOn=false,meterMode='volts',meterBlown=false,redNode=0,blackNode=11,faultType='open',faultSegment='4-5';
-let nodeVoltages={},segmentData=[],totalR=0,currentA=0;
+let powerOn=false,circuitType='series',meterMode='volts',meterBlown=false,redNode=0,blackNode=11,faultType='open',faultSegment='4-5';
+let nodeVoltages={},segmentData=[],totalR=0,currentA=0,nodes={},baseSegments=[],groundNode=11;
 const SOURCE_V=24;
+const MIN_R=0.001;
 const COLORS={black:"#111",brown:"#6b3f1f",red:"#c22",orange:"#f58220",yellow:"#ffd21f",green:"#168a42",blue:"#2459d8",violet:"#7d3fb2",gray:"#888",white:"#f5f5f5",gold:"#c8a540"};
 const DIGITS=["black","brown","red","orange","yellow","green","blue","violet","gray","white"];
-const nodes={0:{x:210,y:270,label:"BAT+"},1:{x:305,y:270,label:"T1"},2:{x:405,y:270,label:"T2"},3:{x:500,y:270,label:"T3"},4:{x:590,y:270,label:"T4"},5:{x:680,y:270,label:"T5"},6:{x:770,y:270,label:"T6"},7:{x:860,y:270,label:"T7"},8:{x:950,y:270,label:"T8"},9:{x:1040,y:270,label:"T9"},10:{x:1125,y:270,label:"T10"},11:{x:1185,y:270,label:"GND"}};
-const baseSegments=[
+
+const SERIES_NODES={0:{x:210,y:270,label:"BAT+"},1:{x:305,y:270,label:"T1"},2:{x:405,y:270,label:"T2"},3:{x:500,y:270,label:"T3"},4:{x:590,y:270,label:"T4"},5:{x:680,y:270,label:"T5"},6:{x:770,y:270,label:"T6"},7:{x:860,y:270,label:"T7"},8:{x:950,y:270,label:"T8"},9:{x:1040,y:270,label:"T9"},10:{x:1125,y:270,label:"T10"},11:{x:1185,y:270,label:"GND"}};
+const SERIES_SEGMENTS=[
 {id:"0-1",type:"fuse",label:"F1",a:0,b:1,r:0},
 {id:"1-2",type:"powerSwitch",label:"SW1",a:1,b:2,r:0,noFault:true},
 {id:"2-3",type:"wire",label:"W1",a:2,b:3,r:0},
@@ -133,6 +139,36 @@ const baseSegments=[
 {id:"9-10",type:"resistor",label:"R4",a:9,b:10,r:3300},
 {id:"10-11",type:"wire",label:"W5",a:10,b:11,r:0}];
 
+const PARALLEL_NODES={0:{x:210,y:270,label:"BAT+"},1:{x:305,y:270,label:"T1"},2:{x:405,y:270,label:"T2"},3:{x:525,y:130,label:"T3",ldx:-28,ldy:-10,anchor:"end"},4:{x:760,y:130,label:"T4",ldx:28,ldy:-10,anchor:"start"},5:{x:525,y:225,label:"T5",ldx:-28,ldy:4,anchor:"end"},6:{x:760,y:225,label:"T6",ldx:28,ldy:4,anchor:"start"},7:{x:525,y:320,label:"T7",ldx:-28,ldy:4,anchor:"end"},8:{x:760,y:320,label:"T8",ldx:28,ldy:4,anchor:"start"},9:{x:525,y:415,label:"T9",ldx:-28,ldy:16,anchor:"end"},10:{x:760,y:415,label:"T10",ldx:28,ldy:16,anchor:"start"},11:{x:1185,y:270,label:"GND",ldx:0,ldy:44,anchor:"middle"}};
+const PARALLEL_SEGMENTS=[
+{id:"0-1",type:"fuse",label:"F1",a:0,b:1,r:0},
+{id:"1-2",type:"powerSwitch",label:"SW1",a:1,b:2,r:0,noFault:true},
+{id:"2-5",type:"wire",label:"W1",a:2,b:5,r:0},
+{id:"5-3",type:"wire",label:"W2",a:5,b:3,r:0},
+{id:"5-7",type:"wire",label:"W3",a:5,b:7,r:0},
+{id:"7-9",type:"wire",label:"W4",a:7,b:9,r:0},
+{id:"3-4",type:"resistor",label:"R1",a:3,b:4,r:1000},
+{id:"5-6",type:"resistor",label:"R2",a:5,b:6,r:2200},
+{id:"7-8",type:"resistor",label:"R3",a:7,b:8,r:4700},
+{id:"9-10",type:"resistor",label:"R4",a:9,b:10,r:3300},
+{id:"4-6",type:"wire",label:"W5",a:4,b:6,r:0},
+{id:"6-8",type:"wire",label:"W6",a:6,b:8,r:0},
+{id:"8-10",type:"wire",label:"W7",a:8,b:10,r:0},
+{id:"6-11",type:"wire",label:"W8",a:6,b:11,r:0}];
+
+function cloneNodes(src){return JSON.parse(JSON.stringify(src))}
+function setCircuitTemplate(){
+  circuitType=document.getElementById('circuitType')?.value||circuitType||'series';
+  if(circuitType==='parallel'){
+    nodes=cloneNodes(PARALLEL_NODES);
+    baseSegments=PARALLEL_SEGMENTS.map(s=>({...s}));
+  }else{
+    nodes=cloneNodes(SERIES_NODES);
+    baseSegments=SERIES_SEGMENTS.map(s=>({...s}));
+  }
+  groundNode=Number(Object.keys(nodes).find(id=>nodes[id].label==='GND'))||11;
+}
+
 function line(x1,y1,x2,y2){return `<line class="wire" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`}
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
 function round(n,d=2){let m=Math.pow(10,d);return Math.round(n*m)/m}
@@ -141,7 +177,9 @@ function resistorBands(value){let s=String(value),first=Number(s[0]),second=Numb
 function buildAnswerOptions(){let sel=document.getElementById('answerLocation');sel.innerHTML='<option value="">Choose...</option>';baseSegments.filter(s=>!s.noFault).forEach(s=>{sel.innerHTML+=`<option value="${s.id}">${nodes[s.a].label} and ${nodes[s.b].label}</option>`})}
 
 function newCircuit(){
-  faultType=document.getElementById('faultType').value; meterBlown=false; powerOn=false; meterMode='volts'; redNode=0; blackNode=11;
+  setCircuitTemplate();
+  buildAnswerOptions();
+  faultType=document.getElementById('faultType').value; meterBlown=false; powerOn=false; meterMode='volts'; redNode=0; blackNode=groundNode;
   document.getElementById('powerBtn').classList.remove('powerOn'); document.getElementById('powerBtn').textContent='Switch: OPEN'; document.getElementById('meterDisplay').classList.remove('blow');
   segmentData=baseSegments.map(s=>({...s,actualR:s.r,open:false,fault:false}));
   let candidates=segmentData.filter(s=>!s.noFault && (faultType==='open'||(faultType==='added'&&(s.type==='wire'||s.type==='resistor'))||(faultType==='short'&&s.type==='resistor')));
@@ -149,7 +187,7 @@ function newCircuit(){
   if(faultType==='open'){fault.open=true;fault.actualR=Infinity}
   if(faultType==='added'){fault.actualR=fault.type==='resistor'?fault.r*rand(2,4):rand(500,1500)}
   if(faultType==='short'){fault.actualR=.05}
-  solveSeries(); drawCircuit(); updateMeter(); document.getElementById('status').textContent='New circuit loaded.';
+  solveSeries(); drawCircuit(); updateMeter(); document.getElementById('status').textContent=`New ${circuitType} circuit loaded.`;
 }
 
 function applyPowerSwitchState(){
@@ -157,26 +195,142 @@ function applyPowerSwitchState(){
   if(sw){sw.open=!powerOn;sw.actualR=powerOn?0:Infinity;}
 }
 
-function solveSeries(){
-  applyPowerSwitchState();
-  nodeVoltages={}; let openIndex=segmentData.findIndex(s=>s.open);
-  if(openIndex>=0){
-    currentA=0; segmentData.forEach((s,i)=>{if(i<openIndex){nodeVoltages[s.a]=SOURCE_V;nodeVoltages[s.b]=SOURCE_V}else if(i===openIndex){nodeVoltages[s.a]=SOURCE_V;nodeVoltages[s.b]=0}else{nodeVoltages[s.a]=0;nodeVoltages[s.b]=0}});
-    nodeVoltages[0]=SOURCE_V; nodeVoltages[11]=0; totalR=Infinity; return;
+function activeResistance(s){
+  if(!s||s.open||!isFinite(s.actualR)) return Infinity;
+  return Math.max(Math.abs(s.actualR),MIN_R);
+}
+
+function solveLinear(A,b){
+  const n=A.length;
+  for(let i=0;i<n;i++){
+    let maxRow=i;
+    for(let r=i+1;r<n;r++){if(Math.abs(A[r][i])>Math.abs(A[maxRow][i]))maxRow=r;}
+    if(Math.abs(A[maxRow][i])<1e-12) return null;
+    if(maxRow!==i){[A[i],A[maxRow]]=[A[maxRow],A[i]];[b[i],b[maxRow]]=[b[maxRow],b[i]];}
+    const pivot=A[i][i];
+    for(let c=i;c<n;c++) A[i][c]/=pivot;
+    b[i]/=pivot;
+    for(let r=0;r<n;r++){
+      if(r===i) continue;
+      const factor=A[r][i];
+      if(Math.abs(factor)<1e-18) continue;
+      for(let c=i;c<n;c++) A[r][c]-=factor*A[i][c];
+      b[r]-=factor*b[i];
+    }
   }
-  totalR=segmentData.reduce((sum,s)=>sum+s.actualR,0); currentA=SOURCE_V/totalR; let v=SOURCE_V; nodeVoltages[0]=SOURCE_V;
-  segmentData.forEach(s=>{nodeVoltages[s.a]=v; v-=currentA*s.actualR; nodeVoltages[s.b]=v}); nodeVoltages[11]=0;
+  return b;
+}
+
+function solveSeries(){
+  // Name preserved so the rest of the trainer does not need architecture changes.
+  // This now solves either the original series layout or the new parallel layout.
+  applyPowerSwitchState();
+  nodeVoltages={};
+  const nodeIds=Object.keys(nodes).map(Number);
+  const fixed={0:SOURCE_V,[groundNode]:0};
+  nodeVoltages[0]=SOURCE_V;
+  nodeVoltages[groundNode]=0;
+
+  const unknown=nodeIds.filter(id=>fixed[id]===undefined);
+  const idx=new Map(unknown.map((id,i)=>[id,i]));
+  const A=unknown.map(()=>unknown.map(()=>0));
+  const b=unknown.map(()=>0);
+
+  function addToNode(n,other,g){
+    if(fixed[n]!==undefined) return;
+    const i=idx.get(n);
+    A[i][i]+=g;
+    if(fixed[other]!==undefined){
+      b[i]+=g*fixed[other];
+    }else{
+      A[i][idx.get(other)]-=g;
+    }
+  }
+
+  segmentData.forEach(s=>{
+    const r=activeResistance(s);
+    if(!isFinite(r)) return;
+    const g=1/r;
+    addToNode(s.a,s.b,g);
+    addToNode(s.b,s.a,g);
+  });
+
+  const solution=solveLinear(A,b);
+  if(solution){
+    unknown.forEach((id,i)=>nodeVoltages[id]=solution[i]);
+  }else{
+    // Fallback for any fully floating island: do not invent voltage.
+    unknown.forEach(id=>{if(nodeVoltages[id]===undefined)nodeVoltages[id]=0;});
+  }
+
+  currentA=0;
+  segmentData.forEach(s=>{
+    const r=activeResistance(s);
+    if(!isFinite(r)) return;
+    if(s.a===0) currentA+=(nodeVoltages[s.a]-nodeVoltages[s.b])/r;
+    if(s.b===0) currentA+=(nodeVoltages[s.b]-nodeVoltages[s.a])/r;
+  });
+  currentA=Math.max(0,currentA);
+  totalR=currentA>0?SOURCE_V/currentA:Infinity;
 }
 
 function drawCircuit(){
-  const svg=document.getElementById('schematic'); svg.innerHTML=svgDefs(); drawBattery(svg); drawAmmeter(svg); let y=270;
+  const svg=document.getElementById('schematic');
+  svg.innerHTML=svgDefs();
+  drawBattery(svg);
+  drawAmmeter(svg);
+  if(circuitType==='parallel') drawParallelCircuit(svg);
+  else drawSeriesCircuit(svg);
+  drawSvgMeter(svg);
+  drawLeads(svg);
+}
+
+function drawSeriesCircuit(svg){
+  let y=270;
   svg.innerHTML+=line(180,y,210,y); terminal(svg,0); drawFuse(svg,210,y,305,y,'F1'); terminal(svg,1);
   drawPowerSwitch(svg,305,y,405,y,'SW1'); terminal(svg,2);
   drawWireLabel(svg,405,y,500,y,'W1'); terminal(svg,3); drawResistor(svg,500,y,590,y,'R1',1000); terminal(svg,4);
   drawWireLabel(svg,590,y,680,y,'W2'); terminal(svg,5); drawResistor(svg,680,y,770,y,'R2',2200); terminal(svg,6);
   drawWireLabel(svg,770,y,860,y,'W3'); terminal(svg,7); drawResistor(svg,860,y,950,y,'R3',4700); terminal(svg,8);
   drawWireLabel(svg,950,y,1040,y,'W4'); terminal(svg,9); drawResistor(svg,1040,y,1125,y,'R4',3300);
-  terminal(svg,10); drawWireLabel(svg,1125,y,1185,y,'W5'); terminal(svg,11); drawGround(svg,1185,y); drawSvgMeter(svg); drawLeads(svg);
+  terminal(svg,10); drawWireLabel(svg,1125,y,1185,y,'W5'); terminal(svg,11); drawGround(svg,1185,y);
+}
+
+function drawParallelCircuit(svg){
+  let y=270;
+  svg.innerHTML+=line(180,y,210,y); terminal(svg,0); drawFuse(svg,210,y,305,y,'F1'); terminal(svg,1);
+  drawPowerSwitch(svg,305,y,405,y,'SW1'); terminal(svg,2);
+
+  drawWireLabel(svg,405,270,525,225,'W1',{x:465,y:232,anchor:'middle'});
+  terminal(svg,5);
+  drawWireLabel(svg,525,225,525,130,'W2',{x:493,y:178,anchor:'end'});
+  drawWireLabel(svg,525,225,525,320,'W3',{x:493,y:274,anchor:'end'});
+  drawWireLabel(svg,525,320,525,415,'W4',{x:493,y:370,anchor:'end'});
+
+  terminal(svg,3); terminal(svg,4);
+  drawResistor(svg,525,130,760,130,'R1',1000);
+
+  terminal(svg,6);
+  drawResistor(svg,525,225,760,225,'R2',2200);
+
+  terminal(svg,7); terminal(svg,8);
+  drawResistor(svg,525,320,760,320,'R3',4700);
+
+  terminal(svg,9); terminal(svg,10);
+  drawResistor(svg,525,415,760,415,'R4',3300);
+
+  drawWireLabel(svg,760,130,760,225,'W5',{x:792,y:178,anchor:'start'});
+  drawWireLabel(svg,760,225,760,320,'W6',{x:792,y:274,anchor:'start'});
+  drawWireLabel(svg,760,320,760,415,'W7',{x:792,y:370,anchor:'start'});
+  wirePath(svg,`M 760 225 L 900 225 L 900 270 L 1185 270`,'W8',1015,245);
+
+  terminal(svg,11);
+  drawGround(svg,1185,270);
+}
+
+function wirePath(svg,d,label,lx,ly){
+  svg.innerHTML+=`<path class="wire" d="${d}"></path>`;
+  labelText(svg,label,lx,ly,'middle','wireLabel');
 }
 
 
@@ -200,21 +354,43 @@ function svgDefs(){return `<defs>
 
 function drawBattery(svg){let y=270;svg.innerHTML+=line(40,y,75,y);svg.innerHTML+=line(75,y-20,75,y+20);svg.innerHTML+=line(95,y-35,95,y+35);svg.innerHTML+=line(115,y-20,115,y+20);svg.innerHTML+=line(135,y-35,135,y+35);svg.innerHTML+=line(135,y,177,y);svg.innerHTML+=`<text x="67" y="${y-45}" fill="#7fd3ff">−</text><text x="137" y="${y-45}" fill="#7fd3ff">+</text>`}
 function drawAmmeter(svg){let y=270;svg.innerHTML+=`<circle cx="205" cy="${y}" r="27" fill="#061522" stroke="#39ff9d" stroke-width="2"></circle><text x="205" y="${y-3}" fill="#39ff9d" text-anchor="middle" font-size="16">A</text><text x="205" y="${y+18}" fill="#39ff9d" text-anchor="middle" font-size="11">${powerOn?round(currentA,3):'0.00'}A</text>`;svg.innerHTML+=line(177,y,178,y)+line(232,y,230,y)}
-function drawFuse(svg,x1,y1,x2,y2,label){let mid=(x1+x2)/2;svg.innerHTML+=line(x1,y1,mid-28,y1)+`<rect class="fuse componentShadow" x="${mid-28}" y="${y1-13}" width="56" height="26" rx="6"></rect><text x="${mid}" y="${y1+5}" fill="#7fd3ff" text-anchor="middle">${label}</text>`+line(mid+28,y1,x2,y2)}
+function drawFuse(svg,x1,y1,x2,y2,label){let mid=(x1+x2)/2;svg.innerHTML+=line(x1,y1,mid-28,y1)+`<rect class="fuse componentShadow" x="${mid-28}" y="${y1-13}" width="56" height="26" rx="6"></rect><text class="componentLabel" x="${mid}" y="${y1+5}" text-anchor="middle">${label}</text>`+line(mid+28,y1,x2,y2)}
 function drawPowerSwitch(svg,x1,y1,x2,y2,label){
   const left=x1+24,right=x2-24,bladeEndX=powerOn?right:left+44,bladeEndY=powerOn?y1:y1-28;
+  const mid=(x1+x2)/2;
   svg.innerHTML+=line(x1,y1,left,y1)+line(right,y1,x2,y2);
-  svg.innerHTML+=`<g class="componentShadow">
+  svg.innerHTML+=`<g class="componentShadow" onclick="togglePower()" onkeydown="if(event.key==='Enter'||event.key===' '){togglePower()}" tabindex="0" role="button" aria-label="Open or close switch" style="cursor:pointer">
+    <rect x="${x1+6}" y="${y1-58}" width="${x2-x1-12}" height="74" rx="10" fill="transparent"></rect>
     <circle cx="${left}" cy="${y1}" r="6" fill="#08131f" stroke="#7fd3ff" stroke-width="3"></circle>
     <circle cx="${right}" cy="${y1}" r="6" fill="#08131f" stroke="#7fd3ff" stroke-width="3"></circle>
     <line x1="${left}" y1="${y1}" x2="${bladeEndX}" y2="${bladeEndY}" stroke="${powerOn?'#39ff9d':'#ffd166'}" stroke-width="5" stroke-linecap="round"></line>
-    <text x="${(x1+x2)/2}" y="${y1-45}" fill="#7fd3ff" text-anchor="middle" font-size="12">${label}</text>
-    <text x="${(x1+x2)/2}" y="${y1-30}" fill="${powerOn?'#39ff9d':'#ffd166'}" text-anchor="middle" font-size="10">${powerOn?'CLOSED':'OPEN'}</text>
+    <text x="${mid}" y="${y1-45}" fill="#7fd3ff" text-anchor="middle" font-size="12">${label}</text>
+    <text x="${mid}" y="${y1-30}" fill="${powerOn?'#39ff9d':'#ffd166'}" text-anchor="middle" font-size="10">${powerOn?'CLOSED':'OPEN'}</text>
+    <text x="${mid}" y="${y1+18}" fill="#78aaca" text-anchor="middle" font-size="9">CLICK</text>
   </g>`;
 }
-function drawWireLabel(svg,x1,y1,x2,y2,label){svg.innerHTML+=line(x1,y1,x2,y2)+`<text x="${(x1+x2)/2}" y="${y1-18}" fill="#7fd3ff" text-anchor="middle" font-size="12">${label}</text>`}
-function drawResistor(svg,x1,y1,x2,y2,label,value){let mid=(x1+x2)/2,w=66,h=26;svg.innerHTML+=`<line class="wire" x1="${x1}" y1="${y1}" x2="${mid-w/2}" y2="${y1}"></line><line class="wire" x1="${mid+w/2}" y1="${y1}" x2="${x2}" y2="${y2}"></line><rect class="resBody componentShadow" x="${mid-w/2}" y="${y1-h/2}" width="${w}" height="${h}" rx="12"></rect>`;resistorBands(value).forEach((b,i)=>svg.innerHTML+=`<rect class="band" x="${mid-21+i*13}" y="${y1-h/2}" width="8" height="${h}" fill="${COLORS[b]}"></rect>`);svg.innerHTML+=`<text x="${mid}" y="${y1-26}" fill="#7fd3ff" text-anchor="middle">${label}</text>`}
-function terminal(svg,id){let p=nodes[id];svg.innerHTML+=`<circle class="terminal" cx="${p.x}" cy="${p.y}" r="9" onclick="setLead('red',${id})" oncontextmenu="event.preventDefault();setLead('black',${id});return false;"></circle><text x="${p.x}" y="${p.y+30}" fill="#7fd3ff" text-anchor="middle" font-size="12">${p.label}</text>`}
+function labelText(svg,label,x,y,anchor='middle',cls='wireLabel'){
+  svg.innerHTML+=`<text class="${cls}" x="${x}" y="${y}" text-anchor="${anchor}">${label}</text>`;
+}
+function drawWireLabel(svg,x1,y1,x2,y2,label,opts={}){
+  svg.innerHTML+=line(x1,y1,x2,y2);
+  const midX=(x1+x2)/2, midY=(y1+y2)/2;
+  let lx=opts.x, ly=opts.y, anchor=opts.anchor||'middle';
+  if(lx===undefined||ly===undefined){
+    const dx=Math.abs(x2-x1), dy=Math.abs(y2-y1);
+    if(dy>dx){
+      const side=x1<650?-30:30;
+      lx=x1+side; ly=midY+4; anchor=side<0?'end':'start';
+    }else if(dx>dy){
+      lx=midX; ly=Math.min(y1,y2)-18;
+    }else{
+      lx=midX; ly=midY-20;
+    }
+  }
+  labelText(svg,label,lx,ly,anchor,'wireLabel');
+}
+function drawResistor(svg,x1,y1,x2,y2,label,value){let mid=(x1+x2)/2,w=66,h=26;svg.innerHTML+=`<line class="wire" x1="${x1}" y1="${y1}" x2="${mid-w/2}" y2="${y1}"></line><line class="wire" x1="${mid+w/2}" y1="${y1}" x2="${x2}" y2="${y2}"></line><rect class="resBody componentShadow" x="${mid-w/2}" y="${y1-h/2}" width="${w}" height="${h}" rx="12"></rect>`;resistorBands(value).forEach((b,i)=>svg.innerHTML+=`<rect class="band" x="${mid-21+i*13}" y="${y1-h/2}" width="8" height="${h}" fill="${COLORS[b]}"></rect>`);labelText(svg,label,mid,y1-26,'middle','componentLabel')}
+function terminal(svg,id){let p=nodes[id];let ldx=p.ldx??0,ldy=p.ldy??30,anchor=p.anchor??'middle';svg.innerHTML+=`<circle class="terminal" cx="${p.x}" cy="${p.y}" r="9" onclick="setLead('red',${id})" oncontextmenu="event.preventDefault();setLead('black',${id});return false;"></circle><text class="terminalLabel" x="${p.x+ldx}" y="${p.y+ldy}" text-anchor="${anchor}">${p.label}</text>`}
 function drawGround(svg,x,y){svg.innerHTML+=line(x,y,x,y+30)+line(x-20,y+30,x+20,y+30)+line(x-14,y+40,x+14,y+40)+line(x-8,y+50,x+8,y+50)}
 
 function drawSvgMeter(svg){
@@ -353,7 +529,61 @@ function updateMeter(){
 
   applyMeterDisplay(getMeterDisplayText());
 }
-function ohmsBetween(a,b){if(a===b)return 0;let seg=segmentData.find(s=>(s.a===a&&s.b===b)||(s.a===b&&s.b===a));if(seg){return seg.open?Infinity:seg.actualR}let lo=Math.min(a,b),hi=Math.max(a,b),sum=0;for(let n=lo;n<hi;n++){let s=segmentData.find(x=>x.a===n&&x.b===n+1);if(!s||s.open)return Infinity;sum+=s.actualR}return sum}
+function ohmsBetween(a,b){
+  if(a===b) return 0;
+
+  // Equivalent resistance from the meter's point of view.
+  // This keeps series readings simple, and it makes parallel readings realistic:
+  // measuring one branch in-circuit also includes the other parallel branches.
+  const graph=new Map();
+  Object.keys(nodes).map(Number).forEach(id=>graph.set(id,[]));
+  segmentData.forEach(s=>{
+    const r=activeResistance(s);
+    if(!isFinite(r)) return;
+    graph.get(s.a)?.push({to:s.b,r});
+    graph.get(s.b)?.push({to:s.a,r});
+  });
+
+  const visited=new Set([a]);
+  const stack=[a];
+  while(stack.length){
+    const n=stack.pop();
+    (graph.get(n)||[]).forEach(edge=>{
+      if(!visited.has(edge.to)){
+        visited.add(edge.to);
+        stack.push(edge.to);
+      }
+    });
+  }
+  if(!visited.has(b)) return Infinity;
+
+  const unknown=[...visited].filter(id=>id!==b);
+  const idx=new Map(unknown.map((id,i)=>[id,i]));
+  const A=unknown.map(()=>unknown.map(()=>0));
+  const I=unknown.map(()=>0);
+
+  if(idx.has(a)) I[idx.get(a)]=1;
+
+  segmentData.forEach(s=>{
+    const r=activeResistance(s);
+    if(!isFinite(r)||!visited.has(s.a)||!visited.has(s.b)) return;
+    const g=1/r;
+
+    function stamp(n,other){
+      if(n===b) return;
+      const i=idx.get(n);
+      A[i][i]+=g;
+      if(other!==b) A[i][idx.get(other)]-=g;
+    }
+
+    stamp(s.a,s.b);
+    stamp(s.b,s.a);
+  });
+
+  const solution=solveLinear(A,I);
+  if(!solution||!idx.has(a)) return Infinity;
+  return Math.max(0,solution[idx.get(a)]);
+}
 function checkAnswer(){let type=document.getElementById('answerFault').value,loc=document.getElementById('answerLocation').value;if(type===faultType&&loc===faultSegment)document.getElementById('status').innerHTML='<span class="good">Correct diagnosis!</span>';else document.getElementById('status').innerHTML='<span class="bad">Keep troubleshooting.</span>'}
 function revealAnswer(){let seg=baseSegments.find(s=>s.id===faultSegment);document.getElementById('status').innerHTML=`Answer: <b>${faultType.toUpperCase()}</b> between <b>${nodes[seg.a].label}</b> and <b>${nodes[seg.b].label}</b>`}
 function clearScratchPad(){
@@ -444,7 +674,7 @@ function copyScratchPad(){
   }
 }
 window.newCircuit=newCircuit;window.setLead=setLead;window.togglePower=togglePower;window.setMode=setMode;window.resetMeter=resetMeter;window.checkAnswer=checkAnswer;window.revealAnswer=revealAnswer;window.clearScratchPad=clearScratchPad;window.copyScratchPad=copyScratchPad;window.setPadTool=setPadTool;window.clearDrawing=clearDrawing;
-buildAnswerOptions();newCircuit();initDrawPad();
+newCircuit();initDrawPad();
 </script>
 </body>
 </html>
