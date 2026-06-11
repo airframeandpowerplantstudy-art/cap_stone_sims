@@ -14,10 +14,23 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 .scratchPad{display:flex;flex-direction:column;gap:10px;min-height:570px}
 .scratchPad h2{margin:0;color:#e8f3ff;font-size:20px}
 .scratchHelp{margin:0;color:#9fd8ff;font-size:13px;line-height:1.35}
-#studentNotes{flex:1;width:100%;min-height:390px;resize:vertical;box-sizing:border-box;border-radius:10px;border:1px solid #3ea6ff;background:#071827;color:#e8f3ff;padding:12px;font-family:Arial,sans-serif;font-size:15px;line-height:1.4;outline:none}
-#studentNotes:focus{border-color:#39ff9d;box-shadow:0 0 10px rgba(57,255,157,.25)}
+#studentNotes{width:100%;min-height:125px;resize:vertical;box-sizing:border-box;border-radius:0 0 10px 10px;border:1px solid #d4bc78;border-top:none;background:#fff7cf;color:#243044;padding:10px 12px;font-family:'Courier New',monospace;font-size:14px;line-height:1.4;outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+#studentNotes:focus{border-color:#c1973d;box-shadow:0 0 10px rgba(255,209,102,.28)}
+
+.clipboardSheet{position:relative;background:#6b4b2a;border-radius:14px;padding:18px 12px 12px;box-shadow:0 10px 18px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.12)}
+.clipboardClip{position:absolute;left:50%;top:-8px;transform:translateX(-50%);width:118px;height:30px;border-radius:0 0 18px 18px;background:linear-gradient(#d8dee4,#77828f);border:1px solid rgba(0,0,0,.45);box-shadow:0 3px 7px rgba(0,0,0,.35)}
+.clipboardClip:after{content:"";position:absolute;left:40px;top:7px;width:38px;height:10px;border-radius:8px;background:#59636f;box-shadow:inset 0 2px 4px rgba(0,0,0,.5)}
+.paperHeader{background:#fff7cf;color:#243044;border:1px solid #d4bc78;border-bottom:none;border-radius:10px 10px 0 0;padding:10px 12px;font-weight:bold;letter-spacing:.4px;font-size:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.paperDrawWrap{position:relative;height:315px;background:#fff7cf;border:1px solid #d4bc78;overflow:hidden;touch-action:none;background-image:linear-gradient(90deg,rgba(235,99,87,.35) 42px,transparent 43px),linear-gradient(rgba(70,120,180,.24) 1px,transparent 1px);background-size:100% 24px;background-position:0 9px;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+#drawPad{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;touch-action:none}
+.padTools{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.padTools button{font-size:12px;padding:7px 9px;margin:0;border-color:#d4bc78;background:#5b4124;color:#fff7cf}
+.padTools button.activeTool{background:#8f651f;border-color:#ffd166;box-shadow:0 0 9px rgba(255,209,102,.35)}
+.padTools label{font-size:12px;color:#fff7cf;margin-left:4px}
+.padTools input[type="range"]{width:86px;accent-color:#ffd166}
 .notesMini{font-size:12px;color:#78aaca;margin:0}
-@media(max-width:1050px){.workspace{grid-template-columns:1fr}.scratchPad{min-height:330px}#studentNotes{min-height:220px}}
+
+@media(max-width:1050px){.workspace{grid-template-columns:1fr}.scratchPad{min-height:330px}#studentNotes{min-height:120px}.paperDrawWrap{height:280px}}
 .wire{stroke:#7fd3ff;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px #7fd3ff)}
 .terminal{fill:white;stroke:#7fd3ff;stroke-width:3;cursor:pointer;transition:filter .12s ease,fill .12s ease}
 .terminal:hover{fill:#ffd166;filter:drop-shadow(0 0 7px #ffd166)}
@@ -77,51 +90,61 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
   <div class="panel circuitPanel"><svg id="schematic" viewBox="0 0 1220 570"></svg></div>
   <div class="panel scratchPad">
     <h2>Scratch Pad</h2>
-    <p class="scratchHelp">Use this space to track meter readings, suspected opens, added resistance, or bypasses while troubleshooting.</p>
-    <textarea id="studentNotes" placeholder="Example:
+    <p class="scratchHelp">Draw right on the paper or type notes below it. Use this for readings, arrows, circles, and suspected fault locations.</p>
+    <div class="clipboardSheet">
+      <div class="clipboardClip"></div>
+      <div class="paperHeader">A&amp;P TROUBLESHOOTING NOTES</div>
+      <div class="paperDrawWrap"><canvas id="drawPad"></canvas></div>
+      <textarea id="studentNotes" placeholder="Example:
 Red lead: T2
 Black lead: GND
 Reading: ______
 What that tells me: ______"></textarea>
-    <div class="row">
-      <button onclick="clearScratchPad()">Clear Notes</button>
-      <button onclick="copyScratchPad()">Copy Notes</button>
+      <div class="padTools">
+        <button id="penBtn" onclick="setPadTool('pen')" class="activeTool">Pen</button>
+        <button id="eraserBtn" onclick="setPadTool('eraser')">Eraser</button>
+        <label>Size</label><input id="penSize" type="range" min="2" max="22" value="4">
+        <button onclick="clearDrawing()">Clear Drawing</button>
+        <button onclick="clearScratchPad()">Clear All</button>
+        <button onclick="copyScratchPad()">Copy Typed Notes</button>
+      </div>
     </div>
-    <p class="notesMini" id="notesStatus">Notes stay on this page until cleared or refreshed.</p>
+    <p class="notesMini" id="notesStatus">Drawing and typed notes stay on this page until cleared or refreshed.</p>
   </div>
 </div>
 
 <script>
-let powerOn=false,meterMode='volts',meterBlown=false,redNode=0,blackNode=10,faultType='open',faultSegment='4-5';
+let powerOn=false,meterMode='volts',meterBlown=false,redNode=0,blackNode=11,faultType='open',faultSegment='4-5';
 let nodeVoltages={},segmentData=[],totalR=0,currentA=0;
 const SOURCE_V=24;
 const COLORS={black:"#111",brown:"#6b3f1f",red:"#c22",orange:"#f58220",yellow:"#ffd21f",green:"#168a42",blue:"#2459d8",violet:"#7d3fb2",gray:"#888",white:"#f5f5f5",gold:"#c8a540"};
 const DIGITS=["black","brown","red","orange","yellow","green","blue","violet","gray","white"];
-const nodes={0:{x:230,y:270,label:"BAT+"},1:{x:330,y:270,label:"T1"},2:{x:420,y:270,label:"T2"},3:{x:510,y:270,label:"T3"},4:{x:600,y:270,label:"T4"},5:{x:690,y:270,label:"T5"},6:{x:780,y:270,label:"T6"},7:{x:870,y:270,label:"T7"},8:{x:960,y:270,label:"T8"},9:{x:1060,y:270,label:"T9"},10:{x:1150,y:270,label:"GND"}};
+const nodes={0:{x:210,y:270,label:"BAT+"},1:{x:305,y:270,label:"T1"},2:{x:405,y:270,label:"T2"},3:{x:500,y:270,label:"T3"},4:{x:590,y:270,label:"T4"},5:{x:680,y:270,label:"T5"},6:{x:770,y:270,label:"T6"},7:{x:860,y:270,label:"T7"},8:{x:950,y:270,label:"T8"},9:{x:1040,y:270,label:"T9"},10:{x:1125,y:270,label:"T10"},11:{x:1185,y:270,label:"GND"}};
 const baseSegments=[
 {id:"0-1",type:"fuse",label:"F1",a:0,b:1,r:0},
-{id:"1-2",type:"wire",label:"W1",a:1,b:2,r:0},
-{id:"2-3",type:"resistor",label:"R1",a:2,b:3,r:1000},
-{id:"3-4",type:"wire",label:"W2",a:3,b:4,r:0},
-{id:"4-5",type:"resistor",label:"R2",a:4,b:5,r:2200},
-{id:"5-6",type:"wire",label:"W3",a:5,b:6,r:0},
-{id:"6-7",type:"resistor",label:"R3",a:6,b:7,r:4700},
-{id:"7-8",type:"wire",label:"W4",a:7,b:8,r:0},
-{id:"8-9",type:"resistor",label:"R4",a:8,b:9,r:3300},
-{id:"9-10",type:"wire",label:"W5",a:9,b:10,r:0}];
+{id:"1-2",type:"powerSwitch",label:"SW1",a:1,b:2,r:0,noFault:true},
+{id:"2-3",type:"wire",label:"W1",a:2,b:3,r:0},
+{id:"3-4",type:"resistor",label:"R1",a:3,b:4,r:1000},
+{id:"4-5",type:"wire",label:"W2",a:4,b:5,r:0},
+{id:"5-6",type:"resistor",label:"R2",a:5,b:6,r:2200},
+{id:"6-7",type:"wire",label:"W3",a:6,b:7,r:0},
+{id:"7-8",type:"resistor",label:"R3",a:7,b:8,r:4700},
+{id:"8-9",type:"wire",label:"W4",a:8,b:9,r:0},
+{id:"9-10",type:"resistor",label:"R4",a:9,b:10,r:3300},
+{id:"10-11",type:"wire",label:"W5",a:10,b:11,r:0}];
 
 function line(x1,y1,x2,y2){return `<line class="wire" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`}
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
 function round(n,d=2){let m=Math.pow(10,d);return Math.round(n*m)/m}
 function resistorBands(value){let s=String(value),first=Number(s[0]),second=Number(s[1]),mult=s.length-2;return [DIGITS[first],DIGITS[second],DIGITS[mult],"gold"]}
 
-function buildAnswerOptions(){let sel=document.getElementById('answerLocation');sel.innerHTML='<option value="">Choose...</option>';baseSegments.forEach(s=>{sel.innerHTML+=`<option value="${s.id}">${nodes[s.a].label} and ${nodes[s.b].label}</option>`})}
+function buildAnswerOptions(){let sel=document.getElementById('answerLocation');sel.innerHTML='<option value="">Choose...</option>';baseSegments.filter(s=>!s.noFault).forEach(s=>{sel.innerHTML+=`<option value="${s.id}">${nodes[s.a].label} and ${nodes[s.b].label}</option>`})}
 
 function newCircuit(){
-  faultType=document.getElementById('faultType').value; meterBlown=false; powerOn=false; meterMode='volts'; redNode=0; blackNode=10;
+  faultType=document.getElementById('faultType').value; meterBlown=false; powerOn=false; meterMode='volts'; redNode=0; blackNode=11;
   document.getElementById('powerBtn').classList.remove('powerOn'); document.getElementById('powerBtn').textContent='Power: OFF'; document.getElementById('meterDisplay').classList.remove('blow');
   segmentData=baseSegments.map(s=>({...s,actualR:s.r,open:false,fault:false}));
-  let candidates=segmentData.filter(s=>faultType==='open'||(faultType==='added'&&(s.type==='wire'||s.type==='resistor'))||(faultType==='short'&&s.type==='resistor'));
+  let candidates=segmentData.filter(s=>!s.noFault && (faultType==='open'||(faultType==='added'&&(s.type==='wire'||s.type==='resistor'))||(faultType==='short'&&s.type==='resistor')));
   let fault=candidates[rand(0,candidates.length-1)]; fault.fault=true; faultSegment=fault.id;
   if(faultType==='open'){fault.open=true;fault.actualR=Infinity}
   if(faultType==='added'){fault.actualR=fault.type==='resistor'?fault.r*rand(2,4):rand(500,1500)}
@@ -129,24 +152,31 @@ function newCircuit(){
   solveSeries(); drawCircuit(); updateMeter(); document.getElementById('status').textContent='New circuit loaded.';
 }
 
+function applyPowerSwitchState(){
+  const sw=segmentData.find(s=>s.type==='powerSwitch');
+  if(sw){sw.open=!powerOn;sw.actualR=powerOn?0:Infinity;}
+}
+
 function solveSeries(){
+  applyPowerSwitchState();
   nodeVoltages={}; let openIndex=segmentData.findIndex(s=>s.open);
   if(openIndex>=0){
     currentA=0; segmentData.forEach((s,i)=>{if(i<openIndex){nodeVoltages[s.a]=SOURCE_V;nodeVoltages[s.b]=SOURCE_V}else if(i===openIndex){nodeVoltages[s.a]=SOURCE_V;nodeVoltages[s.b]=0}else{nodeVoltages[s.a]=0;nodeVoltages[s.b]=0}});
-    nodeVoltages[0]=SOURCE_V; nodeVoltages[10]=0; totalR=Infinity; return;
+    nodeVoltages[0]=SOURCE_V; nodeVoltages[11]=0; totalR=Infinity; return;
   }
   totalR=segmentData.reduce((sum,s)=>sum+s.actualR,0); currentA=SOURCE_V/totalR; let v=SOURCE_V; nodeVoltages[0]=SOURCE_V;
-  segmentData.forEach(s=>{nodeVoltages[s.a]=v; v-=currentA*s.actualR; nodeVoltages[s.b]=v}); nodeVoltages[10]=0;
+  segmentData.forEach(s=>{nodeVoltages[s.a]=v; v-=currentA*s.actualR; nodeVoltages[s.b]=v}); nodeVoltages[11]=0;
 }
 
 function drawCircuit(){
   const svg=document.getElementById('schematic'); svg.innerHTML=svgDefs(); drawBattery(svg); drawAmmeter(svg); let y=270;
-  svg.innerHTML+=line(180,y,230,y); terminal(svg,0); drawFuse(svg,230,y,330,y,'F1'); terminal(svg,1);
-  drawWireLabel(svg,330,y,420,y,'W1'); terminal(svg,2); drawResistor(svg,420,y,510,y,'R1',1000); terminal(svg,3);
-  drawWireLabel(svg,510,y,600,y,'W2'); terminal(svg,4); drawResistor(svg,600,y,690,y,'R2',2200); terminal(svg,5);
-  drawWireLabel(svg,690,y,780,y,'W3'); terminal(svg,6); drawResistor(svg,780,y,870,y,'R3',4700); terminal(svg,7);
-  drawWireLabel(svg,870,y,960,y,'W4'); terminal(svg,8); drawResistor(svg,960,y,1060,y,'R4',3300);
-  terminal(svg,9); drawWireLabel(svg,1060,y,1150,y,'W5'); terminal(svg,10); drawGround(svg,1150,y); drawSvgMeter(svg); drawLeads(svg);
+  svg.innerHTML+=line(180,y,210,y); terminal(svg,0); drawFuse(svg,210,y,305,y,'F1'); terminal(svg,1);
+  drawPowerSwitch(svg,305,y,405,y,'SW1'); terminal(svg,2);
+  drawWireLabel(svg,405,y,500,y,'W1'); terminal(svg,3); drawResistor(svg,500,y,590,y,'R1',1000); terminal(svg,4);
+  drawWireLabel(svg,590,y,680,y,'W2'); terminal(svg,5); drawResistor(svg,680,y,770,y,'R2',2200); terminal(svg,6);
+  drawWireLabel(svg,770,y,860,y,'W3'); terminal(svg,7); drawResistor(svg,860,y,950,y,'R3',4700); terminal(svg,8);
+  drawWireLabel(svg,950,y,1040,y,'W4'); terminal(svg,9); drawResistor(svg,1040,y,1125,y,'R4',3300);
+  terminal(svg,10); drawWireLabel(svg,1125,y,1185,y,'W5'); terminal(svg,11); drawGround(svg,1185,y); drawSvgMeter(svg); drawLeads(svg);
 }
 
 
@@ -171,6 +201,17 @@ function svgDefs(){return `<defs>
 function drawBattery(svg){let y=270;svg.innerHTML+=line(40,y,75,y);svg.innerHTML+=line(75,y-20,75,y+20);svg.innerHTML+=line(95,y-35,95,y+35);svg.innerHTML+=line(115,y-20,115,y+20);svg.innerHTML+=line(135,y-35,135,y+35);svg.innerHTML+=line(135,y,177,y);svg.innerHTML+=`<text x="67" y="${y-45}" fill="#7fd3ff">−</text><text x="137" y="${y-45}" fill="#7fd3ff">+</text>`}
 function drawAmmeter(svg){let y=270;svg.innerHTML+=`<circle cx="205" cy="${y}" r="27" fill="#061522" stroke="#39ff9d" stroke-width="2"></circle><text x="205" y="${y-3}" fill="#39ff9d" text-anchor="middle" font-size="16">A</text><text x="205" y="${y+18}" fill="#39ff9d" text-anchor="middle" font-size="11">${powerOn?round(currentA,3):'0.00'}A</text>`;svg.innerHTML+=line(177,y,178,y)+line(232,y,230,y)}
 function drawFuse(svg,x1,y1,x2,y2,label){let mid=(x1+x2)/2;svg.innerHTML+=line(x1,y1,mid-28,y1)+`<rect class="fuse componentShadow" x="${mid-28}" y="${y1-13}" width="56" height="26" rx="6"></rect><text x="${mid}" y="${y1+5}" fill="#7fd3ff" text-anchor="middle">${label}</text>`+line(mid+28,y1,x2,y2)}
+function drawPowerSwitch(svg,x1,y1,x2,y2,label){
+  const left=x1+24,right=x2-24,bladeEndX=powerOn?right:left+44,bladeEndY=powerOn?y1:y1-28;
+  svg.innerHTML+=line(x1,y1,left,y1)+line(right,y1,x2,y2);
+  svg.innerHTML+=`<g class="componentShadow">
+    <circle cx="${left}" cy="${y1}" r="6" fill="#08131f" stroke="#7fd3ff" stroke-width="3"></circle>
+    <circle cx="${right}" cy="${y1}" r="6" fill="#08131f" stroke="#7fd3ff" stroke-width="3"></circle>
+    <line x1="${left}" y1="${y1}" x2="${bladeEndX}" y2="${bladeEndY}" stroke="${powerOn?'#39ff9d':'#ffd166'}" stroke-width="5" stroke-linecap="round"></line>
+    <text x="${(x1+x2)/2}" y="${y1-45}" fill="#7fd3ff" text-anchor="middle" font-size="12">${label}</text>
+    <text x="${(x1+x2)/2}" y="${y1-30}" fill="${powerOn?'#39ff9d':'#ffd166'}" text-anchor="middle" font-size="10">${powerOn?'CLOSED':'OPEN'}</text>
+  </g>`;
+}
 function drawWireLabel(svg,x1,y1,x2,y2,label){svg.innerHTML+=line(x1,y1,x2,y2)+`<text x="${(x1+x2)/2}" y="${y1-18}" fill="#7fd3ff" text-anchor="middle" font-size="12">${label}</text>`}
 function drawResistor(svg,x1,y1,x2,y2,label,value){let mid=(x1+x2)/2,w=66,h=26;svg.innerHTML+=`<line class="wire" x1="${x1}" y1="${y1}" x2="${mid-w/2}" y2="${y1}"></line><line class="wire" x1="${mid+w/2}" y1="${y1}" x2="${x2}" y2="${y2}"></line><rect class="resBody componentShadow" x="${mid-w/2}" y="${y1-h/2}" width="${w}" height="${h}" rx="12"></rect>`;resistorBands(value).forEach((b,i)=>svg.innerHTML+=`<rect class="band" x="${mid-21+i*13}" y="${y1-h/2}" width="8" height="${h}" fill="${COLORS[b]}"></rect>`);svg.innerHTML+=`<text x="${mid}" y="${y1-26}" fill="#7fd3ff" text-anchor="middle">${label}</text>`}
 function terminal(svg,id){let p=nodes[id];svg.innerHTML+=`<circle class="terminal" cx="${p.x}" cy="${p.y}" r="9" onclick="setLead('red',${id})" oncontextmenu="event.preventDefault();setLead('black',${id});return false;"></circle><text x="${p.x}" y="${p.y+30}" fill="#7fd3ff" text-anchor="middle" font-size="12">${p.label}</text>`}
@@ -245,7 +286,7 @@ function drawLeads(svg){
 }
 
 function setLead(color,node){node=Number(node); if(color==='red')redNode=node; else blackNode=node; drawCircuit(); updateMeter()}
-function togglePower(){powerOn=!powerOn;let btn=document.getElementById('powerBtn');btn.textContent=powerOn?'Power: ON':'Power: OFF';btn.classList.toggle('powerOn',powerOn);drawCircuit();updateMeter()}
+function togglePower(){powerOn=!powerOn;let btn=document.getElementById('powerBtn');btn.textContent=powerOn?'Power: ON':'Power: OFF';btn.classList.toggle('powerOn',powerOn);solveSeries();drawCircuit();updateMeter()}
 function setMode(mode){if(mode!=='volts'&&mode!=='ohms')return;meterMode=mode;drawCircuit();updateMeter()}
 function resetMeter(){meterBlown=false;const d=document.getElementById('meterDisplay');if(d)d.classList.remove('blow');drawCircuit();updateMeter()}
 
@@ -318,7 +359,76 @@ function clearScratchPad(){
   const notes=document.getElementById('studentNotes');
   const status=document.getElementById('notesStatus');
   if(notes) notes.value='';
-  if(status) status.textContent='Notes cleared.';
+  clearDrawing(false);
+  if(status) status.textContent='Scratch pad cleared.';
+}
+
+let padTool='pen', drawing=false, lastPt=null, drawCtx=null;
+function resizeDrawPad(){
+  const canvas=document.getElementById('drawPad');
+  if(!canvas) return;
+  const old=document.createElement('canvas');
+  old.width=canvas.width; old.height=canvas.height;
+  const oldCtx=old.getContext('2d');
+  if(canvas.width&&canvas.height) oldCtx.drawImage(canvas,0,0);
+  const rect=canvas.parentElement.getBoundingClientRect();
+  const ratio=window.devicePixelRatio||1;
+  canvas.width=Math.max(1,Math.floor(rect.width*ratio));
+  canvas.height=Math.max(1,Math.floor(rect.height*ratio));
+  canvas.style.width=rect.width+'px'; canvas.style.height=rect.height+'px';
+  drawCtx=canvas.getContext('2d');
+  drawCtx.setTransform(ratio,0,0,ratio,0,0);
+  drawCtx.lineCap='round'; drawCtx.lineJoin='round';
+  if(old.width&&old.height) drawCtx.drawImage(old,0,0,old.width/ratio,old.height/ratio,0,0,rect.width,rect.height);
+}
+function getPadPoint(e){
+  const canvas=document.getElementById('drawPad');
+  const rect=canvas.getBoundingClientRect();
+  const p=e.touches?e.touches[0]:e;
+  return {x:p.clientX-rect.left,y:p.clientY-rect.top};
+}
+function setPadTool(tool){
+  padTool=tool;
+  const pen=document.getElementById('penBtn'), eraser=document.getElementById('eraserBtn');
+  if(pen) pen.classList.toggle('activeTool',tool==='pen');
+  if(eraser) eraser.classList.toggle('activeTool',tool==='eraser');
+}
+function beginDraw(e){e.preventDefault();drawing=true;lastPt=getPadPoint(e);drawDot(lastPt);}
+function moveDraw(e){
+  if(!drawing||!drawCtx) return;
+  e.preventDefault();
+  const pt=getPadPoint(e);
+  drawCtx.globalCompositeOperation=padTool==='eraser'?'destination-out':'source-over';
+  drawCtx.strokeStyle=padTool==='eraser'?'rgba(0,0,0,1)':'#243044';
+  drawCtx.lineWidth=Number(document.getElementById('penSize')?.value||4);
+  if(padTool==='eraser') drawCtx.lineWidth=Math.max(12,drawCtx.lineWidth*1.8);
+  drawCtx.beginPath();drawCtx.moveTo(lastPt.x,lastPt.y);drawCtx.lineTo(pt.x,pt.y);drawCtx.stroke();
+  lastPt=pt;
+}
+function endDraw(){drawing=false;lastPt=null;if(drawCtx) drawCtx.globalCompositeOperation='source-over';}
+function drawDot(pt){
+  if(!drawCtx) return;
+  drawCtx.globalCompositeOperation=padTool==='eraser'?'destination-out':'source-over';
+  drawCtx.fillStyle='#243044';
+  const size=Number(document.getElementById('penSize')?.value||4);
+  const r=padTool==='eraser'?Math.max(7,size):size/2;
+  drawCtx.beginPath();drawCtx.arc(pt.x,pt.y,r,0,Math.PI*2);drawCtx.fill();
+}
+function clearDrawing(showStatus=true){
+  const canvas=document.getElementById('drawPad');
+  if(canvas&&drawCtx) drawCtx.clearRect(0,0,canvas.width,canvas.height);
+  const status=document.getElementById('notesStatus');
+  if(showStatus&&status) status.textContent='Drawing cleared.';
+}
+function initDrawPad(){
+  const canvas=document.getElementById('drawPad');
+  if(!canvas) return;
+  resizeDrawPad();
+  canvas.addEventListener('mousedown',beginDraw); canvas.addEventListener('mousemove',moveDraw);
+  window.addEventListener('mouseup',endDraw);
+  canvas.addEventListener('touchstart',beginDraw,{passive:false}); canvas.addEventListener('touchmove',moveDraw,{passive:false});
+  window.addEventListener('touchend',endDraw);
+  window.addEventListener('resize',resizeDrawPad);
 }
 function copyScratchPad(){
   const notes=document.getElementById('studentNotes');
@@ -332,8 +442,8 @@ function copyScratchPad(){
     if(status) status.textContent='Copy did not work in this browser. Select and copy manually.';
   }
 }
-window.newCircuit=newCircuit;window.setLead=setLead;window.togglePower=togglePower;window.setMode=setMode;window.resetMeter=resetMeter;window.checkAnswer=checkAnswer;window.revealAnswer=revealAnswer;window.clearScratchPad=clearScratchPad;window.copyScratchPad=copyScratchPad;
-buildAnswerOptions();newCircuit();
+window.newCircuit=newCircuit;window.setLead=setLead;window.togglePower=togglePower;window.setMode=setMode;window.resetMeter=resetMeter;window.checkAnswer=checkAnswer;window.revealAnswer=revealAnswer;window.clearScratchPad=clearScratchPad;window.copyScratchPad=copyScratchPad;window.setPadTool=setPadTool;window.clearDrawing=clearDrawing;
+buildAnswerOptions();newCircuit();initDrawPad();
 </script>
 </body>
 </html>
