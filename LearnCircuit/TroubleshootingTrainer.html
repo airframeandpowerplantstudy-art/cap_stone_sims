@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DO WHAT I TELL YOU TO DO!</title>
+<title>Troubleshooting Trainer</title>
 <style>
 body{background:#061522;color:#e8f3ff;font-family:Arial,sans-serif;margin:0;padding:20px}
 .panel{background:#0b2236;border:1px solid #1d4d73;border-radius:12px;padding:16px;margin-bottom:16px}
@@ -14,17 +14,26 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 .redLead{stroke:#ff4a4a;stroke-width:5;fill:none;pointer-events:none;filter:drop-shadow(0 0 7px #ff4a4a)}
 .blackLead{stroke:#050505;stroke-width:5;fill:none;pointer-events:none;filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px #7fd3ff)}
 .tipRed{fill:#ff4a4a;stroke:#fff;stroke-width:2}.tipBlack{fill:#050505;stroke:#fff;stroke-width:2}
-.display{background:#b8d6c6;color:#061522;font-size:28px;font-family:Courier New;padding:14px;border-radius:8px;margin-top:12px}
+.display{display:none}
 .display.blow{background:#331015;color:#ff5a5a}
 .resBody{fill:#d7b075;stroke:#2b1b10;stroke-width:2}.band{stroke:#111;stroke-width:.5}
 .fuse{fill:#162f44;stroke:#7fd3ff;stroke-width:2}.note{color:#9fd8ff;line-height:1.35}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.good{color:#39ff9d}.bad{color:#ff5a5a}
+.meterBody{fill:#1a1d22;stroke:#7fd3ff;stroke-width:2;filter:drop-shadow(0 0 8px rgba(127,211,255,.35))}
+.meterScreen{fill:#b8d6c6;stroke:#061522;stroke-width:3}
+.meterScreen.blow{fill:#331015;stroke:#ff5a5a}
+.meterText{fill:#061522;font-family:Courier New, monospace;font-size:22px;font-weight:bold}
+.meterText.blow{fill:#ff5a5a}
+.meterLabel{fill:#9fd8ff;font-size:12px}
+.meterDial{fill:#2a2f38;stroke:#0b1018;stroke-width:3}
+.meterPortRed{fill:#ff4a4a;stroke:#fff;stroke-width:2}
+.meterPortBlack{fill:#050505;stroke:#fff;stroke-width:2}
 </style>
 </head>
 <body>
 <div class="panel">
-<h1>Troubleshooting Trainer — Cleanup Patch 2</h1>
-<p class="note">Left-click terminals for red lead. Right-click terminals for black lead. This version focuses on the series fault engine.</p>
+<h1>Troubleshooting Trainer</h1>
+<p class="note">Left-click terminals for red lead. Right-click terminals for black lead.</p>
 <div class="row">
 <button onclick="newCircuit()">New Circuit</button>
 <label>Fault:</label><select id="faultType"><option value="open">Open</option><option value="added">Added Resistance</option><option value="short">Short / Bypass</option></select>
@@ -96,7 +105,7 @@ function drawCircuit(){
   drawWireLabel(svg,510,y,600,y,'W2'); terminal(svg,4); drawResistor(svg,600,y,690,y,'R2',2200); terminal(svg,5);
   drawWireLabel(svg,690,y,780,y,'W3'); terminal(svg,6); drawResistor(svg,780,y,870,y,'R3',4700); terminal(svg,7);
   drawWireLabel(svg,870,y,960,y,'W4'); terminal(svg,8); drawResistor(svg,960,y,1060,y,'R4',3300);
-  terminal(svg,9); drawWireLabel(svg,1060,y,1150,y,'W5'); terminal(svg,10); drawGround(svg,1150,y); drawLeads(svg);
+  terminal(svg,9); drawWireLabel(svg,1060,y,1150,y,'W5'); terminal(svg,10); drawGround(svg,1150,y); drawSvgMeter(svg); drawLeads(svg);
 }
 
 function drawBattery(svg){let y=270;svg.innerHTML+=line(40,y,75,y);svg.innerHTML+=line(75,y-20,75,y+20);svg.innerHTML+=line(95,y-35,95,y+35);svg.innerHTML+=line(115,y-20,115,y+20);svg.innerHTML+=line(135,y-35,135,y+35);svg.innerHTML+=line(135,y,177,y);svg.innerHTML+=`<text x="67" y="${y-45}" fill="#7fd3ff">−</text><text x="137" y="${y-45}" fill="#7fd3ff">+</text>`}
@@ -106,19 +115,100 @@ function drawWireLabel(svg,x1,y1,x2,y2,label){svg.innerHTML+=line(x1,y1,x2,y2)+`
 function drawResistor(svg,x1,y1,x2,y2,label,value){let mid=(x1+x2)/2,w=66,h=26;svg.innerHTML+=`<line class="wire" x1="${x1}" y1="${y1}" x2="${mid-w/2}" y2="${y1}"></line><line class="wire" x1="${mid+w/2}" y1="${y1}" x2="${x2}" y2="${y2}"></line><rect class="resBody" x="${mid-w/2}" y="${y1-h/2}" width="${w}" height="${h}" rx="12"></rect>`;resistorBands(value).forEach((b,i)=>svg.innerHTML+=`<rect class="band" x="${mid-21+i*13}" y="${y1-h/2}" width="8" height="${h}" fill="${COLORS[b]}"></rect>`);svg.innerHTML+=`<text x="${mid}" y="${y1-26}" fill="#7fd3ff" text-anchor="middle">${label}</text>`}
 function terminal(svg,id){let p=nodes[id];svg.innerHTML+=`<circle class="terminal" cx="${p.x}" cy="${p.y}" r="9" onclick="setLead('red',${id})" oncontextmenu="event.preventDefault();setLead('black',${id});return false;"></circle><text x="${p.x}" y="${p.y+30}" fill="#7fd3ff" text-anchor="middle" font-size="12">${p.label}</text>`}
 function drawGround(svg,x,y){svg.innerHTML+=line(x,y,x,y+30)+line(x-20,y+30,x+20,y+30)+line(x-14,y+40,x+14,y+40)+line(x-8,y+50,x+8,y+50)}
-function drawLeads(svg){let r=nodes[redNode],b=nodes[blackNode];svg.innerHTML+=`<path class="redLead" d="M 100 525 C 180 500, ${r.x-40} ${r.y+70}, ${r.x} ${r.y}"></path><circle class="tipRed" cx="${r.x}" cy="${r.y}" r="6"></circle>`;svg.innerHTML+=`<path class="blackLead" d="M 220 525 C 300 500, ${b.x-40} ${b.y+70}, ${b.x} ${b.y}"></path><circle class="tipBlack" cx="${b.x}" cy="${b.y}" r="6"></circle>`}
+
+function drawSvgMeter(svg){
+  const x=45, y=385, w=250, h=160;
+  const screenClass = meterBlown ? "meterScreen blow" : "meterScreen";
+  const textClass = meterBlown ? "meterText blow" : "meterText";
+  const displayText = getMeterDisplayText();
+
+  svg.innerHTML += `<g id="svgMeter">
+    <rect class="meterBody" x="${x}" y="${y}" width="${w}" height="${h}" rx="18"></rect>
+    <rect class="${screenClass}" id="svgMeterScreen" x="${x+28}" y="${y+20}" width="${w-56}" height="44" rx="6"></rect>
+    <text class="${textClass}" id="svgMeterDisplay" x="${x+w-40}" y="${y+50}" text-anchor="end">${displayText}</text>
+
+    <circle class="meterDial" cx="${x+w/2}" cy="${y+98}" r="31"></circle>
+    <line x1="${x+w/2}" y1="${y+98}" x2="${x+w/2+18}" y2="${y+80}" stroke="#9fd8ff" stroke-width="4" stroke-linecap="round"></line>
+
+    <text class="meterLabel" x="${x+42}" y="${y+84}">V</text>
+    <text class="meterLabel" x="${x+190}" y="${y+84}">Ω</text>
+    <text class="meterLabel" id="svgMeterMode" x="${x+w/2}" y="${y+142}" text-anchor="middle">${meterMode.toUpperCase()}</text>
+
+    <circle class="meterPortRed" cx="110" cy="525" r="9"></circle>
+    <circle class="meterPortBlack" cx="220" cy="525" r="9"></circle>
+    <text class="meterLabel" x="110" y="512" text-anchor="middle">RED</text>
+    <text class="meterLabel" x="220" y="512" text-anchor="middle">COM</text>
+  </g>`;
+}
+
+function drawLeads(svg){let r=nodes[redNode],b=nodes[blackNode];svg.innerHTML+=`<path class="redLead" d="M 110 525 C 180 500, ${r.x-40} ${r.y+70}, ${r.x} ${r.y}"></path><circle class="tipRed" cx="${r.x}" cy="${r.y}" r="6"></circle>`;svg.innerHTML+=`<path class="blackLead" d="M 220 525 C 300 500, ${b.x-40} ${b.y+70}, ${b.x} ${b.y}"></path><circle class="tipBlack" cx="${b.x}" cy="${b.y}" r="6"></circle>`}
 
 function setLead(color,node){node=Number(node); if(color==='red')redNode=node; else blackNode=node; drawCircuit(); updateMeter()}
 function togglePower(){powerOn=!powerOn;let btn=document.getElementById('powerBtn');btn.textContent=powerOn?'Power: ON':'Power: OFF';btn.classList.toggle('powerOn',powerOn);drawCircuit();updateMeter()}
-function setMode(mode){meterMode=mode;updateMeter()}
-function resetMeter(){meterBlown=false;document.getElementById('meterDisplay').classList.remove('blow');updateMeter()}
+function setMode(mode){meterMode=mode;drawCircuit();updateMeter()}
+function resetMeter(){meterBlown=false;const d=document.getElementById('meterDisplay');if(d)d.classList.remove('blow');drawCircuit();updateMeter()}
+
+
+function getMeterDisplayText(){
+  if(meterBlown) return "BLOWN";
+
+  if(meterMode==='ohms' && powerOn){
+    return "BLOWN";
+  }
+
+  if(meterMode==='volts'){
+    if(!powerOn) return "0.00 V";
+    let v=Math.abs((nodeVoltages[redNode]??0)-(nodeVoltages[blackNode]??0));
+    return round(v,2).toFixed(2)+' V';
+  }
+
+  if(meterMode==='ohms'){
+    let r=ohmsBetween(redNode,blackNode);
+    return isFinite(r)?round(r,1)+' Ω':'OL';
+  }
+
+  return "0.00";
+}
+
+function applyMeterDisplay(text){
+  const oldDisplay=document.getElementById('meterDisplay');
+  if(oldDisplay){
+    oldDisplay.textContent=text;
+    oldDisplay.classList.toggle('blow', meterBlown);
+  }
+
+  const svgText=document.getElementById('svgMeterDisplay');
+  if(svgText){
+    svgText.textContent=text;
+    svgText.setAttribute('class', meterBlown ? 'meterText blow' : 'meterText');
+  }
+
+  const svgScreen=document.getElementById('svgMeterScreen');
+  if(svgScreen){
+    svgScreen.setAttribute('class', meterBlown ? 'meterScreen blow' : 'meterScreen');
+  }
+
+  const svgMode=document.getElementById('svgMeterMode');
+  if(svgMode){
+    svgMode.textContent=meterMode.toUpperCase();
+  }
+}
 
 function updateMeter(){
-  let display=document.getElementById('meterDisplay');
-  if(meterBlown){display.textContent='BLOWN';return}
-  if(meterMode==='ohms'&&powerOn){meterBlown=true;display.classList.add('blow');display.textContent='BLOWN';document.getElementById('status').innerHTML='<span class="bad">Meter damaged: ohms on powered circuit.</span>';return}
-  if(meterMode==='volts'){if(!powerOn){display.textContent='0.00 V';return}let v=Math.abs((nodeVoltages[redNode]??0)-(nodeVoltages[blackNode]??0));display.textContent=round(v,2).toFixed(2)+' V';return}
-  if(meterMode==='ohms'){let r=ohmsBetween(redNode,blackNode);display.textContent=isFinite(r)?round(r,1)+' Ω':'OL'}
+  if(meterBlown){
+    applyMeterDisplay('BLOWN');
+    return;
+  }
+
+  if(meterMode==='ohms'&&powerOn){
+    meterBlown=true;
+    document.getElementById('status').innerHTML='<span class="bad">Meter damaged: ohms on powered circuit.</span>';
+    applyMeterDisplay('BLOWN');
+    drawCircuit();
+    return;
+  }
+
+  applyMeterDisplay(getMeterDisplayText());
 }
 function ohmsBetween(a,b){if(a===b)return 0;let seg=segmentData.find(s=>(s.a===a&&s.b===b)||(s.a===b&&s.b===a));if(seg){return seg.open?Infinity:seg.actualR}let lo=Math.min(a,b),hi=Math.max(a,b),sum=0;for(let n=lo;n<hi;n++){let s=segmentData.find(x=>x.a===n&&x.b===n+1);if(!s||s.open)return Infinity;sum+=s.actualR}return sum}
 function checkAnswer(){let type=document.getElementById('answerFault').value,loc=document.getElementById('answerLocation').value;if(type===faultType&&loc===faultSegment)document.getElementById('status').innerHTML='<span class="good">Correct diagnosis!</span>';else document.getElementById('status').innerHTML='<span class="bad">Keep troubleshooting.</span>'}
