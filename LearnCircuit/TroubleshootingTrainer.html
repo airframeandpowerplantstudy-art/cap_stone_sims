@@ -285,10 +285,11 @@ function drawCircuit(){
   // Glass-cockpit ammeter is drawn above the battery/main wire instead of sitting in the conductor path.
   drawAmmeter(svg);
 
-  // Meter first, then cords routed around the meter, then probe bodies on top.
-  // The cord paths are intentionally kept outside the LCD area.
-  drawSvgMeter(svg);
+  // Lead cords are drawn before the meter so the meter face/LCD stays readable.
+  // Plug bodies and probe bodies are drawn after the meter so the leads still look connected.
   drawLeadCords(svg);
+  drawSvgMeter(svg);
+  drawLeadPlugs(svg);
   drawLeadProbes(svg);
 }
 
@@ -534,22 +535,53 @@ function probeShape(svg,p,color){
   </g>`;
 }
 
-function getLeadPaths(){
-  let r=nodes[redNode],b=nodes[blackNode];
+function probeCableAnchor(p){
+  // Cable attaches to the back of the angled probe handle, not the metal tip.
+  const angle=-38*Math.PI/180;
+  const dx=-92, dy=0;
+  return {
+    x:p.x + dx*Math.cos(angle) - dy*Math.sin(angle),
+    y:p.y + dx*Math.sin(angle) + dy*Math.cos(angle)
+  };
+}
 
-  // Leads now start from the bottom of the plug bodies, not from the jack center.
-  // That keeps the cords visibly connected while preventing the cord/highlight
-  // from drawing over the plug face or meter labels.
+function naturalLeadPath(startX,startY,endX,endY,isRed){
+  // Hide the messy service-loop behavior behind the meter body, then let the
+  // cord emerge from the left or right side with only a short visible tail.
+  // This keeps the LCD clear and avoids the obvious ‘kink’ near the probe.
+  const meter={left:45, top:385, right:295, bottom:545};
+  const hiddenY=meter.bottom+16;
+  const exitX=isRed?58:282;
+  const exitY=isRed?506:506;
+  const sideBias=isRed?-1:1;
+
+  // A short visible tail near the probe handle looks cleaner than showing the
+  // entire lead trying to solve every bend in front of the meter.
+  const approachX=endX + (isRed?-34:-28);
+  const approachY=endY + 34;
+  const visibleLift=Math.max(26, Math.min(72, Math.abs(endX-exitX)*0.16 + 22));
+
+  return `M ${startX} ${startY}
+    C ${startX} ${hiddenY-6}, ${startX} ${hiddenY}, ${startX} ${hiddenY}
+    C ${startX} ${hiddenY+8}, ${exitX-sideBias*28} ${hiddenY+8}, ${exitX} ${hiddenY}
+    C ${exitX+sideBias*10} ${hiddenY-18}, ${exitX} ${exitY+36}, ${exitX} ${exitY}
+    C ${exitX+sideBias*6} ${exitY-visibleLift}, ${approachX} ${approachY+26}, ${approachX} ${approachY}
+    C ${approachX} ${approachY-10}, ${endX-16} ${endY+8}, ${endX} ${endY}`;
+}
+
+function getLeadPaths(){
+  const rAnchor=probeCableAnchor(nodes[redNode]);
+  const bAnchor=probeCableAnchor(nodes[blackNode]);
+
+  // Start at the bottom of the banana plugs so the cords are visibly inserted
+  // but have freedom to loop naturally around the meter instead of making
+  // rigid, kinked paths.
   const redStartX=110, redStartY=558;
   const blackStartX=220, blackStartY=558;
-  const redEndX=r.x-28, redEndY=r.y+18;
-  const blackEndX=b.x-30, blackEndY=b.y+20;
-  const redKneeX=Math.max(38,Math.min(1050,r.x-110));
-  const blackKneeX=Math.max(330,Math.min(1110,b.x-110));
 
   return {
-    red:`M ${redStartX} ${redStartY} C 92 566, 58 566, 37 552 C 12 535, 14 415, 39 365 C 70 344, 120 340, ${redKneeX} 344 C ${Math.max(70,redKneeX+22)} 338, ${Math.max(88,redEndX-70)} ${Math.max(284,redEndY+42)}, ${redEndX} ${redEndY}`,
-    black:`M ${blackStartX} ${blackStartY} C 246 566, 286 566, 312 552 C 340 535, 338 415, 309 365 C 352 344, 420 340, ${blackKneeX} 344 C ${Math.max(360,blackKneeX+28)} 338, ${Math.max(340,blackEndX-68)} ${Math.max(284,blackEndY+46)}, ${blackEndX} ${blackEndY}`
+    red:naturalLeadPath(redStartX,redStartY,rAnchor.x,rAnchor.y,true),
+    black:naturalLeadPath(blackStartX,blackStartY,bAnchor.x,bAnchor.y,false)
   };
 }
 
@@ -579,7 +611,9 @@ function drawLeadCords(svg){
     <path class="leadShadow" d="${paths.red}"></path><path class="redLead" d="${paths.red}"></path><path class="redLeadHi" d="${paths.red}"></path>
     <path class="leadShadow" d="${paths.black}"></path><path class="blackLead" d="${paths.black}"></path><path class="blackLeadHi" d="${paths.black}"></path>
   </g>`;
+}
 
+function drawLeadPlugs(svg){
   drawPlug(svg,110,525,'red');
   drawPlug(svg,220,525,'black');
 }
@@ -592,6 +626,8 @@ function drawLeadProbes(svg){
 function drawLeads(svg){
   // Kept as a compatibility wrapper for older calls.
   drawLeadCords(svg);
+  drawSvgMeter(svg);
+  drawLeadPlugs(svg);
   drawLeadProbes(svg);
 }
 
