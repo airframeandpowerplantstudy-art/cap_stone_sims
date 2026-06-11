@@ -601,9 +601,9 @@ function naturalLeadPath(startX,startY,endX,endY,isRed){
 
   // A short visible tail near the probe handle looks cleaner than showing the
   // entire lead trying to solve every bend in front of the meter.
-  //const approachX=endX + (isRed?-34:-28);
- // const approachY=endY + 34;
-//  const visibleLift=Math.max(26, Math.min(72, Math.abs(endX-exitX)*0.16 + 22));
+  const approachX=endX + (isRed?-34:-28);
+  const approachY=endY + 34;
+  const visibleLift=Math.max(26, Math.min(72, Math.abs(endX-exitX)*0.16 + 22));
 
   return `M ${startX} ${startY}
     C ${startX} ${hiddenY-6}, ${startX} ${hiddenY}, ${startX} ${hiddenY}
