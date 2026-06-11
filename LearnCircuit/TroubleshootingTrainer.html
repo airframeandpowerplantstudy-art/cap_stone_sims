@@ -8,6 +8,8 @@ body{background:#061522;color:#e8f3ff;font-family:Arial,sans-serif;margin:0;padd
 .panel{background:#0b2236;border:1px solid #1d4d73;border-radius:12px;padding:16px;margin-bottom:16px}
 button,select{padding:8px 12px;margin:4px;border-radius:8px;border:1px solid #3ea6ff;background:#123a57;color:white;cursor:pointer}
 button.powerOn{background:#155039;border-color:#39ff9d;box-shadow:0 0 14px rgba(57,255,157,.75)}
+.statusBadge{display:inline-flex;align-items:center;padding:8px 12px;margin:4px;border-radius:999px;border:1px solid #3ea6ff;background:#10283b;color:#b9e7ff;font-weight:bold;letter-spacing:.4px}
+.statusBadge.on{background:#163825;border-color:#39ff9d;box-shadow:0 0 12px rgba(57,255,157,.28);color:#dffff0}
 svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px solid #1d4d73}
 .workspace{display:grid;grid-template-columns:minmax(720px,1fr) 310px;gap:16px;align-items:stretch}
 .circuitPanel{min-width:0}
@@ -34,6 +36,9 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 .wire{stroke:#7fd3ff;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px #7fd3ff)}
 .terminal{fill:white;stroke:#7fd3ff;stroke-width:3;cursor:pointer;transition:filter .12s ease,fill .12s ease}
 .terminal:hover{fill:#ffd166;filter:drop-shadow(0 0 7px #ffd166)}
+.terminalShank{fill:#8fa4b5;stroke:#dce9f2;stroke-width:.8;pointer-events:none;opacity:.9}
+.terminalShankShade{stroke:#3a4a57;stroke-width:1;pointer-events:none;opacity:.65}
+.switchBlade{stroke-linecap:round;filter:drop-shadow(0 0 5px rgba(127,211,255,.28))}
 .wireLabel,.terminalLabel,.componentLabel{fill:#b9e7ff;stroke:#08131f;stroke-width:4;paint-order:stroke;font-size:12px;font-weight:bold;pointer-events:none}
 .terminalLabel{fill:#e8f3ff;font-size:12px}
 .componentLabel{fill:#7fd3ff;font-size:12px}
@@ -50,6 +55,14 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 .resBody{fill:url(#resistorGrad);stroke:#2b1b10;stroke-width:2}.band{stroke:#111;stroke-width:.45}.resEnd{fill:rgba(86,54,28,.18);stroke:rgba(43,27,16,.45);stroke-width:.8}.resSheen{fill:rgba(255,255,255,.24);stroke:none;pointer-events:none}.resShadowLine{stroke:rgba(43,27,16,.28);stroke-width:1.1;stroke-linecap:round;pointer-events:none}
 .fuse{fill:url(#fuseGrad);stroke:#7fd3ff;stroke-width:2}
 .componentShadow{filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}.note{color:#9fd8ff;line-height:1.35}
+.answerBox{margin-top:12px;padding:14px 16px;border:1px solid #ffd166;border-radius:14px;background:linear-gradient(180deg,rgba(255,209,102,.14),rgba(14,35,52,.55));box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 16px rgba(0,0,0,.18)}
+.answerTitle{margin:0 0 6px 0;color:#ffe29a;font-size:16px;font-weight:bold;letter-spacing:.4px}
+.answerHint{margin:0 0 10px 0;color:#cfe7ff;font-size:12px;line-height:1.35}
+.answerBox .row{gap:10px}
+.answerBox label{color:#ffe29a;font-weight:bold}
+.answerBox select{border-color:#ffd166;background:#17344b}
+.answerBox button{background:#6f4a14;border-color:#ffd166;color:#fff7cf;font-weight:bold;box-shadow:0 0 10px rgba(255,209,102,.18)}
+
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.good{color:#39ff9d}.bad{color:#ff5a5a}
 .meterBody{fill:url(#meterBodyGrad);stroke:#6bbfed;stroke-width:2.2;filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)) drop-shadow(0 0 8px rgba(127,211,255,.25))}
 .meterBezel{fill:#0e1117;stroke:#384b5d;stroke-width:1.5}
@@ -75,19 +88,23 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 <body>
 <div class="panel">
 <h1>Troubleshooting Trainer</h1>
-<p class="note">Left-click terminals for red lead. Right-click terminals for black lead. Change meter mode by clicking V or Ω on the meter face.</p>
+<p class="note">Left-click terminals for red lead. Right-click terminals for black lead. Click SW1 to open or close the switch. Change meter mode by clicking V or Ω on the meter face.</p>
 <div class="row">
 <button onclick="newCircuit()">New Circuit</button>
 <label>Fault:</label><select id="faultType"><option value="open">Open</option><option value="added">Added Resistance</option><option value="short">Short / Bypass</option></select>
 <label>Circuit:</label><select id="circuitType" onchange="newCircuit()"><option value="series">Series</option><option value="parallel">Parallel</option></select>
-<button id="powerBtn" onclick="togglePower()">Switch: OPEN</button>
+<span id="switchStatus" class="statusBadge">Switch: OPEN</span>
 <button onclick="resetMeter()">Replace Meter</button><button onclick="revealAnswer()">Reveal Answer</button>
 </div>
 <div class="display" id="meterDisplay">0.00 V</div>
-<div class="row">
-<label>Fault Type:</label><select id="answerFault"><option value="">Choose...</option><option value="open">Open</option><option value="added">Added Resistance</option><option value="short">Short</option></select>
-<label>Problem Between:</label><select id="answerLocation"></select>
-<button onclick="checkAnswer()">Check Diagnosis</button>
+<div class="answerBox">
+  <h2 class="answerTitle">Check Your Diagnosis</h2>
+  <p class="answerHint">When you are done troubleshooting, use this section to select the fault type and location, then check your answer.</p>
+  <div class="row">
+    <label>Fault Type:</label><select id="answerFault"><option value="">Choose...</option><option value="open">Open</option><option value="added">Added Resistance</option><option value="short">Short</option></select>
+    <label>Problem Between:</label><select id="answerLocation"></select>
+    <button onclick="checkAnswer()">Check Diagnosis</button>
+  </div>
 </div>
 <p class="note" id="status">Ready.</p>
 </div>
@@ -119,7 +136,7 @@ What that tells me: ______"></textarea>
 </div>
 
 <script>
-let powerOn=false,circuitType='series',meterMode='volts',meterBlown=false,redNode=0,blackNode=11,faultType='open',faultSegment='4-5';
+let powerOn=false,circuitType='series',meterMode='volts',meterBlown=false,redNode=0,blackNode=11,faultType='open',faultSegment='4-5',switchAnimateFrom=false;
 let nodeVoltages={},segmentData=[],totalR=0,currentA=0,nodes={},baseSegments=[],groundNode=11;
 const SOURCE_V=24;
 const MIN_R=0.001;
@@ -181,7 +198,7 @@ function newCircuit(){
   setCircuitTemplate();
   buildAnswerOptions();
   faultType=document.getElementById('faultType').value; meterBlown=false; powerOn=false; meterMode='volts'; redNode=0; blackNode=groundNode;
-  document.getElementById('powerBtn').classList.remove('powerOn'); document.getElementById('powerBtn').textContent='Switch: OPEN'; document.getElementById('meterDisplay').classList.remove('blow');
+  updateSwitchStatus(); switchAnimateFrom=false; document.getElementById('meterDisplay').classList.remove('blow');
   segmentData=baseSegments.map(s=>({...s,actualR:s.r,open:false,fault:false}));
   let candidates=segmentData.filter(s=>!s.noFault && (faultType==='open'||(faultType==='added'&&(s.type==='wire'||s.type==='resistor'))||(faultType==='short'&&s.type==='resistor')));
   let fault=candidates[rand(0,candidates.length-1)]; fault.fault=true; faultSegment=fault.id;
@@ -278,6 +295,7 @@ function solveSeries(){
 function drawCircuit(){
   const svg=document.getElementById('schematic');
   svg.innerHTML=svgDefs();
+  drawTrainerPlate(svg);
   drawBattery(svg);
   if(circuitType==='parallel') drawParallelCircuit(svg);
   else drawSeriesCircuit(svg);
@@ -375,6 +393,14 @@ function svgDefs(){return `<defs>
   </linearGradient>
 </defs>`}
 
+
+function drawTrainerPlate(svg){
+  svg.innerHTML+=`<g pointer-events="none">
+    <rect x="20" y="20" width="1180" height="530" rx="16" fill="rgba(3,10,18,.16)" stroke="rgba(107,191,237,.24)" stroke-width="1.2"></rect>
+    <text x="610" y="512" text-anchor="middle" fill="rgba(185,231,255,.07)" font-size="30" font-weight="bold" letter-spacing="5">MAINTENANCE TRAINER</text>
+  </g>`;
+}
+
 function drawBattery(svg){let y=270;svg.innerHTML+=line(40,y,75,y);svg.innerHTML+=line(75,y-20,75,y+20);svg.innerHTML+=line(95,y-35,95,y+35);svg.innerHTML+=line(115,y-20,115,y+20);svg.innerHTML+=line(135,y-35,135,y+35);svg.innerHTML+=line(135,y,177,y);svg.innerHTML+=`<text x="67" y="${y-45}" fill="#7fd3ff">−</text><text x="137" y="${y-45}" fill="#7fd3ff">+</text>`}
 function drawAmmeter(svg){
   const x=58, y=68, w=300, h=94;
@@ -412,16 +438,25 @@ function drawAmmeter(svg){
 }
 function drawFuse(svg,x1,y1,x2,y2,label){let mid=(x1+x2)/2;svg.innerHTML+=line(x1,y1,mid-28,y1)+`<rect class="fuse componentShadow" x="${mid-28}" y="${y1-13}" width="56" height="26" rx="6"></rect><text class="componentLabel" x="${mid}" y="${y1+5}" text-anchor="middle">${label}</text>`+line(mid+28,y1,x2,y2)}
 function drawPowerSwitch(svg,x1,y1,x2,y2,label){
-  const left=x1+24,right=x2-24,bladeEndX=powerOn?right:left+44,bladeEndY=powerOn?y1:y1-28;
+  const left=x1+24,right=x2-24;
   const mid=(x1+x2)/2;
+  const openAngle=-32;
+  const toAngle=powerOn?0:openAngle;
+  const fromAngle=(switchAnimateFrom===powerOn)?toAngle:(switchAnimateFrom?0:openAngle);
+  const bladeColor=powerOn?'#39ff9d':'#ffd166';
+  const animateTag=(fromAngle!==toAngle)?`<animateTransform attributeName="transform" type="rotate" from="${fromAngle} ${left} ${y1}" to="${toAngle} ${left} ${y1}" dur="0.18s" fill="freeze"></animateTransform>`:'';
+
   svg.innerHTML+=line(x1,y1,left,y1)+line(right,y1,x2,y2);
   svg.innerHTML+=`<g class="componentShadow" onclick="togglePower()" onkeydown="if(event.key==='Enter'||event.key===' '){togglePower()}" tabindex="0" role="button" aria-label="Open or close switch" style="cursor:pointer">
     <rect x="${x1+6}" y="${y1-58}" width="${x2-x1-12}" height="74" rx="10" fill="transparent"></rect>
     <circle cx="${left}" cy="${y1}" r="6" fill="#08131f" stroke="#7fd3ff" stroke-width="3"></circle>
     <circle cx="${right}" cy="${y1}" r="6" fill="#08131f" stroke="#7fd3ff" stroke-width="3"></circle>
-    <line x1="${left}" y1="${y1}" x2="${bladeEndX}" y2="${bladeEndY}" stroke="${powerOn?'#39ff9d':'#ffd166'}" stroke-width="5" stroke-linecap="round"></line>
+    <g transform="rotate(${toAngle} ${left} ${y1})">
+      ${animateTag}
+      <line class="switchBlade" x1="${left}" y1="${y1}" x2="${right}" y2="${y1}" stroke="${bladeColor}" stroke-width="5"></line>
+    </g>
     <text x="${mid}" y="${y1-45}" fill="#7fd3ff" text-anchor="middle" font-size="12">${label}</text>
-    <text x="${mid}" y="${y1-30}" fill="${powerOn?'#39ff9d':'#ffd166'}" text-anchor="middle" font-size="10">${powerOn?'CLOSED':'OPEN'}</text>
+    <text x="${mid}" y="${y1-30}" fill="${bladeColor}" text-anchor="middle" font-size="10">${powerOn?'CLOSED':'OPEN'}</text>
     <text x="${mid}" y="${y1+18}" fill="#78aaca" text-anchor="middle" font-size="9">CLICK</text>
   </g>`;
 }
@@ -465,11 +500,20 @@ function drawResistor(svg,x1,y1,x2,y2,label,value){
     </g>`;
   labelText(svg,label,mid,y1-28,'middle','componentLabel');
 }
-function terminal(svg,id){let p=nodes[id];let ldx=p.ldx??0,ldy=p.ldy??30,anchor=p.anchor??'middle';svg.innerHTML+=`<circle class="terminal" cx="${p.x}" cy="${p.y}" r="9" onclick="setLead('red',${id})" oncontextmenu="event.preventDefault();setLead('black',${id});return false;"></circle><text class="terminalLabel" x="${p.x+ldx}" y="${p.y+ldy}" text-anchor="${anchor}">${p.label}</text>`}
+function terminal(svg,id){
+  let p=nodes[id];
+  let ldx=p.ldx??0,ldy=p.ldy??30,anchor=p.anchor??'middle';
+  svg.innerHTML+=`<g onclick="setLead('red',${id})" oncontextmenu="event.preventDefault();setLead('black',${id});return false;" style="cursor:pointer">
+    <rect class="terminalShank" x="${p.x-3.3}" y="${p.y+8}" width="6.6" height="14" rx="2.2"></rect>
+    <line class="terminalShankShade" x1="${p.x-1.1}" y1="${p.y+10}" x2="${p.x-1.1}" y2="${p.y+20}"></line>
+    <circle class="terminal" cx="${p.x}" cy="${p.y}" r="9"></circle>
+  </g>
+  <text class="terminalLabel" x="${p.x+ldx}" y="${p.y+ldy}" text-anchor="${anchor}">${p.label}</text>`;
+}
 function drawGround(svg,x,y){svg.innerHTML+=line(x,y,x,y+30)+line(x-20,y+30,x+20,y+30)+line(x-14,y+40,x+14,y+40)+line(x-8,y+50,x+8,y+50)}
 
 function drawSvgMeter(svg){
-  const x=45, y=385, w=250, h=160;
+  const x=45, y=385, w=350, h=200;
   const screenClass = meterBlown ? "meterScreen blow" : "meterScreen";
   const textClass = meterBlown ? "meterText blow" : "meterText";
   const displayText = getMeterDisplayText();
@@ -503,7 +547,7 @@ function drawSvgMeter(svg){
       <rect class="meterClickZone" x="${x+158}" y="${y+70}" width="56" height="34" rx="8"></rect>
       <text class="meterModeChoice ${meterMode==='ohms'?'active':''}" x="${x+186}" y="${y+91}" text-anchor="middle">Ω</text>
     </g>
-    <text class="meterModeHint" x="${x+w/2}" y="${y+146}" text-anchor="middle">CLICK V OR Ω TO TURN KNOB</text>
+    <text class="meterModeHint" x="${x+w/2}" y="${y+146}" text-anchor="middle">TAP V OR Ω TO TURN</text>
     <text class="meterLabel" id="svgMeterMode" x="${x+w/2}" y="${y+158}" text-anchor="middle">${meterMode.toUpperCase()}</text>
 
     <circle class="portRing" cx="110" cy="525" r="13"></circle>
@@ -557,9 +601,9 @@ function naturalLeadPath(startX,startY,endX,endY,isRed){
 
   // A short visible tail near the probe handle looks cleaner than showing the
   // entire lead trying to solve every bend in front of the meter.
-  const approachX=endX + (isRed?-34:-28);
-  const approachY=endY + 34;
-  const visibleLift=Math.max(26, Math.min(72, Math.abs(endX-exitX)*0.16 + 22));
+  //const approachX=endX + (isRed?-34:-28);
+ // const approachY=endY + 34;
+//  const visibleLift=Math.max(26, Math.min(72, Math.abs(endX-exitX)*0.16 + 22));
 
   return `M ${startX} ${startY}
     C ${startX} ${hiddenY-6}, ${startX} ${hiddenY}, ${startX} ${hiddenY}
@@ -631,8 +675,15 @@ function drawLeads(svg){
   drawLeadProbes(svg);
 }
 
+function updateSwitchStatus(){
+  const el=document.getElementById('switchStatus');
+  if(!el) return;
+  el.textContent=powerOn?'Switch: CLOSED':'Switch: OPEN';
+  el.classList.toggle('on', powerOn);
+}
+
 function setLead(color,node){node=Number(node); if(color==='red')redNode=node; else blackNode=node; drawCircuit(); updateMeter()}
-function togglePower(){powerOn=!powerOn;let btn=document.getElementById('powerBtn');btn.textContent=powerOn?'Switch: CLOSED':'Switch: OPEN';btn.classList.toggle('powerOn',powerOn);solveSeries();drawCircuit();updateMeter()}
+function togglePower(){switchAnimateFrom=powerOn; powerOn=!powerOn; updateSwitchStatus(); solveSeries(); drawCircuit(); updateMeter(); switchAnimateFrom=powerOn}
 function setMode(mode){if(mode!=='volts'&&mode!=='ohms')return;meterMode=mode;drawCircuit();updateMeter()}
 function resetMeter(){meterBlown=false;const d=document.getElementById('meterDisplay');if(d)d.classList.remove('blow');drawCircuit();updateMeter()}
 
