@@ -9,6 +9,15 @@ body{background:#061522;color:#e8f3ff;font-family:Arial,sans-serif;margin:0;padd
 button,select{padding:8px 12px;margin:4px;border-radius:8px;border:1px solid #3ea6ff;background:#123a57;color:white;cursor:pointer}
 button.powerOn{background:#155039;border-color:#39ff9d;box-shadow:0 0 14px rgba(57,255,157,.75)}
 svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px solid #1d4d73}
+.workspace{display:grid;grid-template-columns:minmax(720px,1fr) 310px;gap:16px;align-items:stretch}
+.circuitPanel{min-width:0}
+.scratchPad{display:flex;flex-direction:column;gap:10px;min-height:570px}
+.scratchPad h2{margin:0;color:#e8f3ff;font-size:20px}
+.scratchHelp{margin:0;color:#9fd8ff;font-size:13px;line-height:1.35}
+#studentNotes{flex:1;width:100%;min-height:390px;resize:vertical;box-sizing:border-box;border-radius:10px;border:1px solid #3ea6ff;background:#071827;color:#e8f3ff;padding:12px;font-family:Arial,sans-serif;font-size:15px;line-height:1.4;outline:none}
+#studentNotes:focus{border-color:#39ff9d;box-shadow:0 0 10px rgba(57,255,157,.25)}
+.notesMini{font-size:12px;color:#78aaca;margin:0}
+@media(max-width:1050px){.workspace{grid-template-columns:1fr}.scratchPad{min-height:330px}#studentNotes{min-height:220px}}
 .wire{stroke:#7fd3ff;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px #7fd3ff)}
 .terminal{fill:white;stroke:#7fd3ff;stroke-width:3;cursor:pointer;transition:filter .12s ease,fill .12s ease}
 .terminal:hover{fill:#ffd166;filter:drop-shadow(0 0 7px #ffd166)}
@@ -33,6 +42,10 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 .meterText{fill:#061522;font-family:Courier New, monospace;font-size:23px;font-weight:bold;letter-spacing:1px}
 .meterText.blow{fill:#ff5a5a}
 .meterLabel{fill:#b9e7ff;font-size:12px;font-weight:bold;letter-spacing:.5px}
+.meterModeChoice{fill:#b9e7ff;font-size:17px;font-weight:bold;letter-spacing:.5px;cursor:pointer;user-select:none}
+.meterModeChoice.active{fill:#39ff9d;filter:drop-shadow(0 0 5px rgba(57,255,157,.85))}
+.meterClickZone{fill:transparent;cursor:pointer}
+.meterModeHint{fill:#78aaca;font-size:9px;letter-spacing:.4px}
 .meterTiny{fill:#78aaca;font-size:9px;letter-spacing:.4px}
 .meterDial{fill:url(#dialGrad);stroke:#090c11;stroke-width:4;filter:drop-shadow(0 3px 4px rgba(0,0,0,.55))}
 .dialPointer{stroke:#eaf8ff;stroke-width:5;stroke-linecap:round;filter:drop-shadow(0 0 3px rgba(127,211,255,.8))}
@@ -45,12 +58,12 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 <body>
 <div class="panel">
 <h1>Troubleshooting Trainer</h1>
-<p class="note">Left-click terminals for red lead. Right-click terminals for black lead.</p>
+<p class="note">Left-click terminals for red lead. Right-click terminals for black lead. Change meter mode by clicking V or Ω on the meter face.</p>
 <div class="row">
 <button onclick="newCircuit()">New Circuit</button>
 <label>Fault:</label><select id="faultType"><option value="open">Open</option><option value="added">Added Resistance</option><option value="short">Short / Bypass</option></select>
 <button id="powerBtn" onclick="togglePower()">Power: OFF</button>
-<button onclick="setMode('volts')">Volts</button><button onclick="setMode('ohms')">Ohms</button><button onclick="resetMeter()">Replace Meter</button><button onclick="revealAnswer()">Reveal Answer</button>
+<button onclick="resetMeter()">Replace Meter</button><button onclick="revealAnswer()">Reveal Answer</button>
 </div>
 <div class="display" id="meterDisplay">0.00 V</div>
 <div class="row">
@@ -60,7 +73,23 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 </div>
 <p class="note" id="status">Ready.</p>
 </div>
-<div class="panel"><svg id="schematic" viewBox="0 0 1220 570"></svg></div>
+<div class="workspace">
+  <div class="panel circuitPanel"><svg id="schematic" viewBox="0 0 1220 570"></svg></div>
+  <div class="panel scratchPad">
+    <h2>Scratch Pad</h2>
+    <p class="scratchHelp">Use this space to track meter readings, suspected opens, added resistance, or bypasses while troubleshooting.</p>
+    <textarea id="studentNotes" placeholder="Example:
+Red lead: T2
+Black lead: GND
+Reading: ______
+What that tells me: ______"></textarea>
+    <div class="row">
+      <button onclick="clearScratchPad()">Clear Notes</button>
+      <button onclick="copyScratchPad()">Copy Notes</button>
+    </div>
+    <p class="notesMini" id="notesStatus">Notes stay on this page until cleared or refreshed.</p>
+  </div>
+</div>
 
 <script>
 let powerOn=false,meterMode='volts',meterBlown=false,redNode=0,blackNode=10,faultType='open',faultSegment='4-5';
@@ -174,9 +203,16 @@ function drawSvgMeter(svg){
     <line class="dialPointer" transform="rotate(${pointerAngle} ${x+w/2} ${y+104})" x1="${x+w/2}" y1="${y+104}" x2="${x+w/2}" y2="${y+72}"></line>
     <circle cx="${x+w/2}" cy="${y+104}" r="4" fill="#dce9f2"></circle>
 
-    <text class="meterLabel" x="${x+56}" y="${y+88}">V</text>
-    <text class="meterLabel" x="${x+187}" y="${y+88}">Ω</text>
-    <text class="meterLabel" id="svgMeterMode" x="${x+w/2}" y="${y+148}" text-anchor="middle">${meterMode.toUpperCase()}</text>
+    <g onclick="setMode('volts')" onkeydown="if(event.key==='Enter'||event.key===' '){setMode('volts')}" tabindex="0" role="button" aria-label="Set meter to volts">
+      <rect class="meterClickZone" x="${x+36}" y="${y+70}" width="56" height="34" rx="8"></rect>
+      <text class="meterModeChoice ${meterMode==='volts'?'active':''}" x="${x+64}" y="${y+91}" text-anchor="middle">V</text>
+    </g>
+    <g onclick="setMode('ohms')" onkeydown="if(event.key==='Enter'||event.key===' '){setMode('ohms')}" tabindex="0" role="button" aria-label="Set meter to ohms">
+      <rect class="meterClickZone" x="${x+158}" y="${y+70}" width="56" height="34" rx="8"></rect>
+      <text class="meterModeChoice ${meterMode==='ohms'?'active':''}" x="${x+186}" y="${y+91}" text-anchor="middle">Ω</text>
+    </g>
+    <text class="meterModeHint" x="${x+w/2}" y="${y+146}" text-anchor="middle">CLICK V OR Ω TO TURN KNOB</text>
+    <text class="meterLabel" id="svgMeterMode" x="${x+w/2}" y="${y+158}" text-anchor="middle">${meterMode.toUpperCase()}</text>
 
     <circle class="portRing" cx="110" cy="525" r="13"></circle>
     <circle class="portRing" cx="220" cy="525" r="13"></circle>
@@ -210,7 +246,7 @@ function drawLeads(svg){
 
 function setLead(color,node){node=Number(node); if(color==='red')redNode=node; else blackNode=node; drawCircuit(); updateMeter()}
 function togglePower(){powerOn=!powerOn;let btn=document.getElementById('powerBtn');btn.textContent=powerOn?'Power: ON':'Power: OFF';btn.classList.toggle('powerOn',powerOn);drawCircuit();updateMeter()}
-function setMode(mode){meterMode=mode;drawCircuit();updateMeter()}
+function setMode(mode){if(mode!=='volts'&&mode!=='ohms')return;meterMode=mode;drawCircuit();updateMeter()}
 function resetMeter(){meterBlown=false;const d=document.getElementById('meterDisplay');if(d)d.classList.remove('blow');drawCircuit();updateMeter()}
 
 
@@ -278,7 +314,25 @@ function updateMeter(){
 function ohmsBetween(a,b){if(a===b)return 0;let seg=segmentData.find(s=>(s.a===a&&s.b===b)||(s.a===b&&s.b===a));if(seg){return seg.open?Infinity:seg.actualR}let lo=Math.min(a,b),hi=Math.max(a,b),sum=0;for(let n=lo;n<hi;n++){let s=segmentData.find(x=>x.a===n&&x.b===n+1);if(!s||s.open)return Infinity;sum+=s.actualR}return sum}
 function checkAnswer(){let type=document.getElementById('answerFault').value,loc=document.getElementById('answerLocation').value;if(type===faultType&&loc===faultSegment)document.getElementById('status').innerHTML='<span class="good">Correct diagnosis!</span>';else document.getElementById('status').innerHTML='<span class="bad">Keep troubleshooting.</span>'}
 function revealAnswer(){let seg=baseSegments.find(s=>s.id===faultSegment);document.getElementById('status').innerHTML=`Answer: <b>${faultType.toUpperCase()}</b> between <b>${nodes[seg.a].label}</b> and <b>${nodes[seg.b].label}</b>`}
-window.newCircuit=newCircuit;window.setLead=setLead;window.togglePower=togglePower;window.setMode=setMode;window.resetMeter=resetMeter;window.checkAnswer=checkAnswer;window.revealAnswer=revealAnswer;
+function clearScratchPad(){
+  const notes=document.getElementById('studentNotes');
+  const status=document.getElementById('notesStatus');
+  if(notes) notes.value='';
+  if(status) status.textContent='Notes cleared.';
+}
+function copyScratchPad(){
+  const notes=document.getElementById('studentNotes');
+  const status=document.getElementById('notesStatus');
+  if(!notes) return;
+  notes.select();
+  try{
+    document.execCommand('copy');
+    if(status) status.textContent='Notes copied.';
+  }catch(e){
+    if(status) status.textContent='Copy did not work in this browser. Select and copy manually.';
+  }
+}
+window.newCircuit=newCircuit;window.setLead=setLead;window.togglePower=togglePower;window.setMode=setMode;window.resetMeter=resetMeter;window.checkAnswer=checkAnswer;window.revealAnswer=revealAnswer;window.clearScratchPad=clearScratchPad;window.copyScratchPad=copyScratchPad;
 buildAnswerOptions();newCircuit();
 </script>
 </body>
