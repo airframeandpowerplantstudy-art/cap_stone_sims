@@ -457,7 +457,7 @@ function drawPowerSwitch(svg,x1,y1,x2,y2,label){
     </g>
     <text x="${mid}" y="${y1-45}" fill="#7fd3ff" text-anchor="middle" font-size="12">${label}</text>
     <text x="${mid}" y="${y1-30}" fill="${bladeColor}" text-anchor="middle" font-size="10">${powerOn?'CLOSED':'OPEN'}</text>
-    <text x="${mid}" y="${y1+18}" fill="#78aaca" text-anchor="middle" font-size="9">CLICK</text>
+    <text x="${mid}" y="${y1+18}" fill="#78aaca" text-anchor="middle" font-size="9"></text>
   </g>`;
 }
 function labelText(svg,label,x,y,anchor='middle',cls='wireLabel'){
