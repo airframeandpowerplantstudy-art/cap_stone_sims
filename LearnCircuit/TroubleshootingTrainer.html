@@ -10,24 +10,36 @@ button,select{padding:8px 12px;margin:4px;border-radius:8px;border:1px solid #3e
 button.powerOn{background:#155039;border-color:#39ff9d;box-shadow:0 0 14px rgba(57,255,157,.75)}
 svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px solid #1d4d73}
 .wire{stroke:#7fd3ff;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px #7fd3ff)}
-.terminal{fill:white;stroke:#7fd3ff;stroke-width:3;cursor:pointer}.terminal:hover{fill:#ffd166}
-.redLead{stroke:#ff4a4a;stroke-width:5;fill:none;pointer-events:none;filter:drop-shadow(0 0 7px #ff4a4a)}
-.blackLead{stroke:#050505;stroke-width:5;fill:none;pointer-events:none;filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px #7fd3ff)}
-.tipRed{fill:#ff4a4a;stroke:#fff;stroke-width:2}.tipBlack{fill:#050505;stroke:#fff;stroke-width:2}
+.terminal{fill:white;stroke:#7fd3ff;stroke-width:3;cursor:pointer;transition:filter .12s ease,fill .12s ease}
+.terminal:hover{fill:#ffd166;filter:drop-shadow(0 0 7px #ffd166)}
+.leadShadow{stroke:rgba(0,0,0,.5);stroke-width:10;fill:none;pointer-events:none;stroke-linecap:round;stroke-linejoin:round}
+.redLead{stroke:#e11e2f;stroke-width:6;fill:none;pointer-events:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(0,0,0,.55))}
+.blackLead{stroke:#050505;stroke-width:6;fill:none;pointer-events:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(0,0,0,.65))}
+.redLeadHi{stroke:rgba(255,255,255,.22);stroke-width:2;fill:none;pointer-events:none;stroke-linecap:round}
+.blackLeadHi{stroke:rgba(255,255,255,.18);stroke-width:2;fill:none;pointer-events:none;stroke-linecap:round}
+.probeGripRed{fill:#aa1624;stroke:#fff;stroke-width:1.5}.probeGripBlack{fill:#111;stroke:#fff;stroke-width:1.5}
+.probeNeedle{stroke:#dce9f2;stroke-width:3;stroke-linecap:round}.tipRed{fill:#ff4a4a;stroke:#fff;stroke-width:2}.tipBlack{fill:#050505;stroke:#fff;stroke-width:2}
 .display{display:none}
 .display.blow{background:#331015;color:#ff5a5a}
-.resBody{fill:#d7b075;stroke:#2b1b10;stroke-width:2}.band{stroke:#111;stroke-width:.5}
-.fuse{fill:#162f44;stroke:#7fd3ff;stroke-width:2}.note{color:#9fd8ff;line-height:1.35}
+.resBody{fill:url(#resistorGrad);stroke:#2b1b10;stroke-width:2}.band{stroke:#111;stroke-width:.5}
+.fuse{fill:url(#fuseGrad);stroke:#7fd3ff;stroke-width:2}
+.componentShadow{filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}.note{color:#9fd8ff;line-height:1.35}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.good{color:#39ff9d}.bad{color:#ff5a5a}
-.meterBody{fill:#1a1d22;stroke:#7fd3ff;stroke-width:2;filter:drop-shadow(0 0 8px rgba(127,211,255,.35))}
-.meterScreen{fill:#b8d6c6;stroke:#061522;stroke-width:3}
+.meterBody{fill:url(#meterBodyGrad);stroke:#6bbfed;stroke-width:2.2;filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)) drop-shadow(0 0 8px rgba(127,211,255,.25))}
+.meterBezel{fill:#0e1117;stroke:#384b5d;stroke-width:1.5}
+.meterScreen{fill:url(#lcdGrad);stroke:#061522;stroke-width:3}
 .meterScreen.blow{fill:#331015;stroke:#ff5a5a}
-.meterText{fill:#061522;font-family:Courier New, monospace;font-size:22px;font-weight:bold}
+.meterGlass{fill:rgba(255,255,255,.20);pointer-events:none}
+.meterText{fill:#061522;font-family:Courier New, monospace;font-size:23px;font-weight:bold;letter-spacing:1px}
 .meterText.blow{fill:#ff5a5a}
-.meterLabel{fill:#9fd8ff;font-size:12px}
-.meterDial{fill:#2a2f38;stroke:#0b1018;stroke-width:3}
-.meterPortRed{fill:#ff4a4a;stroke:#fff;stroke-width:2}
-.meterPortBlack{fill:#050505;stroke:#fff;stroke-width:2}
+.meterLabel{fill:#b9e7ff;font-size:12px;font-weight:bold;letter-spacing:.5px}
+.meterTiny{fill:#78aaca;font-size:9px;letter-spacing:.4px}
+.meterDial{fill:url(#dialGrad);stroke:#090c11;stroke-width:4;filter:drop-shadow(0 3px 4px rgba(0,0,0,.55))}
+.dialPointer{stroke:#eaf8ff;stroke-width:5;stroke-linecap:round;filter:drop-shadow(0 0 3px rgba(127,211,255,.8))}
+.dialTick{stroke:#8fcff0;stroke-width:2;stroke-linecap:round}
+.meterPortRed{fill:#ff4a4a;stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+.meterPortBlack{fill:#050505;stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+.portRing{fill:none;stroke:#6f8798;stroke-width:3}
 </style>
 </head>
 <body>
@@ -99,7 +111,7 @@ function solveSeries(){
 }
 
 function drawCircuit(){
-  const svg=document.getElementById('schematic'); svg.innerHTML=''; drawBattery(svg); drawAmmeter(svg); let y=270;
+  const svg=document.getElementById('schematic'); svg.innerHTML=svgDefs(); drawBattery(svg); drawAmmeter(svg); let y=270;
   svg.innerHTML+=line(180,y,230,y); terminal(svg,0); drawFuse(svg,230,y,330,y,'F1'); terminal(svg,1);
   drawWireLabel(svg,330,y,420,y,'W1'); terminal(svg,2); drawResistor(svg,420,y,510,y,'R1',1000); terminal(svg,3);
   drawWireLabel(svg,510,y,600,y,'W2'); terminal(svg,4); drawResistor(svg,600,y,690,y,'R2',2200); terminal(svg,5);
@@ -108,11 +120,30 @@ function drawCircuit(){
   terminal(svg,9); drawWireLabel(svg,1060,y,1150,y,'W5'); terminal(svg,10); drawGround(svg,1150,y); drawSvgMeter(svg); drawLeads(svg);
 }
 
+
+function svgDefs(){return `<defs>
+  <linearGradient id="meterBodyGrad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#303640"></stop><stop offset=".45" stop-color="#15191f"></stop><stop offset="1" stop-color="#080b10"></stop>
+  </linearGradient>
+  <linearGradient id="lcdGrad" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#d7eadc"></stop><stop offset=".55" stop-color="#a8c8b8"></stop><stop offset="1" stop-color="#7fa394"></stop>
+  </linearGradient>
+  <radialGradient id="dialGrad" cx="40%" cy="35%" r="70%">
+    <stop offset="0" stop-color="#4b5361"></stop><stop offset=".65" stop-color="#222832"></stop><stop offset="1" stop-color="#0c1016"></stop>
+  </radialGradient>
+  <linearGradient id="resistorGrad" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#efd19b"></stop><stop offset=".5" stop-color="#d7b075"></stop><stop offset="1" stop-color="#a77d49"></stop>
+  </linearGradient>
+  <linearGradient id="fuseGrad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#244a68"></stop><stop offset=".55" stop-color="#14293c"></stop><stop offset="1" stop-color="#091521"></stop>
+  </linearGradient>
+</defs>`}
+
 function drawBattery(svg){let y=270;svg.innerHTML+=line(40,y,75,y);svg.innerHTML+=line(75,y-20,75,y+20);svg.innerHTML+=line(95,y-35,95,y+35);svg.innerHTML+=line(115,y-20,115,y+20);svg.innerHTML+=line(135,y-35,135,y+35);svg.innerHTML+=line(135,y,177,y);svg.innerHTML+=`<text x="67" y="${y-45}" fill="#7fd3ff">−</text><text x="137" y="${y-45}" fill="#7fd3ff">+</text>`}
 function drawAmmeter(svg){let y=270;svg.innerHTML+=`<circle cx="205" cy="${y}" r="27" fill="#061522" stroke="#39ff9d" stroke-width="2"></circle><text x="205" y="${y-3}" fill="#39ff9d" text-anchor="middle" font-size="16">A</text><text x="205" y="${y+18}" fill="#39ff9d" text-anchor="middle" font-size="11">${powerOn?round(currentA,3):'0.00'}A</text>`;svg.innerHTML+=line(177,y,178,y)+line(232,y,230,y)}
-function drawFuse(svg,x1,y1,x2,y2,label){let mid=(x1+x2)/2;svg.innerHTML+=line(x1,y1,mid-28,y1)+`<rect class="fuse" x="${mid-28}" y="${y1-13}" width="56" height="26" rx="6"></rect><text x="${mid}" y="${y1+5}" fill="#7fd3ff" text-anchor="middle">${label}</text>`+line(mid+28,y1,x2,y2)}
+function drawFuse(svg,x1,y1,x2,y2,label){let mid=(x1+x2)/2;svg.innerHTML+=line(x1,y1,mid-28,y1)+`<rect class="fuse componentShadow" x="${mid-28}" y="${y1-13}" width="56" height="26" rx="6"></rect><text x="${mid}" y="${y1+5}" fill="#7fd3ff" text-anchor="middle">${label}</text>`+line(mid+28,y1,x2,y2)}
 function drawWireLabel(svg,x1,y1,x2,y2,label){svg.innerHTML+=line(x1,y1,x2,y2)+`<text x="${(x1+x2)/2}" y="${y1-18}" fill="#7fd3ff" text-anchor="middle" font-size="12">${label}</text>`}
-function drawResistor(svg,x1,y1,x2,y2,label,value){let mid=(x1+x2)/2,w=66,h=26;svg.innerHTML+=`<line class="wire" x1="${x1}" y1="${y1}" x2="${mid-w/2}" y2="${y1}"></line><line class="wire" x1="${mid+w/2}" y1="${y1}" x2="${x2}" y2="${y2}"></line><rect class="resBody" x="${mid-w/2}" y="${y1-h/2}" width="${w}" height="${h}" rx="12"></rect>`;resistorBands(value).forEach((b,i)=>svg.innerHTML+=`<rect class="band" x="${mid-21+i*13}" y="${y1-h/2}" width="8" height="${h}" fill="${COLORS[b]}"></rect>`);svg.innerHTML+=`<text x="${mid}" y="${y1-26}" fill="#7fd3ff" text-anchor="middle">${label}</text>`}
+function drawResistor(svg,x1,y1,x2,y2,label,value){let mid=(x1+x2)/2,w=66,h=26;svg.innerHTML+=`<line class="wire" x1="${x1}" y1="${y1}" x2="${mid-w/2}" y2="${y1}"></line><line class="wire" x1="${mid+w/2}" y1="${y1}" x2="${x2}" y2="${y2}"></line><rect class="resBody componentShadow" x="${mid-w/2}" y="${y1-h/2}" width="${w}" height="${h}" rx="12"></rect>`;resistorBands(value).forEach((b,i)=>svg.innerHTML+=`<rect class="band" x="${mid-21+i*13}" y="${y1-h/2}" width="8" height="${h}" fill="${COLORS[b]}"></rect>`);svg.innerHTML+=`<text x="${mid}" y="${y1-26}" fill="#7fd3ff" text-anchor="middle">${label}</text>`}
 function terminal(svg,id){let p=nodes[id];svg.innerHTML+=`<circle class="terminal" cx="${p.x}" cy="${p.y}" r="9" onclick="setLead('red',${id})" oncontextmenu="event.preventDefault();setLead('black',${id});return false;"></circle><text x="${p.x}" y="${p.y+30}" fill="#7fd3ff" text-anchor="middle" font-size="12">${p.label}</text>`}
 function drawGround(svg,x,y){svg.innerHTML+=line(x,y,x,y+30)+line(x-20,y+30,x+20,y+30)+line(x-14,y+40,x+14,y+40)+line(x-8,y+50,x+8,y+50)}
 
@@ -121,27 +152,61 @@ function drawSvgMeter(svg){
   const screenClass = meterBlown ? "meterScreen blow" : "meterScreen";
   const textClass = meterBlown ? "meterText blow" : "meterText";
   const displayText = getMeterDisplayText();
+  const pointerAngle = meterMode === 'ohms' ? 42 : -42;
 
   svg.innerHTML += `<g id="svgMeter">
-    <rect class="meterBody" x="${x}" y="${y}" width="${w}" height="${h}" rx="18"></rect>
-    <rect class="${screenClass}" id="svgMeterScreen" x="${x+28}" y="${y+20}" width="${w-56}" height="44" rx="6"></rect>
-    <text class="${textClass}" id="svgMeterDisplay" x="${x+w-40}" y="${y+50}" text-anchor="end">${displayText}</text>
+    <rect class="meterBody" x="${x}" y="${y}" width="${w}" height="${h}" rx="22"></rect>
+    <path d="M ${x+18} ${y+12} Q ${x+w/2} ${y-6} ${x+w-18} ${y+12}" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="3"></path>
 
-    <circle class="meterDial" cx="${x+w/2}" cy="${y+98}" r="31"></circle>
-    <line x1="${x+w/2}" y1="${y+98}" x2="${x+w/2+18}" y2="${y+80}" stroke="#9fd8ff" stroke-width="4" stroke-linecap="round"></line>
+    <rect class="meterBezel" x="${x+22}" y="${y+16}" width="${w-44}" height="56" rx="9"></rect>
+    <rect class="${screenClass}" id="svgMeterScreen" x="${x+30}" y="${y+23}" width="${w-60}" height="42" rx="5"></rect>
+    <path class="meterGlass" d="M ${x+34} ${y+27} H ${x+w-34} V ${y+39} C ${x+w-82} ${y+34}, ${x+85} ${y+34}, ${x+34} ${y+48} Z"></path>
+    <text class="${textClass}" id="svgMeterDisplay" x="${x+w-38}" y="${y+52}" text-anchor="end">${displayText}</text>
+    <text class="meterTiny" x="${x+38}" y="${y+35}">AUTO</text>
 
-    <text class="meterLabel" x="${x+42}" y="${y+84}">V</text>
-    <text class="meterLabel" x="${x+190}" y="${y+84}">Ω</text>
-    <text class="meterLabel" id="svgMeterMode" x="${x+w/2}" y="${y+142}" text-anchor="middle">${meterMode.toUpperCase()}</text>
+    <g id="dialTicks">
+      <line class="dialTick" x1="${x+78}" y1="${y+96}" x2="${x+63}" y2="${y+89}"></line>
+      <line class="dialTick" x1="${x+125}" y1="${y+76}" x2="${x+125}" y2="${y+60}"></line>
+      <line class="dialTick" x1="${x+172}" y1="${y+96}" x2="${x+187}" y2="${y+89}"></line>
+    </g>
+    <circle class="meterDial" cx="${x+w/2}" cy="${y+104}" r="36"></circle>
+    <circle cx="${x+w/2}" cy="${y+104}" r="19" fill="#151a21" stroke="#59697b" stroke-width="1.5"></circle>
+    <line class="dialPointer" transform="rotate(${pointerAngle} ${x+w/2} ${y+104})" x1="${x+w/2}" y1="${y+104}" x2="${x+w/2}" y2="${y+72}"></line>
+    <circle cx="${x+w/2}" cy="${y+104}" r="4" fill="#dce9f2"></circle>
 
+    <text class="meterLabel" x="${x+56}" y="${y+88}">V</text>
+    <text class="meterLabel" x="${x+187}" y="${y+88}">Ω</text>
+    <text class="meterLabel" id="svgMeterMode" x="${x+w/2}" y="${y+148}" text-anchor="middle">${meterMode.toUpperCase()}</text>
+
+    <circle class="portRing" cx="110" cy="525" r="13"></circle>
+    <circle class="portRing" cx="220" cy="525" r="13"></circle>
     <circle class="meterPortRed" cx="110" cy="525" r="9"></circle>
     <circle class="meterPortBlack" cx="220" cy="525" r="9"></circle>
-    <text class="meterLabel" x="110" y="512" text-anchor="middle">RED</text>
-    <text class="meterLabel" x="220" y="512" text-anchor="middle">COM</text>
+    <text class="meterLabel" x="110" y="509" text-anchor="middle">VΩ</text>
+    <text class="meterLabel" x="220" y="509" text-anchor="middle">COM</text>
   </g>`;
 }
 
-function drawLeads(svg){let r=nodes[redNode],b=nodes[blackNode];svg.innerHTML+=`<path class="redLead" d="M 110 525 C 180 500, ${r.x-40} ${r.y+70}, ${r.x} ${r.y}"></path><circle class="tipRed" cx="${r.x}" cy="${r.y}" r="6"></circle>`;svg.innerHTML+=`<path class="blackLead" d="M 220 525 C 300 500, ${b.x-40} ${b.y+70}, ${b.x} ${b.y}"></path><circle class="tipBlack" cx="${b.x}" cy="${b.y}" r="6"></circle>`}
+function probeShape(svg,p,color){
+  const isRed=color==='red';
+  const grip=isRed?'probeGripRed':'probeGripBlack';
+  const tip=isRed?'tipRed':'tipBlack';
+  svg.innerHTML+=`<g pointer-events="none">
+    <line class="probeNeedle" x1="${p.x-22}" y1="${p.y+18}" x2="${p.x-4}" y2="${p.y+4}"></line>
+    <rect class="${grip}" x="${p.x-42}" y="${p.y+19}" width="28" height="12" rx="5" transform="rotate(-38 ${p.x-28} ${p.y+25})"></rect>
+    <circle class="${tip}" cx="${p.x}" cy="${p.y}" r="6"></circle>
+  </g>`;
+}
+
+function drawLeads(svg){
+  let r=nodes[redNode],b=nodes[blackNode];
+  const redPath=`M 110 525 C 150 510, 180 488, ${Math.max(245,r.x-120)} ${Math.min(500,r.y+118)} S ${r.x-52} ${r.y+70}, ${r.x-8} ${r.y+8}`;
+  const blackPath=`M 220 525 C 275 520, 330 492, ${Math.max(355,b.x-130)} ${Math.min(505,b.y+128)} S ${b.x-62} ${b.y+78}, ${b.x-8} ${b.y+8}`;
+  svg.innerHTML+=`<path class="leadShadow" d="${redPath}"></path><path class="redLead" d="${redPath}"></path><path class="redLeadHi" d="${redPath}"></path>`;
+  svg.innerHTML+=`<path class="leadShadow" d="${blackPath}"></path><path class="blackLead" d="${blackPath}"></path><path class="blackLeadHi" d="${blackPath}"></path>`;
+  probeShape(svg,r,'red');
+  probeShape(svg,b,'black');
+}
 
 function setLead(color,node){node=Number(node); if(color==='red')redNode=node; else blackNode=node; drawCircuit(); updateMeter()}
 function togglePower(){powerOn=!powerOn;let btn=document.getElementById('powerBtn');btn.textContent=powerOn?'Power: ON':'Power: OFF';btn.classList.toggle('powerOn',powerOn);drawCircuit();updateMeter()}
