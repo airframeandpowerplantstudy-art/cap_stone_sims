@@ -90,10 +90,10 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
   <div class="panel circuitPanel"><svg id="schematic" viewBox="0 0 1220 570"></svg></div>
   <div class="panel scratchPad">
     <h2>Scratch Pad</h2>
-    <p class="scratchHelp">Draw right on the paper or type notes below it. Use this for readings, arrows, circles, and suspected fault locations.</p>
+    <p class="scratchHelp">Draw right on the paper or type notes below it.</p>
     <div class="clipboardSheet">
       <div class="clipboardClip"></div>
-      <div class="paperHeader">A&amp;P TROUBLESHOOTING NOTES</div>
+      <div class="paperHeader">TROUBLESHOOTING NOTES</div>
       <div class="paperDrawWrap"><canvas id="drawPad"></canvas></div>
       <textarea id="studentNotes" placeholder="Example:
 Red lead: T2
@@ -104,9 +104,9 @@ What that tells me: ______"></textarea>
         <button id="penBtn" onclick="setPadTool('pen')" class="activeTool">Pen</button>
         <button id="eraserBtn" onclick="setPadTool('eraser')">Eraser</button>
         <label>Size</label><input id="penSize" type="range" min="2" max="22" value="4">
-        <button onclick="clearDrawing()">Clear Drawing</button>
+        <button onclick="clearDrawing()">Clear Pad</button>
         <button onclick="clearScratchPad()">Clear All</button>
-        <button onclick="copyScratchPad()">Copy Typed Notes</button>
+        <button onclick="copyScratchPad()">Copy Notes</button>
       </div>
     </div>
     <p class="notesMini" id="notesStatus">Drawing and typed notes stay on this page until cleared or refreshed.</p>
