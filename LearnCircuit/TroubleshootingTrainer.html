@@ -75,7 +75,7 @@ svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px sol
 <div class="row">
 <button onclick="newCircuit()">New Circuit</button>
 <label>Fault:</label><select id="faultType"><option value="open">Open</option><option value="added">Added Resistance</option><option value="short">Short / Bypass</option></select>
-<button id="powerBtn" onclick="togglePower()">Power: OFF</button>
+<button id="powerBtn" onclick="togglePower()">Switch: OPEN</button>
 <button onclick="resetMeter()">Replace Meter</button><button onclick="revealAnswer()">Reveal Answer</button>
 </div>
 <div class="display" id="meterDisplay">0.00 V</div>
@@ -142,7 +142,7 @@ function buildAnswerOptions(){let sel=document.getElementById('answerLocation');
 
 function newCircuit(){
   faultType=document.getElementById('faultType').value; meterBlown=false; powerOn=false; meterMode='volts'; redNode=0; blackNode=11;
-  document.getElementById('powerBtn').classList.remove('powerOn'); document.getElementById('powerBtn').textContent='Power: OFF'; document.getElementById('meterDisplay').classList.remove('blow');
+  document.getElementById('powerBtn').classList.remove('powerOn'); document.getElementById('powerBtn').textContent='Switch: OPEN'; document.getElementById('meterDisplay').classList.remove('blow');
   segmentData=baseSegments.map(s=>({...s,actualR:s.r,open:false,fault:false}));
   let candidates=segmentData.filter(s=>!s.noFault && (faultType==='open'||(faultType==='added'&&(s.type==='wire'||s.type==='resistor'))||(faultType==='short'&&s.type==='resistor')));
   let fault=candidates[rand(0,candidates.length-1)]; fault.fault=true; faultSegment=fault.id;
@@ -286,21 +286,22 @@ function drawLeads(svg){
 }
 
 function setLead(color,node){node=Number(node); if(color==='red')redNode=node; else blackNode=node; drawCircuit(); updateMeter()}
-function togglePower(){powerOn=!powerOn;let btn=document.getElementById('powerBtn');btn.textContent=powerOn?'Power: ON':'Power: OFF';btn.classList.toggle('powerOn',powerOn);solveSeries();drawCircuit();updateMeter()}
+function togglePower(){powerOn=!powerOn;let btn=document.getElementById('powerBtn');btn.textContent=powerOn?'Switch: CLOSED':'Switch: OPEN';btn.classList.toggle('powerOn',powerOn);solveSeries();drawCircuit();updateMeter()}
 function setMode(mode){if(mode!=='volts'&&mode!=='ohms')return;meterMode=mode;drawCircuit();updateMeter()}
 function resetMeter(){meterBlown=false;const d=document.getElementById('meterDisplay');if(d)d.classList.remove('blow');drawCircuit();updateMeter()}
 
 
+function voltageBetweenLeads(){
+  return Math.abs((nodeVoltages[redNode]??0)-(nodeVoltages[blackNode]??0));
+}
+
 function getMeterDisplayText(){
   if(meterBlown) return "BLOWN";
 
-  if(meterMode==='ohms' && powerOn){
-    return "BLOWN";
-  }
-
   if(meterMode==='volts'){
-    if(!powerOn) return "0.00 V";
-    let v=Math.abs((nodeVoltages[redNode]??0)-(nodeVoltages[blackNode]??0));
+    // The battery/source remains present even when SW1 is open.
+    // With the switch open, points upstream of SW1 should still read source voltage to ground.
+    let v=(nodeVoltages[redNode]??0)-(nodeVoltages[blackNode]??0);
     return round(v,2).toFixed(2)+' V';
   }
 
@@ -342,9 +343,9 @@ function updateMeter(){
     return;
   }
 
-  if(meterMode==='ohms'&&powerOn){
+  if(meterMode==='ohms' && voltageBetweenLeads() > 0.5){
     meterBlown=true;
-    document.getElementById('status').innerHTML='<span class="bad">Meter damaged: ohms on powered circuit.</span>';
+    document.getElementById('status').innerHTML='<span class="bad">Meter damaged: ohms on a live circuit.</span>';
     applyMeterDisplay('BLOWN');
     drawCircuit();
     return;
