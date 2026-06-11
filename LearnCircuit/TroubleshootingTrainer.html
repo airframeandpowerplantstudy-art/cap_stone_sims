@@ -2,349 +2,129 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Troubleshooting Trainer Phase 1</title>
+<title>Troubleshooting Trainer Patch 2</title>
 <style>
-body{
-  background:#061522;
-  color:#e8f3ff;
-  font-family:Arial,sans-serif;
-  margin:0;
-  padding:20px;
-}
-.panel{
-  background:#0b2236;
-  border:1px solid #1d4d73;
-  border-radius:12px;
-  padding:16px;
-  margin-bottom:16px;
-}
-button,select{
-  padding:8px 12px;
-  margin:4px;
-  border-radius:8px;
-  border:1px solid #3ea6ff;
-  background:#123a57;
-  color:white;
-  cursor:pointer;
-}
-svg{
-  width:100%;
-  height:520px;
-  background:#08131f;
-  border-radius:12px;
-  border:1px solid #1d4d73;
-}
-.wire{
-  stroke:#7fd3ff;
-  stroke-width:5;
-  fill:none;
-  stroke-linecap:round;
-}
-.terminal{
-  fill:white;
-  stroke:#7fd3ff;
-  stroke-width:3;
-  cursor:pointer;
-}
-.terminal:hover{
-  fill:#ffd166;
-}
-.redLead{
-  pointer-events:none;
-  stroke:#ff4a4a;
-  stroke-width:4;
-  fill:none;
-}
-.blackLead{
-  pointer-events:none;
-  stroke:#ffffff;
-  stroke-width:4;
-  fill:none;
-}
-.resBody{
-  fill:#d7b075;
-  stroke:#2b1b10;
-  stroke-width:2;
-}
-.band{
-  stroke:#111;
-  stroke-width:.5;
-}
-.display{
-  background:#b8d6c6;
-  color:#061522;
-  font-size:28px;
-  font-family:Courier New;
-  padding:14px;
-  border-radius:8px;
-  margin-top:12px;
-}
+body{background:#061522;color:#e8f3ff;font-family:Arial,sans-serif;margin:0;padding:20px}
+.panel{background:#0b2236;border:1px solid #1d4d73;border-radius:12px;padding:16px;margin-bottom:16px}
+button,select{padding:8px 12px;margin:4px;border-radius:8px;border:1px solid #3ea6ff;background:#123a57;color:white;cursor:pointer}
+button.powerOn{background:#155039;border-color:#39ff9d;box-shadow:0 0 14px rgba(57,255,157,.75)}
+svg{width:100%;height:570px;background:#08131f;border-radius:12px;border:1px solid #1d4d73}
+.wire{stroke:#7fd3ff;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px #7fd3ff)}
+.terminal{fill:white;stroke:#7fd3ff;stroke-width:3;cursor:pointer}.terminal:hover{fill:#ffd166}
+.redLead{stroke:#ff4a4a;stroke-width:5;fill:none;pointer-events:none;filter:drop-shadow(0 0 7px #ff4a4a)}
+.blackLead{stroke:#050505;stroke-width:5;fill:none;pointer-events:none;filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px #7fd3ff)}
+.tipRed{fill:#ff4a4a;stroke:#fff;stroke-width:2}.tipBlack{fill:#050505;stroke:#fff;stroke-width:2}
+.display{background:#b8d6c6;color:#061522;font-size:28px;font-family:Courier New;padding:14px;border-radius:8px;margin-top:12px}
+.display.blow{background:#331015;color:#ff5a5a}
+.resBody{fill:#d7b075;stroke:#2b1b10;stroke-width:2}.band{stroke:#111;stroke-width:.5}
+.fuse{fill:#162f44;stroke:#7fd3ff;stroke-width:2}.note{color:#9fd8ff;line-height:1.35}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.good{color:#39ff9d}.bad{color:#ff5a5a}
 </style>
 </head>
 <body>
-
 <div class="panel">
-  <h1>Troubleshooting Trainer</h1>
-
-  <button onclick="newTrouble()">New Trouble Circuit</button>
-
-  <select id="circuitType">
-    <option value="series">Series</option>
-    <option value="parallel">Parallel</option>
-    <option value="complex">Complex</option>
-  </select>
-
-  <select id="faultType">
-    <option value="open">Open</option>
-    <option value="added">Added Resistance</option>
-    <option value="short">Short</option>
-  </select>
-
-  <button onclick="togglePower()">Power</button>
-  <button onclick="setMeterMode('volts')">Volts</button>
-  <button onclick="setMeterMode('ohms')">Ohms</button>
-
-  <div class="display" id="meterDisplay">0.00 V</div>
+<h1>Troubleshooting Trainer — Cleanup Patch 2</h1>
+<p class="note">Left-click terminals for red lead. Right-click terminals for black lead. This version focuses on the series fault engine.</p>
+<div class="row">
+<button onclick="newCircuit()">New Circuit</button>
+<label>Fault:</label><select id="faultType"><option value="open">Open</option><option value="added">Added Resistance</option><option value="short">Short / Bypass</option></select>
+<button id="powerBtn" onclick="togglePower()">Power: OFF</button>
+<button onclick="setMode('volts')">Volts</button><button onclick="setMode('ohms')">Ohms</button><button onclick="resetMeter()">Replace Meter</button><button onclick="revealAnswer()">Reveal Answer</button>
 </div>
-
-<div class="panel">
-  <svg id="schematic" viewBox="0 0 1050 520"></svg>
+<div class="display" id="meterDisplay">0.00 V</div>
+<div class="row">
+<label>Fault Type:</label><select id="answerFault"><option value="">Choose...</option><option value="open">Open</option><option value="added">Added Resistance</option><option value="short">Short</option></select>
+<label>Problem Between:</label><select id="answerLocation"></select>
+<button onclick="checkAnswer()">Check Diagnosis</button>
 </div>
+<p class="note" id="status">Ready.</p>
+</div>
+<div class="panel"><svg id="schematic" viewBox="0 0 1220 570"></svg></div>
 
 <script>
-let powerOn=false;
-let meterMode='volts';
-let redNode=0;
-let blackNode=9;
-let currentType='series';
+let powerOn=false,meterMode='volts',meterBlown=false,redNode=0,blackNode=10,faultType='open',faultSegment='4-5';
+let nodeVoltages={},segmentData=[],totalR=0,currentA=0;
+const SOURCE_V=24;
+const COLORS={black:"#111",brown:"#6b3f1f",red:"#c22",orange:"#f58220",yellow:"#ffd21f",green:"#168a42",blue:"#2459d8",violet:"#7d3fb2",gray:"#888",white:"#f5f5f5",gold:"#c8a540"};
+const DIGITS=["black","brown","red","orange","yellow","green","blue","violet","gray","white"];
+const nodes={0:{x:230,y:270,label:"BAT+"},1:{x:330,y:270,label:"T1"},2:{x:420,y:270,label:"T2"},3:{x:510,y:270,label:"T3"},4:{x:600,y:270,label:"T4"},5:{x:690,y:270,label:"T5"},6:{x:780,y:270,label:"T6"},7:{x:870,y:270,label:"T7"},8:{x:960,y:270,label:"T8"},9:{x:1060,y:270,label:"T9"},10:{x:1150,y:270,label:"GND"}};
+const baseSegments=[
+{id:"0-1",type:"fuse",label:"F1",a:0,b:1,r:0},
+{id:"1-2",type:"wire",label:"W1",a:1,b:2,r:0},
+{id:"2-3",type:"resistor",label:"R1",a:2,b:3,r:1000},
+{id:"3-4",type:"wire",label:"W2",a:3,b:4,r:0},
+{id:"4-5",type:"resistor",label:"R2",a:4,b:5,r:2200},
+{id:"5-6",type:"wire",label:"W3",a:5,b:6,r:0},
+{id:"6-7",type:"resistor",label:"R3",a:6,b:7,r:4700},
+{id:"7-8",type:"wire",label:"W4",a:7,b:8,r:0},
+{id:"8-9",type:"resistor",label:"R4",a:8,b:9,r:3300},
+{id:"9-10",type:"wire",label:"W5",a:9,b:10,r:0}];
 
-const COLORS={
-  black:"#111111",
-  brown:"#6b3f1f",
-  red:"#c22",
-  orange:"#f58220",
-  yellow:"#ffd21f",
-  green:"#168a42",
-  blue:"#2459d8",
-  violet:"#7d3fb2",
-  gray:"#888",
-  white:"#f5f5f5",
-  gold:"#c8a540"
-};
+function line(x1,y1,x2,y2){return `<line class="wire" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`}
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function round(n,d=2){let m=Math.pow(10,d);return Math.round(n*m)/m}
+function resistorBands(value){let s=String(value),first=Number(s[0]),second=Number(s[1]),mult=s.length-2;return [DIGITS[first],DIGITS[second],DIGITS[mult],"gold"]}
 
-function line(x1,y1,x2,y2){
-  return `<line class="wire" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
+function buildAnswerOptions(){let sel=document.getElementById('answerLocation');sel.innerHTML='<option value="">Choose...</option>';baseSegments.forEach(s=>{sel.innerHTML+=`<option value="${s.id}">${nodes[s.a].label} and ${nodes[s.b].label}</option>`})}
+
+function newCircuit(){
+  faultType=document.getElementById('faultType').value; meterBlown=false; powerOn=false; meterMode='volts'; redNode=0; blackNode=10;
+  document.getElementById('powerBtn').classList.remove('powerOn'); document.getElementById('powerBtn').textContent='Power: OFF'; document.getElementById('meterDisplay').classList.remove('blow');
+  segmentData=baseSegments.map(s=>({...s,actualR:s.r,open:false,fault:false}));
+  let candidates=segmentData.filter(s=>faultType==='open'||(faultType==='added'&&(s.type==='wire'||s.type==='resistor'))||(faultType==='short'&&s.type==='resistor'));
+  let fault=candidates[rand(0,candidates.length-1)]; fault.fault=true; faultSegment=fault.id;
+  if(faultType==='open'){fault.open=true;fault.actualR=Infinity}
+  if(faultType==='added'){fault.actualR=fault.type==='resistor'?fault.r*rand(2,4):rand(500,1500)}
+  if(faultType==='short'){fault.actualR=.05}
+  solveSeries(); drawCircuit(); updateMeter(); document.getElementById('status').textContent='New circuit loaded.';
 }
 
-function resistorBands(value){
-  const map=["black","brown","red","orange","yellow","green","blue","violet","gray","white"];
-  let s=String(value);
-  let first=Number(s[0]);
-  let second=Number(s[1]);
-  let multiplier=s.length-2;
-  return [map[first],map[second],map[multiplier],"gold"];
-}
-
-function drawResistor(svg,x1,y1,x2,y2,label,value){
-  const mid=(x1+x2)/2;
-  const w=70;
-  const h=26;
-
-  svg.innerHTML += `<line class="wire" x1="${x1}" y1="${y1}" x2="${mid-w/2}" y2="${y1}"></line>`;
-  svg.innerHTML += `<line class="wire" x1="${mid+w/2}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
-
-  svg.innerHTML += `<rect class="resBody" x="${mid-w/2}" y="${y1-h/2}" width="${w}" height="${h}" rx="12"></rect>`;
-
-  const bands=resistorBands(value);
-
-  bands.forEach((b,i)=>{
-    svg.innerHTML += `<rect class="band" x="${mid-22+i*14}" y="${y1-h/2}" width="8" height="${h}" fill="${COLORS[b]}"></rect>`;
-  });
-
-  svg.innerHTML += `<text x="${mid}" y="${y1-24}" fill="#7fd3ff" text-anchor="middle">${label}</text>`;
-}
-
-function terminal(svg,x,y,node,label){
-  svg.innerHTML += `<circle class="terminal" cx="${x}" cy="${y}" r="9"
-    onclick="setLead('red',${node})"
-    oncontextmenu="event.preventDefault();setLead('black',${node});return false;"></circle>`;
-
-  svg.innerHTML += `<text x="${x}" y="${y+28}" fill="#7fd3ff" text-anchor="middle">${label}</text>`;
-}
-
-function drawBattery(svg){
-  svg.innerHTML += line(40,260,75,260);
-  svg.innerHTML += line(75,225,75,295);
-  svg.innerHTML += line(95,240,95,280);
-  svg.innerHTML += line(115,225,115,295);
-  svg.innerHTML += line(135,240,135,280);
-  svg.innerHTML += line(135,260,170,260);
-}
-
-function drawGround(svg,x,y){
-  svg.innerHTML += line(x,y,x,y+30);
-  svg.innerHTML += line(x-20,y+30,x+20,y+30);
-  svg.innerHTML += line(x-14,y+40,x+14,y+40);
-  svg.innerHTML += line(x-8,y+50,x+8,y+50);
-}
-
-function drawLeads(svg){
-  const points={
-    0:[260,260],
-    1:[360,260],
-    2:[470,260],
-    3:[590,260],
-    4:[700,260],
-    5:[820,260],
-    9:[960,260]
-  };
-
-  const r=points[redNode];
-  const b=points[blackNode];
-
-  if(r){
-    svg.innerHTML += `<path class="redLead" d="M 80 500 C 150 470, ${r[0]-40} ${r[1]+60}, ${r[0]} ${r[1]}"></path>`;
+function solveSeries(){
+  nodeVoltages={}; let openIndex=segmentData.findIndex(s=>s.open);
+  if(openIndex>=0){
+    currentA=0; segmentData.forEach((s,i)=>{if(i<openIndex){nodeVoltages[s.a]=SOURCE_V;nodeVoltages[s.b]=SOURCE_V}else if(i===openIndex){nodeVoltages[s.a]=SOURCE_V;nodeVoltages[s.b]=0}else{nodeVoltages[s.a]=0;nodeVoltages[s.b]=0}});
+    nodeVoltages[0]=SOURCE_V; nodeVoltages[10]=0; totalR=Infinity; return;
   }
-
-  if(b){
-    svg.innerHTML += `<path class="blackLead" d="M 180 500 C 250 470, ${b[0]-40} ${b[1]+60}, ${b[0]} ${b[1]}"></path>`;
-  }
-}
-
-function drawSeries(svg){
-  drawBattery(svg);
-
-  svg.innerHTML += line(170,260,260,260);
-
-  drawResistor(svg,360,260,470,260,"R1",1000);
-  drawResistor(svg,590,260,700,260,"R2",2200);
-  drawResistor(svg,820,260,930,260,"R3",4700);
-
-  svg.innerHTML += line(260,260,360,260);
-  svg.innerHTML += line(470,260,590,260);
-  svg.innerHTML += line(700,260,820,260);
-  svg.innerHTML += line(930,260,960,260);
-
-  drawGround(svg,960,260);
-
-  terminal(svg,260,260,0,"T0");
-  terminal(svg,360,260,1,"T1");
-  terminal(svg,470,260,2,"T2");
-  terminal(svg,590,260,3,"T3");
-  terminal(svg,700,260,4,"T4");
-  terminal(svg,820,260,5,"T5");
-  terminal(svg,960,260,9,"GND");
-}
-
-function drawParallel(svg){
-  drawBattery(svg);
-
-  svg.innerHTML += line(170,260,320,260);
-  svg.innerHTML += line(320,120,320,400);
-  svg.innerHTML += line(820,120,820,400);
-
-  const ys=[150,250,350];
-
-  ys.forEach((y,i)=>{
-    drawResistor(svg,320,y,820,y,"R"+(i+1),[1000,2200,4700][i]);
-  });
-
-  svg.innerHTML += line(820,260,960,260);
-
-  drawGround(svg,960,260);
-
-  terminal(svg,320,260,0,"T0");
-  terminal(svg,820,260,1,"T1");
-  terminal(svg,960,260,9,"GND");
-}
-
-function drawComplex(svg){
-  drawBattery(svg);
-
-  svg.innerHTML += line(170,260,320,260);
-
-  drawResistor(svg,320,260,450,260,"R1",1000);
-
-  svg.innerHTML += line(450,260,560,260);
-  svg.innerHTML += line(560,150,560,360);
-  svg.innerHTML += line(820,150,820,360);
-
-  drawResistor(svg,560,180,820,180,"R2",2200);
-  drawResistor(svg,560,330,820,330,"R3",4700);
-
-  svg.innerHTML += line(820,260,960,260);
-
-  drawGround(svg,960,260);
-
-  terminal(svg,320,260,0,"T0");
-  terminal(svg,450,260,1,"T1");
-  terminal(svg,560,260,2,"T2");
-  terminal(svg,820,260,3,"T3");
-  terminal(svg,960,260,9,"GND");
+  totalR=segmentData.reduce((sum,s)=>sum+s.actualR,0); currentA=SOURCE_V/totalR; let v=SOURCE_V; nodeVoltages[0]=SOURCE_V;
+  segmentData.forEach(s=>{nodeVoltages[s.a]=v; v-=currentA*s.actualR; nodeVoltages[s.b]=v}); nodeVoltages[10]=0;
 }
 
 function drawCircuit(){
-  const svg=document.getElementById('schematic');
-  svg.innerHTML='';
-
-  currentType=document.getElementById('circuitType').value;
-
-  if(currentType==='series') drawSeries(svg);
-  if(currentType==='parallel') drawParallel(svg);
-  if(currentType==='complex') drawComplex(svg);
-
-  drawLeads(svg);
-  updateMeter();
+  const svg=document.getElementById('schematic'); svg.innerHTML=''; drawBattery(svg); drawAmmeter(svg); let y=270;
+  svg.innerHTML+=line(180,y,230,y); terminal(svg,0); drawFuse(svg,230,y,330,y,'F1'); terminal(svg,1);
+  drawWireLabel(svg,330,y,420,y,'W1'); terminal(svg,2); drawResistor(svg,420,y,510,y,'R1',1000); terminal(svg,3);
+  drawWireLabel(svg,510,y,600,y,'W2'); terminal(svg,4); drawResistor(svg,600,y,690,y,'R2',2200); terminal(svg,5);
+  drawWireLabel(svg,690,y,780,y,'W3'); terminal(svg,6); drawResistor(svg,780,y,870,y,'R3',4700); terminal(svg,7);
+  drawWireLabel(svg,870,y,960,y,'W4'); terminal(svg,8); drawResistor(svg,960,y,1060,y,'R4',3300);
+  terminal(svg,9); drawWireLabel(svg,1060,y,1150,y,'W5'); terminal(svg,10); drawGround(svg,1150,y); drawLeads(svg);
 }
 
-function setLead(color,node){
-  if(color==='red') redNode=node;
-  else blackNode=node;
+function drawBattery(svg){let y=270;svg.innerHTML+=line(40,y,75,y);svg.innerHTML+=line(75,y-20,75,y+20);svg.innerHTML+=line(95,y-35,95,y+35);svg.innerHTML+=line(115,y-20,115,y+20);svg.innerHTML+=line(135,y-35,135,y+35);svg.innerHTML+=line(135,y,177,y);svg.innerHTML+=`<text x="67" y="${y-45}" fill="#7fd3ff">−</text><text x="137" y="${y-45}" fill="#7fd3ff">+</text>`}
+function drawAmmeter(svg){let y=270;svg.innerHTML+=`<circle cx="205" cy="${y}" r="27" fill="#061522" stroke="#39ff9d" stroke-width="2"></circle><text x="205" y="${y-3}" fill="#39ff9d" text-anchor="middle" font-size="16">A</text><text x="205" y="${y+18}" fill="#39ff9d" text-anchor="middle" font-size="11">${powerOn?round(currentA,3):'0.00'}A</text>`;svg.innerHTML+=line(177,y,178,y)+line(232,y,230,y)}
+function drawFuse(svg,x1,y1,x2,y2,label){let mid=(x1+x2)/2;svg.innerHTML+=line(x1,y1,mid-28,y1)+`<rect class="fuse" x="${mid-28}" y="${y1-13}" width="56" height="26" rx="6"></rect><text x="${mid}" y="${y1+5}" fill="#7fd3ff" text-anchor="middle">${label}</text>`+line(mid+28,y1,x2,y2)}
+function drawWireLabel(svg,x1,y1,x2,y2,label){svg.innerHTML+=line(x1,y1,x2,y2)+`<text x="${(x1+x2)/2}" y="${y1-18}" fill="#7fd3ff" text-anchor="middle" font-size="12">${label}</text>`}
+function drawResistor(svg,x1,y1,x2,y2,label,value){let mid=(x1+x2)/2,w=66,h=26;svg.innerHTML+=`<line class="wire" x1="${x1}" y1="${y1}" x2="${mid-w/2}" y2="${y1}"></line><line class="wire" x1="${mid+w/2}" y1="${y1}" x2="${x2}" y2="${y2}"></line><rect class="resBody" x="${mid-w/2}" y="${y1-h/2}" width="${w}" height="${h}" rx="12"></rect>`;resistorBands(value).forEach((b,i)=>svg.innerHTML+=`<rect class="band" x="${mid-21+i*13}" y="${y1-h/2}" width="8" height="${h}" fill="${COLORS[b]}"></rect>`);svg.innerHTML+=`<text x="${mid}" y="${y1-26}" fill="#7fd3ff" text-anchor="middle">${label}</text>`}
+function terminal(svg,id){let p=nodes[id];svg.innerHTML+=`<circle class="terminal" cx="${p.x}" cy="${p.y}" r="9" onclick="setLead('red',${id})" oncontextmenu="event.preventDefault();setLead('black',${id});return false;"></circle><text x="${p.x}" y="${p.y+30}" fill="#7fd3ff" text-anchor="middle" font-size="12">${p.label}</text>`}
+function drawGround(svg,x,y){svg.innerHTML+=line(x,y,x,y+30)+line(x-20,y+30,x+20,y+30)+line(x-14,y+40,x+14,y+40)+line(x-8,y+50,x+8,y+50)}
+function drawLeads(svg){let r=nodes[redNode],b=nodes[blackNode];svg.innerHTML+=`<path class="redLead" d="M 100 525 C 180 500, ${r.x-40} ${r.y+70}, ${r.x} ${r.y}"></path><circle class="tipRed" cx="${r.x}" cy="${r.y}" r="6"></circle>`;svg.innerHTML+=`<path class="blackLead" d="M 220 525 C 300 500, ${b.x-40} ${b.y+70}, ${b.x} ${b.y}"></path><circle class="tipBlack" cx="${b.x}" cy="${b.y}" r="6"></circle>`}
 
-  drawCircuit();
-}
+function setLead(color,node){node=Number(node); if(color==='red')redNode=node; else blackNode=node; drawCircuit(); updateMeter()}
+function togglePower(){powerOn=!powerOn;let btn=document.getElementById('powerBtn');btn.textContent=powerOn?'Power: ON':'Power: OFF';btn.classList.toggle('powerOn',powerOn);drawCircuit();updateMeter()}
+function setMode(mode){meterMode=mode;updateMeter()}
+function resetMeter(){meterBlown=false;document.getElementById('meterDisplay').classList.remove('blow');updateMeter()}
 
 function updateMeter(){
-  const display=document.getElementById('meterDisplay');
-
-  if(meterMode==='volts'){
-    if(!powerOn){
-      display.textContent='0.00 V';
-    } else {
-      display.textContent='24.00 V';
-    }
-  }
-
-  if(meterMode==='ohms'){
-    if(powerOn){
-      display.textContent='BLOWN';
-    } else {
-      display.textContent='1000 Ω';
-    }
-  }
+  let display=document.getElementById('meterDisplay');
+  if(meterBlown){display.textContent='BLOWN';return}
+  if(meterMode==='ohms'&&powerOn){meterBlown=true;display.classList.add('blow');display.textContent='BLOWN';document.getElementById('status').innerHTML='<span class="bad">Meter damaged: ohms on powered circuit.</span>';return}
+  if(meterMode==='volts'){if(!powerOn){display.textContent='0.00 V';return}let v=Math.abs((nodeVoltages[redNode]??0)-(nodeVoltages[blackNode]??0));display.textContent=round(v,2).toFixed(2)+' V';return}
+  if(meterMode==='ohms'){let r=ohmsBetween(redNode,blackNode);display.textContent=isFinite(r)?round(r,1)+' Ω':'OL'}
 }
-
-function setMeterMode(mode){
-  meterMode=mode;
-  updateMeter();
-}
-
-function togglePower(){
-  powerOn=!powerOn;
-  updateMeter();
-}
-
-function newTrouble(){
-  drawCircuit();
-}
-
-window.newTrouble=newTrouble;
-window.setLead=setLead;
-window.togglePower=togglePower;
-window.setMeterMode=setMeterMode;
-
-newTrouble();
+function ohmsBetween(a,b){if(a===b)return 0;let seg=segmentData.find(s=>(s.a===a&&s.b===b)||(s.a===b&&s.b===a));if(seg){return seg.open?Infinity:seg.actualR}let lo=Math.min(a,b),hi=Math.max(a,b),sum=0;for(let n=lo;n<hi;n++){let s=segmentData.find(x=>x.a===n&&x.b===n+1);if(!s||s.open)return Infinity;sum+=s.actualR}return sum}
+function checkAnswer(){let type=document.getElementById('answerFault').value,loc=document.getElementById('answerLocation').value;if(type===faultType&&loc===faultSegment)document.getElementById('status').innerHTML='<span class="good">Correct diagnosis!</span>';else document.getElementById('status').innerHTML='<span class="bad">Keep troubleshooting.</span>'}
+function revealAnswer(){let seg=baseSegments.find(s=>s.id===faultSegment);document.getElementById('status').innerHTML=`Answer: <b>${faultType.toUpperCase()}</b> between <b>${nodes[seg.a].label}</b> and <b>${nodes[seg.b].label}</b>`}
+window.newCircuit=newCircuit;window.setLead=setLead;window.togglePower=togglePower;window.setMode=setMode;window.resetMeter=resetMeter;window.checkAnswer=checkAnswer;window.revealAnswer=revealAnswer;
+buildAnswerOptions();newCircuit();
 </script>
-
 </body>
 </html>
