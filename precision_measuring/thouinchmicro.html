@@ -1,1 +1,260 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>0-1 Inch Micrometer Trainer v1</title>
+<style>
+  :root{
+    --bg:#101820; --panel:#17232e; --panel2:#203142; --ink:#eaf2f8; --muted:#9fb3c6;
+    --accent:#f2b84b; --good:#45d483; --bad:#ff6b6b; --metal1:#f8fbfd; --metal2:#cfd9e0;
+    --line:#121820;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#213246,#0b1117 70%);color:var(--ink);}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px;}
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:14px;}
+  h1{font-size:clamp(1.4rem,3vw,2.2rem);margin:0;color:#fff;letter-spacing:.4px;}
+  .sub{color:var(--muted);font-size:.95rem;margin-top:4px;}
+  .trainer{display:grid;grid-template-columns:1fr 330px;gap:16px;align-items:stretch;}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 60px rgba(0,0,0,.35);border-radius:18px;overflow:hidden;}
+  .stage{min-height:520px;padding:14px;background:linear-gradient(135deg,#233447,#111a23);position:relative;}
+  svg{width:100%;height:auto;display:block;}
+  .controls{padding:18px;background:linear-gradient(180deg,#1d2a38,#121b24);}
+  label{display:block;color:var(--muted);font-size:.85rem;margin-bottom:8px;}
+  input{width:100%;font-size:1.8rem;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:#0c1218;color:#fff;outline:none;}
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(242,184,75,.16);}
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+  button{border:0;border-radius:12px;padding:13px 10px;font-weight:700;cursor:pointer;color:#101820;background:var(--accent);box-shadow:0 8px 20px rgba(0,0,0,.25);}
+  button.secondary{background:#dce8f2;}
+  button:hover{filter:brightness(1.05)}
+  .feedback{min-height:56px;padding:12px;border-radius:12px;background:#0c1218;border:1px solid rgba(255,255,255,.1);font-weight:700;line-height:1.35;}
+  .feedback.good{border-color:rgba(69,212,131,.65);color:var(--good)}
+  .feedback.bad{border-color:rgba(255,107,107,.65);color:var(--bad)}
+  .hints{margin-top:14px;padding:14px;border-radius:14px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1);}
+  .hints h2{font-size:1rem;margin:0 0 10px;color:#fff;}
+  .hint{padding:10px 0;border-top:1px solid rgba(255,255,255,.1);}
+  .hint:first-of-type{border-top:0;padding-top:0;}
+  .hint b{color:var(--accent)}
+  .hint span{display:block;color:var(--muted);font-size:.92rem;margin-top:3px;line-height:1.3;}
+  .answerPeek{display:none;margin-top:10px;color:#fff;background:rgba(242,184,75,.12);border:1px solid rgba(242,184,75,.35);padding:10px;border-radius:10px;}
+  .metal{fill:url(#metalGrad);stroke:#101820;stroke-width:3;}
+  .darkMetal{fill:url(#darkMetalGrad);stroke:#101820;stroke-width:3;}
+  .frame{fill:url(#frameGrad);stroke:#101820;stroke-width:4;}
+  .anvil{fill:url(#darkMetalGrad);stroke:#101820;stroke-width:3;}
+  .knurl line{stroke:#6f7f8c;stroke-width:1.4;opacity:.75}
+  .scaleLine{stroke:#101820;stroke-width:2;stroke-linecap:round}
+  .scaleSmall{stroke-width:1.2}.scaleMid{stroke-width:1.6}.scaleLong{stroke-width:2.3}
+  .number{font-size:28px;fill:#05080a;font-weight:700;font-family:Arial,Helvetica,sans-serif;}
+  .tinyNum{font-size:17px;fill:#05080a;font-weight:700;}
+  .labelText{font-size:13px;fill:#101820;font-weight:700;opacity:.72}
+  .readLine{stroke:#dc3e45;stroke-width:2;opacity:.55}
+  .glow{filter:drop-shadow(0 10px 14px rgba(0,0,0,.35));}
+  .moving{transition:transform .55s cubic-bezier(.22,.8,.25,1)}
+  @media(max-width:900px){.trainer{grid-template-columns:1fr}.stage{min-height:auto}.controls{order:2}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>0-1 Inch Micrometer Trainer</h1>
+      <div class="sub">Type the measurement, then check your answer. Use three decimal places.</div>
+    </div>
+  </header>
+  <main class="trainer">
+    <section class="card stage">
+      <svg viewBox="0 0 1100 540" role="img" aria-label="Animated inch micrometer reading trainer">
+        <defs>
+          <linearGradient id="metalGrad" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#e4ebf0"/><stop offset=".7" stop-color="#b7c5cf"/><stop offset="1" stop-color="#f7fafc"/>
+          </linearGradient>
+          <linearGradient id="darkMetalGrad" x1="0" x2="1">
+            <stop offset="0" stop-color="#6d7b86"/><stop offset=".5" stop-color="#d8e0e5"/><stop offset="1" stop-color="#56636d"/>
+          </linearGradient>
+          <linearGradient id="frameGrad" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#e9eef2"/><stop offset=".55" stop-color="#bfcad2"/><stop offset="1" stop-color="#f9fbfc"/>
+          </linearGradient>
+          <clipPath id="sleeveClip"><rect x="345" y="163" width="360" height="158" rx="3"/></clipPath>
+          <clipPath id="thimbleClip"><polygon points="700,130 938,130 938,352 700,352 650,327 650,155"/></clipPath>
+        </defs>
+
+        <!-- frame -->
+        <path class="frame glow" d="M145 85 H360 V270 C316 275 300 303 300 338 V375 H205 V302 H125 V392 C125 460 177 504 247 504 H395 C468 504 521 462 531 391 H625 V450 H705 V374 H650 V318 H345 V270 H160 V160 H145 C104 160 75 190 75 233 C75 276 104 306 145 306 H160 V270 H112 V160 H145 Z"/>
+        <rect class="anvil" x="78" y="210" width="63" height="54" rx="8"/>
+        <rect class="darkMetal" x="141" y="220" width="55" height="34" rx="4"/>
+        <rect class="anvil" x="300" y="216" width="50" height="42" rx="5"/>
+        <rect class="darkMetal" x="350" y="223" width="35" height="28" rx="4"/>
+        <circle cx="235" cy="180" r="46" fill="#f4f7f9" stroke="#111820" stroke-width="4"/>
+        <circle cx="235" cy="180" r="24" fill="none" stroke="#111820" stroke-width="4"/>
+        <line x1="219" y1="198" x2="251" y2="162" stroke="#111820" stroke-width="5"/>
+        <rect x="268" y="217" width="27" height="110" rx="10" transform="rotate(-32 281.5 272)" fill="#d8e1e7" stroke="#111820" stroke-width="4"/>
+        <text x="94" y="107" class="labelText">PRECISION MEASURING TRAINER</text>
+        <text x="94" y="128" class="labelText">0-1 INCH MICROMETER</text>
+
+        <!-- spindle extension changes -->
+        <g id="spindle" class="moving">
+          <rect class="darkMetal" x="349" y="223" width="86" height="28" rx="4"/>
+        </g>
+
+        <!-- sleeve fixed -->
+        <rect class="metal glow" x="385" y="158" width="310" height="168" rx="5"/>
+        <line class="scaleLine" x1="405" y1="242" x2="680" y2="242"/>
+        <g id="sleeveScale"></g>
+        <text class="number" x="407" y="309">0</text><text class="number" x="482" y="309">1</text><text class="number" x="557" y="309">2</text><text class="number" x="632" y="309">3</text>
+        <g id="sleeveExtraNums"></g>
+
+        <!-- thimble moving group -->
+        <g id="thimble" class="moving">
+          <polygon class="metal glow" points="690,135 865,135 925,156 925,328 865,349 690,349 650,327 650,155"/>
+          <rect class="metal" x="865" y="135" width="235" height="214" rx="4"/>
+          <rect class="darkMetal" x="1088" y="160" width="65" height="165" rx="6"/>
+          <g class="knurl" id="knurl"></g>
+          <line x1="770" y1="145" x2="770" y2="339" stroke="#788894" stroke-width="1.5"/>
+          <g id="thimbleScale"></g>
+        </g>
+
+        <!-- reference line on top -->
+        <line class="readLine" x1="397" y1="242" x2="830" y2="242"/>
+      </svg>
+    </section>
+
+    <aside class="card controls">
+      <label for="answer">Enter measurement in inches</label>
+      <input id="answer" inputmode="decimal" autocomplete="off" placeholder="0.000" />
+      <div class="btns">
+        <button id="checkBtn">Check Answer</button>
+        <button id="newBtn" class="secondary">New Problem</button>
+      </div>
+      <div id="feedback" class="feedback">Read the micrometer and enter the measurement.</div>
+
+      <section class="hints">
+        <h2>Reading Hints</h2>
+        <div class="hint"><b>1. Sleeve scale</b><span>Read the last visible numbered tenth and any .025 marks showing to the left of the thimble edge.</span></div>
+        <div class="hint"><b>2. Thimble scale</b><span>Find the thimble line that lines up with the sleeve reference line. Each thimble line is .001 inch.</span></div>
+        <div class="hint"><b>3. Vernier scale</b><span>For ten-thousandths micrometers, use the vernier line that matches best to add .0001 increments. This v1 uses thousandths; vernier mode comes next.</span></div>
+      </section>
+    </aside>
+  </main>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const sleeveScale = $('#sleeveScale');
+const sleeveExtraNums = $('#sleeveExtraNums');
+const thimbleScale = $('#thimbleScale');
+const knurl = $('#knurl');
+const thimble = $('#thimble');
+const spindle = $('#spindle');
+const feedback = $('#feedback');
+const input = $('#answer');
+
+const baseX = 405;
+const tickSpacing = 18.75; // .025 per tick, 4 ticks per tenth
+let current = 0;
+
+function drawSleeve(){
+  let html = '';
+  for(let i=0;i<=16;i++){
+    const x = baseX + i*tickSpacing;
+    const len = i%4===0 ? 55 : (i%2===0 ? 38 : 27);
+    html += `<line class="scaleLine ${i%4===0?'scaleLong':i%2===0?'scaleMid':'scaleSmall'}" x1="${x}" y1="242" x2="${x}" y2="${242+len}"/>`;
+    if(i>0 && i%4===0 && i<=12){
+      const n = i/4;
+      // bottom numbers already manually placed for 0-3
+    }
+  }
+  // upper half .025 ticks for shop-realistic look
+  for(let i=0;i<=16;i++){
+    const x = baseX + i*tickSpacing;
+    const len = i%4===0 ? 60 : (i%2===0 ? 43 : 30);
+    html += `<line class="scaleLine ${i%4===0?'scaleLong':i%2===0?'scaleMid':'scaleSmall'}" x1="${x}" y1="242" x2="${x}" y2="${242-len}"/>`;
+  }
+  sleeveScale.innerHTML = html;
+}
+
+function drawThimble(){
+  let html = '';
+  const startY = 145;
+  const spacing = 8.2;
+  for(let i=0;i<=25;i++){
+    const y = startY + i*spacing;
+    const major = i%5===0;
+    const len = major ? 74 : 46;
+    html += `<line class="scaleLine ${major?'scaleLong':'scaleSmall'}" x1="650" y1="${y}" x2="${650+len}" y2="${y}"/>`;
+    if(major){
+      let val = (25 - i + 25) % 25;
+      if(i===5) val = 20; if(i===10) val = 15; if(i===15) val = 10; if(i===20) val = 5; if(i===25) val = 0; if(i===0) val = 25;
+      html += `<text class="tinyNum" x="730" y="${y+6}">${val===25?'':val}</text>`;
+    }
+  }
+  thimbleScale.innerHTML = html;
+
+  let k = '';
+  for(let x=885;x<1090;x+=15){ k += `<line x1="${x}" y1="139" x2="${x+130}" y2="349"/>`; }
+  for(let x=885;x<1090;x+=15){ k += `<line x1="${x+130}" y1="139" x2="${x}" y2="349"/>`; }
+  knurl.innerHTML = k;
+}
+
+function newProblem(){
+  // keep v1 in a visually clear training range for the drawn sleeve
+  current = Math.floor(Math.random()*376); // 0.000 to .375 for this v1 sleeve drawing
+  render(current/1000);
+  input.value = '';
+  feedback.className = 'feedback';
+  feedback.textContent = 'Read the micrometer and enter the measurement.';
+  input.focus();
+}
+
+function render(value){
+  const thou = Math.round(value*1000);
+  const sleeveTicks = Math.floor(thou/25);
+  const thimbleThou = thou % 25;
+  const sleeveEdgeX = baseX + sleeveTicks*tickSpacing + 10;
+  const shift = sleeveEdgeX - 650;
+  thimble.style.transform = `translateX(${shift}px)`;
+  spindle.style.transform = `translateX(${shift}px)`;
+
+  // rotate/slide thimble scale vertically so selected thimble mark meets red reference line
+  const referenceY = 242;
+  const startY = 145;
+  const spacing = 8.2;
+  const markIndex = 25 - thimbleThou;
+  const desiredY = startY + markIndex*spacing;
+  thimbleScale.style.transform = `translateY(${referenceY - desiredY}px)`;
+}
+
+function normalize(v){
+  v = String(v).trim();
+  if(v.startsWith('.')) v = '0' + v;
+  return Number(v);
+}
+
+function checkAnswer(){
+  const user = normalize(input.value);
+  const correct = current/1000;
+  feedback.className = 'feedback';
+  if(Number.isNaN(user)){
+    feedback.classList.add('bad');
+    feedback.textContent = 'Enter a decimal measurement like 0.125';
+    return;
+  }
+  if(Math.abs(user-correct) < 0.0005){
+    feedback.classList.add('good');
+    feedback.textContent = 'Correct. Nice micrometer reading.';
+  }else{
+    feedback.classList.add('bad');
+    feedback.textContent = 'Not quite. Check the sleeve first, then the thimble line on the reference line.';
+  }
+}
+
+$('#checkBtn').addEventListener('click', checkAnswer);
+$('#newBtn').addEventListener('click', newProblem);
+input.addEventListener('keydown', e => { if(e.key === 'Enter') checkAnswer(); });
+
+drawSleeve();
+drawThimble();
+newProblem();
+</script>
+</body>
+</html>
