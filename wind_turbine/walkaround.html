@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commercial Wind Turbine Trainer - MVP v25</title>
+  <title>Commercial Wind Turbine Trainer - MVP v28 V80 Inspired</title>
   <style>
     :root{
       --panel:#0f172a;
@@ -237,7 +237,7 @@
 
   <section class="hud">
     <h1>Commercial Wind Turbine Trainer</h1>
-    <div class="sub">MVP v25: improved nacelle internal realism with more believable drivetrain, control, cooling, and yaw components.</div>
+    <div class="sub">MVP v28: V80-inspired visual pass with a more realistic nacelle silhouette, rooftop cooling housing, roof hardware, and cleaner blade/root proportions.</div>
     <div class="chips">
       <span class="chip"><strong>Drag</strong> orbit</span>
       <span class="chip"><strong>Wheel</strong> zoom</span>
@@ -308,7 +308,7 @@
     </div>
 
     <div class="part-grid" id="partButtons"></div>
-    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: the nacelle internals are now more realistic while keeping the trainer guides and guided flow behavior.</div>
+    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: this V80-inspired pass focuses on the nacelle shell, rooftop cooling house, roof hardware, and slightly more realistic blade/root proportions.</div>
   </aside>
 
   <div class="footer" id="footerText">Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span></div>
@@ -430,7 +430,11 @@
       magenta: new THREE.MeshStandardMaterial({ color: 0xd946ef, roughness: 0.45, metalness: 0.08 }),
       mechGuide: new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.48, depthWrite: false }),
       electricGuide: new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.46, depthWrite: false }),
-      yawGuide: new THREE.MeshBasicMaterial({ color: 0xd946ef, transparent: true, opacity: 0.42, depthWrite: false })
+      yawGuide: new THREE.MeshBasicMaterial({ color: 0xd946ef, transparent: true, opacity: 0.42, depthWrite: false }),
+      sensorWhite: new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35, metalness: 0.08 }),
+      sensorDark: new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.42, metalness: 0.35 }),
+      obstructionRed: new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4, metalness: 0.08 }),
+      ventDark: new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65, metalness: 0.22 })
     };
 
     const parts = {
@@ -473,7 +477,7 @@
         whatIs: 'The nacelle is the large housing at the top of the tower.',
         whatDoes: 'It protects and supports the main drivetrain and electrical conversion components.',
         whyCare: 'Most of the major mechanical and electrical maintenance work happens in or around the nacelle.',
-        moreDetail: 'In this geared turbine layout, the nacelle contains the low-speed shaft, gearbox, brake, high-speed shaft, generator, control cabinet, cooling equipment, and yaw machinery. In the deeper view, the cover panels slide open and subtle guide paths show mechanical rotation, electrical routing, or yaw movement depending on the active system.',
+        moreDetail: 'In this geared turbine layout, the nacelle contains the low-speed shaft, gearbox, brake, high-speed shaft, generator, control cabinet, cooling equipment, and yaw machinery. This version pushes the exterior toward a V80-style silhouette with roof cooling hardware and cleaner cutaway paneling. In the deeper view, the cover panels slide open and subtle guide paths show mechanical rotation, electrical routing, or yaw movement depending on the active system.',
         focus: new THREE.Vector3(0, 73, 0),
         camera: new THREE.Vector3(-24, 79, 21),
         inside: 'nacelle'
@@ -1089,45 +1093,166 @@
     scene.add(yawInside);
 
     // Nacelle shell and cutaway covers
-    const nacelle = register(new THREE.Mesh(makeRoundedBoxGeometry(13.5, 5.2, 5.1, .9), cloneMat(materials.nacelle)), 'nacelle');
-    nacelle.position.set(0, 73, 0);
-    addEdges(nacelle, 0x1e293b, .22);
+    // This pass pushes the exterior silhouette toward a V80-style look:
+    // a cleaner boxy nacelle body, a blunter front cap, and a rear roof cooling house.
+    const nacelle = register(new THREE.Mesh(makeRoundedBoxGeometry(12.9, 4.95, 4.85, .78), cloneMat(materials.nacelle)), 'nacelle');
+    nacelle.position.set(.35, 73, 0);
+    addEdges(nacelle, 0x1e293b, .18);
     scene.add(nacelle);
 
+    const nacelleBellyFairing = new THREE.Mesh(makeRoundedBoxGeometry(8.7, 1.55, 4.35, .32), cloneMat(materials.nacelleShadow));
+    nacelleBellyFairing.position.set(1.25,70.95,0);
+    nacelleBellyFairing.material.transparent = true;
+    scene.add(nacelleBellyFairing);
+
     const rearGrille = new THREE.Group();
-    for(let i=0; i<6; i++){
-      const slat = new THREE.Mesh(new THREE.BoxGeometry(.08, .12, 3.1), cloneMat(materials.towerDark));
-      slat.position.set(6.86, 72.1 + i*.38, 0);
+    for(let i=0; i<7; i++){
+      const slat = new THREE.Mesh(new THREE.BoxGeometry(.09, .12, 3.0), cloneMat(materials.ventDark));
+      slat.position.set(6.62, 71.95 + i*.39, 0);
       rearGrille.add(slat);
     }
     scene.add(rearGrille);
 
-    const nacelleNose = register(new THREE.Mesh(new THREE.ConeGeometry(2.65, 2.6, 48), cloneMat(materials.nacelle)), 'nacelle');
-    nacelleNose.rotation.z = Math.PI / 2;
-    nacelleNose.position.set(-7.9, 73, 0);
+    const nacelleNose = register(new THREE.Mesh(makeRoundedBoxGeometry(2.5, 4.7, 4.55, .65), cloneMat(materials.nacelle)), 'nacelle');
+    nacelleNose.position.set(-7.18, 73, 0);
+    addEdges(nacelleNose, 0x1e293b, .16);
     scene.add(nacelleNose);
 
-    const nacelleCoverTop = new THREE.Mesh(makeRoundedBoxGeometry(12.7, .52, 4.7, .3), cloneMat(materials.nacelleShadow));
-    nacelleCoverTop.position.set(.1,75.38,0);
-    addEdges(nacelleCoverTop, 0x334155, .28);
+    const nacelleNoseFace = new THREE.Mesh(new THREE.BoxGeometry(.05, 4.25, 4.15), cloneMat(materials.towerSeam));
+    nacelleNoseFace.position.set(-8.42, 73, 0);
+    nacelleNoseFace.material.transparent = true;
+    nacelleNoseFace.material.opacity = .18;
+    scene.add(nacelleNoseFace);
+
+    const nacelleCoverTop = new THREE.Mesh(makeRoundedBoxGeometry(12.15, .48, 4.5, .26), cloneMat(materials.nacelleShadow));
+    nacelleCoverTop.position.set(.35,75.28,0);
+    addEdges(nacelleCoverTop, 0x334155, .22);
     scene.add(nacelleCoverTop);
 
-    const nacelleSideCover = new THREE.Mesh(makeRoundedBoxGeometry(12.7, 4.55, .28, .35), cloneMat(materials.nacelleShadow));
-    nacelleSideCover.position.set(.1,73,2.68);
-    addEdges(nacelleSideCover, 0x334155, .2);
+    const nacelleSideCover = new THREE.Mesh(makeRoundedBoxGeometry(12.15, 4.25, .26, .28), cloneMat(materials.nacelleShadow));
+    nacelleSideCover.position.set(.35,73,2.56);
+    addEdges(nacelleSideCover, 0x334155, .16);
     scene.add(nacelleSideCover);
 
-    const nacelleAccessPanel = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.7, .045), cloneMat(materials.towerSeam));
-    nacelleAccessPanel.position.set(2.6,73.15,2.86);
+    const nacelleAccessPanel = new THREE.Mesh(new THREE.BoxGeometry(2.85, 1.58, .04), cloneMat(materials.towerSeam));
+    nacelleAccessPanel.position.set(2.75,73.18,2.72);
     nacelleAccessPanel.material.transparent = true;
-    nacelleAccessPanel.material.opacity = .30;
+    nacelleAccessPanel.material.opacity = .24;
     scene.add(nacelleAccessPanel);
 
-    const nacelleRoofLine = new THREE.Mesh(new THREE.BoxGeometry(8.6,.035,.055), cloneMat(materials.towerSeam));
-    nacelleRoofLine.position.set(.8,75.73,0);
+    const nacellePanelSeam = new THREE.Mesh(new THREE.BoxGeometry(11.25,.03,.05), cloneMat(materials.towerSeam));
+    nacellePanelSeam.position.set(.95,73.92,2.62);
+    nacellePanelSeam.material.transparent = true;
+    nacellePanelSeam.material.opacity = .22;
+    scene.add(nacellePanelSeam);
+
+    const nacelleRoofLine = new THREE.Mesh(new THREE.BoxGeometry(8.2,.03,.05), cloneMat(materials.towerSeam));
+    nacelleRoofLine.position.set(1.0,75.63,0);
     nacelleRoofLine.material.transparent = true;
-    nacelleRoofLine.material.opacity = .35;
+    nacelleRoofLine.material.opacity = .28;
     scene.add(nacelleRoofLine);
+
+    // Roof cooling house / fairing inspired by V80 references.
+    const roofCoolingHouse = new THREE.Group();
+    roofCoolingHouse.position.set(4.5,1.05,0);
+
+    const radiatorCore = new THREE.Mesh(makeRoundedBoxGeometry(1.22, 2.15, 2.55, .12), cloneMat(materials.ventDark));
+    radiatorCore.position.set(.55,1.1,0);
+    roofCoolingHouse.add(radiatorCore);
+
+    for(let i=0; i<6; i++){
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(.07,.08,2.12), cloneMat(materials.steel));
+      fin.position.set(.95,0.38 + i*.29,0);
+      fin.material.transparent = true;
+      fin.material.opacity = .62;
+      roofCoolingHouse.add(fin);
+    }
+
+    const roofFairing = new THREE.Mesh(new THREE.BoxGeometry(3.65,.18,2.72), cloneMat(materials.nacelle));
+    roofFairing.position.set(-0.45,.88,0);
+    roofFairing.rotation.z = -0.9;
+    roofCoolingHouse.add(roofFairing);
+
+    const roofFairingCap = new THREE.Mesh(new THREE.BoxGeometry(2.45,.12,2.72), cloneMat(materials.nacelle));
+    roofFairingCap.position.set(-.1,1.98,0);
+    roofCoolingHouse.add(roofFairingCap);
+
+    const roofSupportA = new THREE.Mesh(new THREE.BoxGeometry(.12,1.85,.16), cloneMat(materials.steel));
+    roofSupportA.position.set(-1.05,.72,-.95);
+    roofCoolingHouse.add(roofSupportA);
+
+    const roofSupportB = roofSupportA.clone();
+    roofSupportB.position.z = .95;
+    roofCoolingHouse.add(roofSupportB);
+
+    // Two obstruction lights on top of the cooling house.
+    for(const x of [-.45, 1.05]){
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.1,16), cloneMat(materials.steel));
+      base.position.set(x,2.34,0);
+      roofCoolingHouse.add(base);
+
+      const beacon = new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.32,20), cloneMat(materials.obstructionRed));
+      beacon.position.set(x,2.54,0);
+      roofCoolingHouse.add(beacon);
+    }
+
+    // Two simple loop antennas near the rear.
+    for(const x of [-1.0, .4]){
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.42,8), cloneMat(materials.sensorDark));
+      post.position.set(x,2.24,.72);
+      roofCoolingHouse.add(post);
+
+      const loop = new THREE.Mesh(new THREE.TorusGeometry(.17,.012,6,24), cloneMat(materials.sensorDark));
+      loop.rotation.x = Math.PI / 2;
+      loop.position.set(x,2.47,.72);
+      roofCoolingHouse.add(loop);
+    }
+
+    nacelleCoverTop.add(roofCoolingHouse);
+
+    // Roof wind sensors inspired by cutaway reference diagrams:
+    // anemometer cups and a simple wind vane at the rear/top of the nacelle.
+    const sensorMast = new THREE.Group();
+    sensorMast.position.set(5.95,75.8,-1.15);
+
+    const mastPole = new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,1.65,12), cloneMat(materials.sensorWhite));
+    mastPole.position.set(0,.82,0);
+    sensorMast.add(mastPole);
+
+    const sensorArm = new THREE.Mesh(new THREE.CylinderGeometry(.022,.022,1.18,10), cloneMat(materials.sensorWhite));
+    sensorArm.rotation.z = Math.PI / 2;
+    sensorArm.position.set(0,1.52,0);
+    sensorMast.add(sensorArm);
+
+    const cupHub = new THREE.Mesh(new THREE.SphereGeometry(.09,16,12), cloneMat(materials.sensorDark));
+    cupHub.position.set(0,1.52,0);
+    sensorMast.add(cupHub);
+
+    for(let i=0;i<3;i++){
+      const angle = i * Math.PI * 2 / 3;
+      const cupArm = new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.42,8), cloneMat(materials.sensorDark));
+      cupArm.rotation.z = Math.PI / 2;
+      cupArm.rotation.y = angle;
+      cupArm.position.set(Math.cos(angle)*.18,1.52,Math.sin(angle)*.18);
+      sensorMast.add(cupArm);
+
+      const cup = new THREE.Mesh(new THREE.SphereGeometry(.09,14,10), cloneMat(materials.sensorWhite));
+      cup.scale.set(1.18,.7,1.18);
+      cup.position.set(Math.cos(angle)*.42,1.52,Math.sin(angle)*.42);
+      sensorMast.add(cup);
+    }
+
+    const vaneBoom = new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,1.0,8), cloneMat(materials.sensorWhite));
+    vaneBoom.rotation.z = Math.PI / 2;
+    vaneBoom.position.set(.02,.95,0);
+    sensorMast.add(vaneBoom);
+
+    const vaneTail = new THREE.Mesh(new THREE.ConeGeometry(.14,.34,3), cloneMat(materials.sensorWhite));
+    vaneTail.rotation.z = -Math.PI / 2;
+    vaneTail.position.set(.55,.95,0);
+    sensorMast.add(vaneTail);
+
+    scene.add(sensorMast);
 
     // Nacelle internals
     const nacelleInside = new THREE.Group();
@@ -1149,6 +1274,23 @@
     lowSpeedCoupling.position.set(-4.15,72.95,0);
     nacelleInside.add(lowSpeedCoupling);
 
+    // Main shaft bearing support. This gives students a clearer visual cue
+    // that the heavy low-speed shaft is supported before entering the gearbox.
+    const mainBearingBase = new THREE.Mesh(makeRoundedBoxGeometry(1.18,.62,1.28,.1), cloneMat(materials.towerDark));
+    mainBearingBase.rotation.y = Math.PI / 2;
+    mainBearingBase.position.set(-5.75,72.18,0);
+    nacelleInside.add(mainBearingBase);
+
+    const mainBearingRing = new THREE.Mesh(new THREE.TorusGeometry(.54,.09,14,42), cloneMat(materials.steel));
+    mainBearingRing.rotation.y = Math.PI / 2;
+    mainBearingRing.position.set(-5.75,72.95,0);
+    nacelleInside.add(mainBearingRing);
+
+    const mainBearingCap = new THREE.Mesh(makeRoundedBoxGeometry(.58,.36,1.0,.08), cloneMat(materials.steel));
+    mainBearingCap.rotation.y = Math.PI / 2;
+    mainBearingCap.position.set(-5.75,73.48,0);
+    nacelleInside.add(mainBearingCap);
+
     // Gearbox housing with top cover, inspection cap, and mounting feet
     const gearbox = register(new THREE.Mesh(makeRoundedBoxGeometry(2.95, 2.2, 2.05, .22), cloneMat(materials.orange)), 'gearbox');
     gearbox.rotation.y = Math.PI / 2;
@@ -1164,6 +1306,24 @@
     gearboxCap.rotation.x = Math.PI / 2;
     gearboxCap.position.set(-2.05,74.22,.62);
     nacelleInside.add(gearboxCap);
+
+    for(let i=0;i<4;i++){
+      const gearRib = new THREE.Mesh(new THREE.BoxGeometry(.06,1.6,.08), cloneMat(materials.steel));
+      gearRib.position.set(-3.35 + i*.55,73.03,1.06);
+      gearRib.material.transparent = true;
+      gearRib.material.opacity = .55;
+      nacelleInside.add(gearRib);
+    }
+
+    const gearboxInputSeal = new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,.22,28), cloneMat(materials.steel));
+    gearboxInputSeal.rotation.z = Math.PI / 2;
+    gearboxInputSeal.position.set(-3.98,72.95,0);
+    nacelleInside.add(gearboxInputSeal);
+
+    const gearboxOutputSeal = new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.18,28), cloneMat(materials.steel));
+    gearboxOutputSeal.rotation.z = Math.PI / 2;
+    gearboxOutputSeal.position.set(-.9,72.95,0);
+    nacelleInside.add(gearboxOutputSeal);
 
     for(const side of [-0.82, 0.82]){
       const foot = new THREE.Mesh(new THREE.BoxGeometry(.4,.28,.5), cloneMat(materials.towerDark));
@@ -1216,11 +1376,31 @@
     generatorRear.position.set(6.55,72.95,0);
     nacelleInside.add(generatorRear);
 
+    for(const x of [4.28,5.78]){
+      for(const z of [-.68,.68]){
+        const genFoot = new THREE.Mesh(makeRoundedBoxGeometry(.42,.46,.42,.08), cloneMat(materials.towerDark));
+        genFoot.position.set(x,71.82,z);
+        nacelleInside.add(genFoot);
+      }
+    }
+
+    const generatorBaseRailA = new THREE.Mesh(new THREE.BoxGeometry(3.75,.12,.16), cloneMat(materials.steel));
+    generatorBaseRailA.position.set(5.0,71.58,-.82);
+    nacelleInside.add(generatorBaseRailA);
+
+    const generatorBaseRailB = new THREE.Mesh(new THREE.BoxGeometry(3.75,.12,.16), cloneMat(materials.steel));
+    generatorBaseRailB.position.set(5.0,71.58,.82);
+    nacelleInside.add(generatorBaseRailB);
+
+    // Subtle generator cooling ribs. Earlier stick-style ribs looked like random rods,
+    // so these read more like bands around the generator housing.
     for(let i=0;i<5;i++){
-      const rib = new THREE.Mesh(new THREE.BoxGeometry(.08,1.75,.08), cloneMat(materials.steel));
-      rib.position.set(4.15 + i*.35,72.95,.98);
-      rib.rotation.x = Math.PI / 2;
-      nacelleInside.add(rib);
+      const ribBand = new THREE.Mesh(new THREE.CylinderGeometry(1.17,1.17,.07,36), cloneMat(materials.steel));
+      ribBand.rotation.z = Math.PI / 2;
+      ribBand.position.set(4.15 + i*.35,72.95,0);
+      ribBand.material.transparent = true;
+      ribBand.material.opacity = .42;
+      nacelleInside.add(ribBand);
     }
 
     const generatorTerminalBox = new THREE.Mesh(makeRoundedBoxGeometry(.92, .58, .72, .08), cloneMat(materials.blue));
@@ -1278,6 +1458,22 @@
     const serviceDeck = new THREE.Mesh(new THREE.BoxGeometry(10.8,.12,4.05), cloneMat(materials.towerDark));
     serviceDeck.position.set(.8,70.72,0);
     nacelleInside.add(serviceDeck);
+
+    for(let i=0;i<5;i++){
+      const deckRib = new THREE.Mesh(new THREE.BoxGeometry(.08,.08,3.86), cloneMat(materials.steel));
+      deckRib.position.set(-4.4 + i*2.15,70.88,0);
+      deckRib.material.transparent = true;
+      deckRib.material.opacity = .55;
+      nacelleInside.add(deckRib);
+    }
+
+    for(let i=0;i<4;i++){
+      const roofFrame = new THREE.Mesh(new THREE.BoxGeometry(.08,1.28,.08), cloneMat(materials.steel));
+      roofFrame.position.set(-3.8 + i*2.65,75.48,-1.92);
+      roofFrame.material.transparent = true;
+      roofFrame.material.opacity = .45;
+      nacelleInside.add(roofFrame);
+    }
 
     // Yaw machinery: ring-gear base, drive motor, and gearbox
     const yawDriveRack = register(new THREE.Mesh(new THREE.CylinderGeometry(1.35,1.35,.28,44), cloneMat(materials.towerDark)), 'yawDrive');
@@ -1434,16 +1630,21 @@
       bladeGroup.rotation.x = angle;
       rotorGroup.add(bladeGroup);
 
-      const blade = register(new THREE.Mesh(makeBladeGeometry(27.5, 1.12, .18, .34, .07), cloneMat(materials.blade)), 'blade');
-      blade.position.set(0, 16.9, 0);
+      const blade = register(new THREE.Mesh(makeBladeGeometry(27.8, 1.24, .15, .38, .05), cloneMat(materials.blade)), 'blade');
+      blade.position.set(0, 17.05, 0);
       bladeGroup.add(blade);
 
-      const root = register(new THREE.Mesh(new THREE.CylinderGeometry(.34,.48,.82,32), cloneMat(materials.towerDark)), 'bladeRoot');
-      root.position.set(0, 1.18, 0);
+      const root = register(new THREE.Mesh(new THREE.CylinderGeometry(.38,.56,1.05,36), cloneMat(materials.towerDark)), 'bladeRoot');
+      root.position.set(0, 1.28, 0);
       bladeGroup.add(root);
 
-      const tip = register(new THREE.Mesh(new THREE.ConeGeometry(.20, 1.2, 24), cloneMat(materials.blade)), 'blade');
-      tip.position.set(-.22, 31.0, 0);
+      const rootRing = new THREE.Mesh(new THREE.TorusGeometry(.56,.045,10,36), cloneMat(materials.steel));
+      rootRing.position.set(0, 1.68, 0);
+      rootRing.rotation.x = Math.PI / 2;
+      bladeGroup.add(rootRing);
+
+      const tip = register(new THREE.Mesh(new THREE.ConeGeometry(.16, 1.15, 24), cloneMat(materials.blade)), 'blade');
+      tip.position.set(-.18, 31.25, 0);
       tip.rotation.x = Math.PI;
       bladeGroup.add(tip);
 
@@ -1600,6 +1801,8 @@
       const n = cutawayState.nacelle;
       nacelle.material.opacity = 1 - 0.62 * n;
       nacelleNose.material.opacity = 1 - 0.52 * n;
+      nacelleBellyFairing.material.opacity = 1 - 0.48 * n;
+      nacelleNoseFace.material.opacity = .18 * (1 - n);
 
       // Cutaway panels slide away from the component view instead of hanging in front of it.
       // The top cover lifts high and drifts behind the nacelle; the side cover drops below
@@ -1610,8 +1813,9 @@
       nacelleSideCover.rotation.y = -n * 0.12;
       nacelleCoverTop.material.opacity = 1 - 0.78 * n;
       nacelleSideCover.material.opacity = 1 - 0.88 * n;
-      nacelleAccessPanel.material.opacity = .30 * (1 - n);
-      nacelleRoofLine.material.opacity = .35 * (1 - n);
+      nacelleAccessPanel.material.opacity = .24 * (1 - n);
+      nacellePanelSeam.material.opacity = .22 * (1 - n);
+      nacelleRoofLine.material.opacity = .28 * (1 - n);
 
       const h = cutawayState.hub;
 
