@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commercial Wind Turbine Trainer - MVP v10</title>
+  <title>Commercial Wind Turbine Trainer - MVP v16</title>
   <style>
     :root{
       --panel:#0f172a;
@@ -108,6 +108,11 @@
     .part-grid button.done{border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.12)}
     .part-grid button.deep-done{border-color:rgba(250,204,21,.55);background:rgba(250,204,21,.12)}
 
+    .system-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .system-grid button{font-size:12px;padding:9px 10px;text-align:left}
+    .system-grid button.active-system{border-color:rgba(56,189,248,.7);background:rgba(56,189,248,.18)}
+    .system-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+
     .footer{
       position:fixed;
       left:50%;
@@ -183,7 +188,7 @@
 
   <section class="hud">
     <h1>Commercial Wind Turbine Trainer</h1>
-    <div class="sub">MVP v10: cleaned up hub, spinner, blade roots, and pitch-system visibility.</div>
+    <div class="sub">MVP v16: added system focus mode that dims unrelated parts and limits labels during system tours.</div>
     <div class="chips">
       <span class="chip"><strong>Drag</strong> orbit</span>
       <span class="chip"><strong>Wheel</strong> zoom</span>
@@ -233,8 +238,18 @@
       <div class="tourtext" id="progressText">Visit each part once, then click again for deeper detail.</div>
     </div>
 
+    <div class="section-card" id="systemTourCard">
+      <div class="section-title">System tours</div>
+      <div class="tourtext">Choose a major system. Unrelated parts dim, and only labels for that system appear.</div>
+      <div class="system-grid" id="systemButtons"></div>
+      <div class="system-actions">
+        <button id="nextSystemBtn">Next system part</button>
+        <button id="clearSystemBtn">Clear focus mode</button>
+      </div>
+    </div>
+
     <div class="part-grid" id="partButtons"></div>
-    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: clickable parts glow when your cursor is over them. Floating labels are clickable too.</div>
+    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: system tours now dim unrelated parts and only show labels for the active system.</div>
   </aside>
 
   <div class="footer" id="footerText">Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span></div>
@@ -297,6 +312,9 @@
     let cameraTween = null;
     let pointerDown = null;
     let rotorSpin = true;
+    let activeSystemKey = null;
+    let activeSystemIndex = -1;
+    const focusDimColor = new THREE.Color(0x334155);
 
     const ui = {
       stageTag: document.getElementById('stageTag'),
@@ -308,6 +326,7 @@
       moreDetailCard: document.getElementById('moreDetailCard'),
       moreDetailText: document.getElementById('moreDetailText'),
       partButtons: document.getElementById('partButtons'),
+      systemButtons: document.getElementById('systemButtons'),
       labelsLayer: document.getElementById('labelsLayer'),
       tourTitle: document.getElementById('tourTitle'),
       progressFill: document.getElementById('progressFill'),
@@ -406,8 +425,8 @@
         whatDoes: 'It transfers torque from the blades into the main shaft and holds the blade pitch hardware.',
         whyCare: 'The hub area contains critical pitch components that control power, speed, and shutdown behavior.',
         moreDetail: 'Inside the hub are pitch bearings and pitch motors or actuators. In the deeper view, the nose cone shifts and the hub becomes transparent so students can see the pitch layout more clearly.',
-        focus: new THREE.Vector3(-8.5, 73, 0),
-        camera: new THREE.Vector3(-29, 76, 17),
+        focus: new THREE.Vector3(-9.2, 73, 0),
+        camera: new THREE.Vector3(-25, 76, 13),
         inside: 'hub'
       },
       blade: {
@@ -516,8 +535,8 @@
         whatDoes: 'It lets the turbine change blade angle for power control, startup, shutdown, and overspeed protection.',
         whyCare: 'Pitch bearing wear or lubrication problems can affect blade control and create serious reliability issues.',
         moreDetail: 'Each blade root uses a pitch bearing so the blade can rotate around its long axis. This is a core part of blade pitch control.',
-        focus: new THREE.Vector3(-8.9, 74.1, 0),
-        camera: new THREE.Vector3(-18.0, 76.8, 8.4),
+        focus: new THREE.Vector3(-8.92, 74.05, 0),
+        camera: new THREE.Vector3(-17.0, 76.2, 7.4),
         inside: 'hub'
       },
       pitchMotor: {
@@ -527,8 +546,8 @@
         whatDoes: 'It turns the blade through the pitch bearing to change aerodynamic angle.',
         whyCare: 'Pitch actuator faults can reduce power control, affect shutdown performance, or cause blade-position alarms.',
         moreDetail: 'The actuator works with pitch control hardware to move the blade toward a productive angle or toward a feathered, low-lift position when needed.',
-        focus: new THREE.Vector3(-8.15, 74.1, 0),
-        camera: new THREE.Vector3(-17.2, 76.6, 8.2),
+        focus: new THREE.Vector3(-8.35, 74.05, 0),
+        camera: new THREE.Vector3(-16.5, 76.0, 7.2),
         inside: 'hub'
       },
       bladeRoot: {
@@ -538,8 +557,8 @@
         whatDoes: 'It transfers aerodynamic loads from the blade into the hub and pitch system.',
         whyCare: 'Blade root hardware is critical because it carries heavy loads and interfaces directly with pitch components.',
         moreDetail: 'The blade root contains the structural connection between the blade and the hub. This area is heavily loaded and central to blade installation and inspection.',
-        focus: new THREE.Vector3(-9.2, 74.8, 0),
-        camera: new THREE.Vector3(-18.8, 77.7, 9.6),
+        focus: new THREE.Vector3(-9.0, 74.15, 0),
+        camera: new THREE.Vector3(-17.5, 76.6, 8.0),
         inside: 'blade'
       },
       internalSpar: {
@@ -578,6 +597,34 @@
     };
 
     const tourOrder = ['foundation','tower','door','transformer','yaw','nacelle','hub','blade','gearbox','brake','generator'];
+    const systemTours = {
+      structure: {
+        name: 'Structure',
+        parts: ['foundation','tower','door','nacelle'],
+        overview: 'Covers the major structural and access parts that support the turbine and allow technicians to enter and work safely.'
+      },
+      drivetrain: {
+        name: 'Drivetrain',
+        parts: ['hub','lowSpeedShaft','gearbox','highSpeedShaft','brake','generator'],
+        overview: 'Follows the path of mechanical power from the rotor hub through the shafts and gearbox to the generator.'
+      },
+      electrical: {
+        name: 'Electrical',
+        parts: ['generator','controllerCabinet','transformer'],
+        overview: 'Focuses on how electrical power is produced, monitored, and sent away from the turbine.'
+      },
+      pitchYaw: {
+        name: 'Pitch & Yaw',
+        parts: ['hub','pitchBearing','pitchMotor','yaw','yawDrive'],
+        overview: 'Explains how the turbine changes blade angle and turns the nacelle into the wind.'
+      },
+      bladeSystem: {
+        name: 'Blade System',
+        parts: ['blade','bladeRoot','internalSpar','lightningProtection'],
+        overview: 'Looks at the blade as an aerodynamic and structural component, including the root, spar, and lightning path.'
+      }
+    };
+    const systemButtonEls = new Map();
     const internalPartIds = new Set(['gearbox','brake','generator','lowSpeedShaft','highSpeedShaft','controllerCabinet','coolingSystem','yawDrive','pitchBearing','pitchMotor','bladeRoot','internalSpar','lightningProtection']);
     const labelPositions = {
       foundation: new THREE.Vector3(0, 3.5, 0),
@@ -585,7 +632,7 @@
       door: new THREE.Vector3(0, 5.4, -3.1),
       yaw: new THREE.Vector3(0, 70.7, 3.4),
       nacelle: new THREE.Vector3(0, 77.1, 3.7),
-      hub: new THREE.Vector3(-11.8, 76.1, 0),
+      hub: new THREE.Vector3(-10.45, 75.3, 0),
       blade: new THREE.Vector3(-9.2, 95.2, 0),
       gearbox: new THREE.Vector3(-2.5, 75.5, 0),
       lowSpeedShaft: new THREE.Vector3(-5.25, 75.0, 0),
@@ -595,12 +642,36 @@
       controllerCabinet: new THREE.Vector3(2.8, 77.1, -1.55),
       coolingSystem: new THREE.Vector3(6.3, 76.8, -1.55),
       yawDrive: new THREE.Vector3(0, 71.25, 0),
-      pitchBearing: new THREE.Vector3(-8.9, 74.12, 0),
-      pitchMotor: new THREE.Vector3(-8.15, 74.12, 0),
-      bladeRoot: new THREE.Vector3(-9.2, 74.8, 0),
+      pitchBearing: new THREE.Vector3(-8.92, 74.05, 0),
+      pitchMotor: new THREE.Vector3(-8.35, 74.05, 0),
+      bladeRoot: new THREE.Vector3(-9.0, 74.15, 0),
       internalSpar: new THREE.Vector3(-9.0, 88.4, 0.22),
       lightningProtection: new THREE.Vector3(-8.8, 86.6, -0.03),
       transformer: new THREE.Vector3(22, 6.3, 14)
+    };
+
+    const labelActivationDistance = {
+      foundation: 42,
+      tower: 34,
+      door: 18,
+      yaw: 24,
+      nacelle: 28,
+      hub: 18,
+      blade: 24,
+      gearbox: 15,
+      lowSpeedShaft: 16,
+      brake: 14,
+      highSpeedShaft: 14,
+      generator: 16,
+      controllerCabinet: 14,
+      coolingSystem: 14,
+      yawDrive: 13,
+      pitchBearing: 11,
+      pitchMotor: 11,
+      bladeRoot: 13,
+      internalSpar: 18,
+      lightningProtection: 18,
+      transformer: 24
     };
 
     const cutawayState = { nacelle: 0, hub: 0, tower: 0, foundation: 0, transformer: 0 };
@@ -690,10 +761,10 @@
         const a = i * 4;
         const b = (i + 1) * 4;
 
-        faces.push(a, b, a+1, a+1, b, b+1);       // top surface
-        faces.push(a+1, b+1, a+2, a+2, b+1, b+2); // right edge
-        faces.push(a+2, b+2, a+3, a+3, b+2, b+3); // lower surface
-        faces.push(a+3, b+3, a, a, b+3, b);       // left edge
+        faces.push(a, b, a+1, a+1, b, b+1);
+        faces.push(a+1, b+1, a+2, a+2, b+1, b+2);
+        faces.push(a+2, b+2, a+3, a+3, b+2, b+3);
+        faces.push(a+3, b+3, a, a, b+3, b);
       }
 
       faces.push(0, 1, 2, 0, 2, 3);
@@ -703,6 +774,23 @@
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
       geometry.setIndex(faces);
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function makeSpinnerGeometry(){
+      // Lathe profile creates a smooth nacelle-style spinner cover instead of a cone/sphere blob.
+      const points = [
+        new THREE.Vector2(0.05, -1.75),
+        new THREE.Vector2(0.42, -1.45),
+        new THREE.Vector2(0.92, -0.82),
+        new THREE.Vector2(1.32, 0.12),
+        new THREE.Vector2(1.47, 0.95),
+        new THREE.Vector2(1.38, 1.38),
+        new THREE.Vector2(0.92, 1.55),
+        new THREE.Vector2(0.18, 1.62)
+      ];
+      const geometry = new THREE.LatheGeometry(points, 72);
       geometry.computeVertexNormals();
       return geometry;
     }
@@ -856,18 +944,27 @@
     scene.add(towerInside);
 
     // Door
-    const door = register(new THREE.Mesh(new THREE.BoxGeometry(1.55, 4.15, .18), cloneMat(materials.towerDark)), 'door');
-    door.position.set(0, 4.58, -2.48);
+    // Door assembly sits just outside the tower skin. This prevents the tower cylinder
+    // from visually cutting through the door at the bottom of the tapered tower.
+    const doorSurfaceZ = -(towerRadiusAt(4.58) + 0.11);
+
+    const doorRecess = new THREE.Mesh(new THREE.BoxGeometry(1.9, 4.45, .08), cloneMat(materials.black));
+    doorRecess.position.set(0, 4.58, doorSurfaceZ + .035);
+    doorRecess.castShadow = true;
+    scene.add(doorRecess);
+
+    const door = register(new THREE.Mesh(new THREE.BoxGeometry(1.55, 4.15, .16), cloneMat(materials.towerDark)), 'door');
+    door.position.set(0, 4.58, doorSurfaceZ - .045);
     addEdges(door, 0x0f172a, .65);
     scene.add(door);
 
-    const doorWindow = new THREE.Mesh(new THREE.BoxGeometry(.65,.42,.05), cloneMat(materials.blue));
-    doorWindow.position.set(0,5.72,-2.59);
+    const doorWindow = new THREE.Mesh(new THREE.BoxGeometry(.65,.42,.04), cloneMat(materials.blue));
+    doorWindow.position.set(0,5.72,doorSurfaceZ - .14);
     scene.add(doorWindow);
 
     const doorHandle = new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.42,12), cloneMat(materials.yellow));
     doorHandle.rotation.x = Math.PI / 2;
-    doorHandle.position.set(.58,4.55,-2.62);
+    doorHandle.position.set(.58,4.55,doorSurfaceZ - .19);
     scene.add(doorHandle);
 
     // Yaw system
@@ -1002,25 +1099,46 @@
     const rotorGroup = new THREE.Group();
     scene.add(rotorGroup);
 
-    const hub = register(new THREE.Mesh(new THREE.SphereGeometry(1.86, 48, 32), cloneMat(materials.hub)), 'hub');
-    hub.scale.set(.82, 1.02, 1.02);
-    hub.position.set(-9.2, 73, 0);
+    const hub = register(new THREE.Mesh(new THREE.CylinderGeometry(1.08, 1.08, 1.55, 64), cloneMat(materials.hub)), 'hub');
+    hub.rotation.z = Math.PI / 2;
+    hub.position.set(-9.0, 73, 0);
     rotorGroup.add(hub);
 
-    const spinner = register(new THREE.Mesh(new THREE.SphereGeometry(1.72, 48, 24, 0, Math.PI * 2, 0, Math.PI * 0.58), cloneMat(materials.hub)), 'hub');
-    spinner.scale.set(1.45, .82, .82);
+    const hubRearCap = register(new THREE.Mesh(new THREE.SphereGeometry(1.08, 48, 24), cloneMat(materials.hub)), 'hub');
+    hubRearCap.scale.set(.34, 1, 1);
+    hubRearCap.position.set(-8.22, 73, 0);
+    rotorGroup.add(hubRearCap);
+
+    hub.material.transparent = true;
+    hubRearCap.material.transparent = true;
+
+    const spinner = register(new THREE.Mesh(makeSpinnerGeometry(), cloneMat(materials.hub)), 'hub');
+    spinner.material.transparent = true;
+    spinner.material.depthWrite = false;
     spinner.rotation.z = Math.PI / 2;
-    spinner.position.set(-10.65,73,0);
+    spinner.position.set(-10.0,73,0);
     rotorGroup.add(spinner);
 
+    const hubCollars = [];
     for(let i=0; i<3; i++){
       const angle = i * Math.PI * 2 / 3;
-      const collar = new THREE.Mesh(new THREE.TorusGeometry(.74,.075,12,44), cloneMat(materials.towerDark));
-      collar.position.set(-9.2, 73, 0);
-      collar.rotation.y = Math.PI / 2;
-      collar.rotation.x = angle;
-      collar.castShadow = true;
-      rotorGroup.add(collar);
+      const collarGroup = new THREE.Group();
+      collarGroup.position.set(-9.0, 73, 0);
+      collarGroup.rotation.x = angle;
+
+      const socket = new THREE.Mesh(new THREE.CylinderGeometry(.56,.64,.34,36), cloneMat(materials.towerDark));
+      socket.position.set(0, 1.15, 0);
+      socket.rotation.x = 0;
+      socket.castShadow = true;
+      collarGroup.add(socket);
+
+      const bearingFace = new THREE.Mesh(new THREE.TorusGeometry(.58,.055,12,44), cloneMat(materials.steel));
+      bearingFace.position.set(0, 1.33, 0);
+      bearingFace.rotation.x = Math.PI / 2;
+      collarGroup.add(bearingFace);
+
+      hubCollars.push(collarGroup);
+      rotorGroup.add(collarGroup);
     }
 
     const hubInside = new THREE.Group();
@@ -1028,34 +1146,34 @@
     insideGroups.set('hub', hubInside);
     scene.add(hubInside);
 
-    const hubCore = new THREE.Mesh(new THREE.SphereGeometry(.62, 32, 20), cloneMat(materials.steel));
-    hubCore.position.set(-9.2, 73, 0);
+    const hubCore = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, 1.15, 40), cloneMat(materials.steel));
+    hubCore.rotation.z = Math.PI / 2;
+    hubCore.position.set(-9.0, 73, 0);
     hubInside.add(hubCore);
 
-    const pitchLabelRing = new THREE.Mesh(new THREE.TorusGeometry(1.18,.035,12,72), cloneMat(materials.magenta));
-    pitchLabelRing.position.set(-9.05,73,0);
+    const pitchLabelRing = new THREE.Mesh(new THREE.TorusGeometry(.92,.035,12,72), cloneMat(materials.magenta));
+    pitchLabelRing.position.set(-9.0,73,0);
     pitchLabelRing.rotation.y = Math.PI / 2;
     hubInside.add(pitchLabelRing);
 
     for(let i=0;i<3;i++){
       const angle = i * Math.PI * 2 / 3;
+      const bearingY = 73 + Math.cos(angle)*1.05;
+      const bearingZ = Math.sin(angle)*1.05;
 
-      const bearingY = 73 + Math.cos(angle)*1.12;
-      const bearingZ = Math.sin(angle)*1.12;
-
-      const pitchBearing = register(new THREE.Mesh(new THREE.TorusGeometry(.48,.075,14,48), cloneMat(materials.yellow)), 'pitchBearing');
-      pitchBearing.position.set(-8.9, bearingY, bearingZ);
+      const pitchBearing = register(new THREE.Mesh(new THREE.TorusGeometry(.40,.065,14,48), cloneMat(materials.yellow)), 'pitchBearing');
+      pitchBearing.position.set(-8.92, bearingY, bearingZ);
       pitchBearing.rotation.y = Math.PI / 2;
       hubInside.add(pitchBearing);
 
-      const pitchMotor = register(new THREE.Mesh(new THREE.BoxGeometry(.42,.28,.28), cloneMat(materials.blue)), 'pitchMotor');
-      pitchMotor.position.set(-8.15, bearingY, bearingZ);
+      const pitchMotor = register(new THREE.Mesh(new THREE.BoxGeometry(.34,.24,.24), cloneMat(materials.blue)), 'pitchMotor');
+      pitchMotor.position.set(-8.35, bearingY, bearingZ);
       pitchMotor.rotation.x = angle;
       hubInside.add(pitchMotor);
 
-      const actuatorRod = new THREE.Mesh(new THREE.CylinderGeometry(.032,.032,.72,12), cloneMat(materials.black));
+      const actuatorRod = new THREE.Mesh(new THREE.CylinderGeometry(.026,.026,.52,12), cloneMat(materials.black));
       actuatorRod.rotation.z = Math.PI / 2;
-      actuatorRod.position.set(-8.52, bearingY, bearingZ);
+      actuatorRod.position.set(-8.62, bearingY, bearingZ);
       hubInside.add(actuatorRod);
     }
 
@@ -1072,15 +1190,15 @@
       rotorGroup.add(bladeGroup);
 
       const blade = register(new THREE.Mesh(makeBladeGeometry(27.5, 1.12, .18, .34, .07), cloneMat(materials.blade)), 'blade');
-      blade.position.set(0, 16.45, 0);
+      blade.position.set(0, 16.9, 0);
       bladeGroup.add(blade);
 
-      const root = register(new THREE.Mesh(new THREE.CylinderGeometry(.46,.62,1.15,32), cloneMat(materials.towerDark)), 'bladeRoot');
-      root.position.set(0, 1.55, 0);
+      const root = register(new THREE.Mesh(new THREE.CylinderGeometry(.34,.48,.82,32), cloneMat(materials.towerDark)), 'bladeRoot');
+      root.position.set(0, 1.18, 0);
       bladeGroup.add(root);
 
       const tip = register(new THREE.Mesh(new THREE.ConeGeometry(.20, 1.2, 24), cloneMat(materials.blade)), 'blade');
-      tip.position.set(-.22, 30.55, 0);
+      tip.position.set(-.22, 31.0, 0);
       tip.rotation.x = Math.PI;
       bladeGroup.add(tip);
 
@@ -1089,15 +1207,15 @@
       sparGroup.rotation.copy(bladeGroup.rotation);
 
       const spar = register(new THREE.Mesh(new THREE.BoxGeometry(.13, 24, .09), cloneMat(materials.yellow)), 'internalSpar');
-      spar.position.set(0, 16.4, .22);
+      spar.position.set(0, 16.9, .22);
       sparGroup.add(spar);
 
       const shearWeb = new THREE.Mesh(new THREE.BoxGeometry(.07, 16, .22), cloneMat(materials.blue));
-      shearWeb.position.set(0, 12.5, 0);
+      shearWeb.position.set(0, 13.0, 0);
       sparGroup.add(shearWeb);
 
       const lightningCable = register(new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,24,12), cloneMat(materials.copper)), 'lightningProtection');
-      lightningCable.position.set(.19,16.4,-.03);
+      lightningCable.position.set(.19,16.9,-.03);
       sparGroup.add(lightningCable);
 
       bladeInside.add(sparGroup);
@@ -1182,6 +1300,20 @@
       labelEls.set(id, label);
     }
 
+    for(const [key, config] of Object.entries(systemTours)){
+      const b = document.createElement('button');
+      b.textContent = config.name;
+      b.addEventListener('click', () => startSystemTour(key));
+      ui.systemButtons.appendChild(b);
+      systemButtonEls.set(key, b);
+    }
+
+    function updateSystemButtons(){
+      for(const [key, btn] of systemButtonEls){
+        btn.classList.toggle('active-system', key === activeSystemKey);
+      }
+    }
+
     function setCutawayTargets(activeInside){
       cutawayTarget.nacelle = activeInside === 'nacelle' ? 1 : 0;
       cutawayTarget.hub = (activeInside === 'hub' || activeInside === 'blade') ? 1 : 0;
@@ -1194,11 +1326,15 @@
       for(const [name, group] of insideGroups){
         group.visible = name === groupName;
       }
+      if(groupName !== 'hub' && groupName !== 'blade'){
+        spinner.visible = true;
+      }
       setCutawayTargets(groupName);
     }
 
     function hideInside(){
       for(const group of insideGroups.values()) group.visible = false;
+      spinner.visible = true;
       setCutawayTargets(null);
     }
 
@@ -1226,12 +1362,18 @@
 
       const h = cutawayState.hub;
 
-      // Hub cutaway: fade the shell and slightly park the spinner nose.
-      // Do not scale the hub or sweep the spinner far away, because that looked like the hub was growing.
-      hub.material.opacity = 1 - 0.86 * h;
-      spinner.material.opacity = 1 - 0.82 * h;
-      spinner.position.x = -10.65 - h * 0.32;
-      spinner.position.y = 73 + h * 0.22;
+      // Hub cutaway: the spinner acts like a removed cover.
+      // It slides well forward, drops below the hub sightline, fades out, then hides.
+      hub.material.opacity = 1 - 0.42 * h;
+      hubRearCap.material.opacity = 1 - 0.42 * h;
+      spinner.visible = h < .985;
+      spinner.material.opacity = Math.max(0, 1 - 1.15 * h);
+      spinner.position.x = -10.0 - h * 4.25;
+      spinner.position.y = 73 - h * 1.35;
+      spinner.position.z = 0 - h * 1.55;
+      for(const collar of hubCollars){
+        collar.visible = h < .72;
+      }
 
       const t = cutawayState.tower;
       tower.material.opacity = 1 - 0.62 * t;
@@ -1283,7 +1425,92 @@
       } else hideInside();
     }
 
+    function clearSystemTour(){
+      activeSystemKey = null;
+      activeSystemIndex = -1;
+      updateSystemButtons();
+      restoreSystemFocusVisuals();
+      setTourStatus();
+    }
+
+    function startSystemTour(systemKey){
+      if(!systemTours[systemKey]) return;
+      activeSystemKey = systemKey;
+      activeSystemIndex = 0;
+      updateSystemButtons();
+      const config = systemTours[systemKey];
+      ui.footerText.innerHTML = `<span class="active-name">${config.name}</span> focus mode active. Unrelated parts are dimmed and only this system's labels show.`;
+      selectPart(config.parts[0]);
+    }
+
+    function nextSystemPart(){
+      if(!activeSystemKey){
+        startSystemTour('structure');
+        return;
+      }
+      const config = systemTours[activeSystemKey];
+      const currentId = config.parts[activeSystemIndex];
+      if(selectedPartId === currentId && selectedStage === 1){
+        selectPart(currentId);
+        return;
+      }
+      activeSystemIndex = (activeSystemIndex + 1) % config.parts.length;
+      selectPart(config.parts[activeSystemIndex]);
+    }
+
+    function getActiveSystemPartSet(){
+      if(!activeSystemKey) return null;
+      return new Set(systemTours[activeSystemKey].parts);
+    }
+
+    function ensureFocusBaseMaterial(mat){
+      if(!mat || !mat.color) return;
+      if(!mat.userData.focusBaseColor){
+        mat.userData.focusBaseColor = mat.color.clone();
+      }
+    }
+
+    function restoreSystemFocusVisuals(){
+      for(const meshes of partMeshes.values()){
+        for(const mesh of meshes){
+          const mat = mesh.material;
+          if(!mat || !mat.color) continue;
+          ensureFocusBaseMaterial(mat);
+          mat.color.copy(mat.userData.focusBaseColor);
+        }
+      }
+    }
+
+    function applySystemFocusVisuals(){
+      const activeSet = getActiveSystemPartSet();
+      if(!activeSet){
+        restoreSystemFocusVisuals();
+        return;
+      }
+
+      for(const [partId, meshes] of partMeshes){
+        const isActive = activeSet.has(partId);
+        for(const mesh of meshes){
+          const mat = mesh.material;
+          if(!mat || !mat.color) continue;
+          ensureFocusBaseMaterial(mat);
+          if(isActive){
+            mat.color.copy(mat.userData.focusBaseColor);
+          } else {
+            mat.color.copy(mat.userData.focusBaseColor).lerp(focusDimColor, 0.72);
+          }
+        }
+      }
+    }
+
     function setTourStatus(){
+      if(activeSystemKey){
+        const config = systemTours[activeSystemKey];
+        const currentId = config.parts[Math.max(0, activeSystemIndex)];
+        const currentName = parts[currentId]?.name || config.name;
+        ui.tourTitle.textContent = `System tour: ${config.name} ${Math.max(1, activeSystemIndex + 1)}/${config.parts.length} — ${currentName}`;
+        return;
+      }
       if(tourIndex < 0){
         ui.tourTitle.textContent = 'Guided tour: not started';
         return;
@@ -1298,9 +1525,12 @@
       ui.stageTag.textContent = stage === 1 ? 'ZOOM VIEW' : 'DEEPER DETAIL';
       ui.stageTag.style.background = stage === 1 ? 'var(--accent2)' : 'var(--accent)';
       ui.partTitle.textContent = part.name;
-      ui.panelLead.textContent = stage === 1
-        ? 'You are in the identify/zoom step. Click the same part again for the deeper training view.'
-        : 'You are in the deeper training view. Use this step to discuss the internal layout and service relevance.';
+      const systemConfig = activeSystemKey ? systemTours[activeSystemKey] : null;
+      ui.panelLead.textContent = systemConfig
+        ? `System tour: ${systemConfig.name}. ${systemConfig.overview}`
+        : (stage === 1
+          ? 'You are in the identify/zoom step. Click the same part again for the deeper training view.'
+          : 'You are in the deeper training view. Use this step to discuss the internal layout and service relevance.');
       ui.whatIsText.textContent = part.whatIs;
       ui.whatDoesText.textContent = part.whatDoes;
       ui.whyCareText.textContent = part.whyCare;
@@ -1346,6 +1576,11 @@
 
       const orderIndex = tourOrder.indexOf(partId);
       if(orderIndex !== -1) tourIndex = orderIndex;
+
+      if(activeSystemKey){
+        const idx = systemTours[activeSystemKey].parts.indexOf(partId);
+        if(idx !== -1) activeSystemIndex = idx;
+      }
       setTourStatus();
     }
 
@@ -1415,6 +1650,12 @@
           label.classList.add('hidden');
           continue;
         }
+
+        if(activeSystemKey && !systemTours[activeSystemKey].parts.includes(id)){
+          label.classList.add('hidden');
+          continue;
+        }
+
         if(internalPartIds.has(id)){
           const insideName = parts[id]?.inside;
           if(!insideGroups.get(insideName)?.visible){
@@ -1422,13 +1663,26 @@
             continue;
           }
         }
+
+        const anchor = parts[id]?.focus ? parts[id].focus : pos;
+        const threshold = labelActivationDistance[id] ?? 22;
+        const distance = camera.position.distanceTo(anchor);
+        const alwaysShow = id === selectedPartId;
+        if(!alwaysShow && distance > threshold){
+          label.classList.add('hidden');
+          continue;
+        }
+
         const projected = pos.clone().project(camera);
         if(projected.z < -1 || projected.z > 1){
           label.classList.add('hidden');
           continue;
         }
+
+        const fade = alwaysShow ? 1 : Math.max(0.35, 1 - Math.max(0, distance - threshold * 0.45) / (threshold * 0.75));
         label.style.left = `${(projected.x * .5 + .5) * window.innerWidth}px`;
         label.style.top = `${(-projected.y * .5 + .5) * window.innerHeight}px`;
+        label.style.opacity = fade.toFixed(2);
         label.classList.toggle('active', id === selectedPartId);
         label.classList.remove('hidden');
       }
@@ -1438,10 +1692,10 @@
       ui.stageTag.textContent = 'READY';
       ui.stageTag.style.background = 'var(--accent2)';
       ui.partTitle.textContent = 'Wind turbine overview';
-      ui.panelLead.textContent = 'Click a turbine part to zoom in. Click the same part again for a deeper cutaway training view.';
+      ui.panelLead.textContent = 'Click a turbine part to zoom in, click it again for deeper detail, or use the new system tour buttons for a guided path.';
       ui.whatIsText.textContent = 'A commercial wind turbine is a machine that turns wind energy into electrical energy.';
       ui.whatDoesText.textContent = 'The rotor captures wind energy, the drivetrain transfers it, and the electrical system conditions and sends power away from the turbine.';
-      ui.whyCareText.textContent = 'Students and technicians need to understand where the major systems are, what they do, and why failures in those systems matter.';
+      ui.whyCareText.textContent = 'Students and technicians need to understand where the major systems are, what they do, and why failures in those systems matter. System tours organize the model into Structure, Drivetrain, Electrical, Pitch & Yaw, and Blade System. Focus mode dims unrelated parts and keeps labels system-specific.';
       ui.moreDetailCard.style.display = 'none';
       ui.moreDetailText.textContent = '';
       ui.footerText.innerHTML = 'Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span>';
@@ -1451,6 +1705,7 @@
       selectedPartId = null;
       selectedStage = 0;
       tourIndex = -1;
+      clearSystemTour();
       hideInside();
       resetOverviewText();
       setTourStatus();
@@ -1487,6 +1742,11 @@
 
     document.getElementById('tourBtn').addEventListener('click', startTour);
     document.getElementById('nextTourBtn').addEventListener('click', nextTourStep);
+    document.getElementById('nextSystemBtn').addEventListener('click', nextSystemPart);
+    document.getElementById('clearSystemBtn').addEventListener('click', () => {
+      clearSystemTour();
+      resetOverviewText();
+    });
     ui.labelsBtn.addEventListener('click', () => {
       labelsEnabled = !labelsEnabled;
       ui.labelsBtn.textContent = labelsEnabled ? 'Hide labels' : 'Show labels';
@@ -1557,6 +1817,7 @@
       updateCameraTween();
       updateMaterialFlashes();
       updateCutaways(delta);
+      applySystemFocusVisuals();
       if(rotorSpin){
         for(const assembly of bladeAssemblies){
           assembly.group.rotation.x += delta * 0.22;
