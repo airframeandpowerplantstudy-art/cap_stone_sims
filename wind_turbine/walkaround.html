@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commercial Wind Turbine Trainer - MVP v23</title>
+  <title>Commercial Wind Turbine Trainer - MVP v25</title>
   <style>
     :root{
       --panel:#0f172a;
@@ -237,7 +237,7 @@
 
   <section class="hud">
     <h1>Commercial Wind Turbine Trainer</h1>
-    <div class="sub">MVP v23: added system intro cards before each guided system flow begins.</div>
+    <div class="sub">MVP v25: improved nacelle internal realism with more believable drivetrain, control, cooling, and yaw components.</div>
     <div class="chips">
       <span class="chip"><strong>Drag</strong> orbit</span>
       <span class="chip"><strong>Wheel</strong> zoom</span>
@@ -308,7 +308,7 @@
     </div>
 
     <div class="part-grid" id="partButtons"></div>
-    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: choose a system, read the intro card, then use the Next button to start the guided flow.</div>
+    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: the nacelle internals are now more realistic while keeping the trainer guides and guided flow behavior.</div>
   </aside>
 
   <div class="footer" id="footerText">Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span></div>
@@ -427,7 +427,10 @@
       whiteLine: new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.7 }),
       cone: new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.6, metalness: 0.05 }),
       steel: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.42, metalness: 0.55 }),
-      magenta: new THREE.MeshStandardMaterial({ color: 0xd946ef, roughness: 0.45, metalness: 0.08 })
+      magenta: new THREE.MeshStandardMaterial({ color: 0xd946ef, roughness: 0.45, metalness: 0.08 }),
+      mechGuide: new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.48, depthWrite: false }),
+      electricGuide: new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.46, depthWrite: false }),
+      yawGuide: new THREE.MeshBasicMaterial({ color: 0xd946ef, transparent: true, opacity: 0.42, depthWrite: false })
     };
 
     const parts = {
@@ -470,7 +473,7 @@
         whatIs: 'The nacelle is the large housing at the top of the tower.',
         whatDoes: 'It protects and supports the main drivetrain and electrical conversion components.',
         whyCare: 'Most of the major mechanical and electrical maintenance work happens in or around the nacelle.',
-        moreDetail: 'In this geared turbine layout, the nacelle contains the low-speed shaft, gearbox, brake, high-speed shaft, generator, control cabinet, cooling equipment, and yaw machinery. In the deeper view, the cover panels slide open so students can see inside.',
+        moreDetail: 'In this geared turbine layout, the nacelle contains the low-speed shaft, gearbox, brake, high-speed shaft, generator, control cabinet, cooling equipment, and yaw machinery. In the deeper view, the cover panels slide open and subtle guide paths show mechanical rotation, electrical routing, or yaw movement depending on the active system.',
         focus: new THREE.Vector3(0, 73, 0),
         camera: new THREE.Vector3(-24, 79, 21),
         inside: 'nacelle'
@@ -778,6 +781,23 @@
       const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 32), mat);
       mesh.rotation.z = Math.PI / 2;
       return mesh;
+    }
+
+    function xGuideArrow(x1, x2, y, z, mat){
+      const group = new THREE.Group();
+      const length = Math.abs(x2 - x1);
+      const direction = x2 >= x1 ? 1 : -1;
+
+      const shaft = xCylinder(.035, Math.max(.15, length - .38), mat);
+      shaft.position.set((x1 + x2) / 2 - direction * .12, y, z);
+      group.add(shaft);
+
+      const head = new THREE.Mesh(new THREE.ConeGeometry(.16, .42, 20), mat);
+      head.rotation.z = direction > 0 ? -Math.PI / 2 : Math.PI / 2;
+      head.position.set(x2, y, z);
+      group.add(head);
+
+      return group;
     }
 
     function makeRoundedBoxGeometry(width, height, depth, radius = 0.75){
@@ -1114,62 +1134,209 @@
     nacelleInside.visible = false;
     insideGroups.set('nacelle', nacelleInside);
 
-    const lowSpeedShaft = register(xCylinder(.28, 5.2, cloneMat(materials.black)), 'lowSpeedShaft');
+    // Low-speed shaft, hub-side flange, and coupling
+    const lowSpeedShaft = register(xCylinder(.24, 5.15, cloneMat(materials.black)), 'lowSpeedShaft');
     lowSpeedShaft.position.set(-5.25, 72.95, 0);
     nacelleInside.add(lowSpeedShaft);
 
-    const lowSpeedHubFlange = new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,.55,32), cloneMat(materials.steel));
+    const lowSpeedHubFlange = new THREE.Mesh(new THREE.CylinderGeometry(.62,.62,.45,40), cloneMat(materials.steel));
     lowSpeedHubFlange.rotation.z = Math.PI / 2;
-    lowSpeedHubFlange.position.set(-7.3,72.95,0);
+    lowSpeedHubFlange.position.set(-7.45,72.95,0);
     nacelleInside.add(lowSpeedHubFlange);
 
-    const gearbox = register(new THREE.Mesh(new THREE.BoxGeometry(2.8, 2.45, 2.35), cloneMat(materials.orange)), 'gearbox');
+    const lowSpeedCoupling = new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.72,32), cloneMat(materials.steel));
+    lowSpeedCoupling.rotation.z = Math.PI / 2;
+    lowSpeedCoupling.position.set(-4.15,72.95,0);
+    nacelleInside.add(lowSpeedCoupling);
+
+    // Gearbox housing with top cover, inspection cap, and mounting feet
+    const gearbox = register(new THREE.Mesh(makeRoundedBoxGeometry(2.95, 2.2, 2.05, .22), cloneMat(materials.orange)), 'gearbox');
+    gearbox.rotation.y = Math.PI / 2;
     gearbox.position.set(-2.45, 72.95, 0);
-    addEdges(gearbox, 0x7c2d12, .55);
+    addEdges(gearbox, 0x7c2d12, .45);
     nacelleInside.add(gearbox);
 
-    const brakeDisk = register(new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.05,.35,48), cloneMat(materials.red)), 'brake');
+    const gearboxTop = new THREE.Mesh(new THREE.BoxGeometry(2.2,.24,1.45), cloneMat(materials.orange));
+    gearboxTop.position.set(-2.45,74.15,0);
+    nacelleInside.add(gearboxTop);
+
+    const gearboxCap = new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.2,24), cloneMat(materials.steel));
+    gearboxCap.rotation.x = Math.PI / 2;
+    gearboxCap.position.set(-2.05,74.22,.62);
+    nacelleInside.add(gearboxCap);
+
+    for(const side of [-0.82, 0.82]){
+      const foot = new THREE.Mesh(new THREE.BoxGeometry(.4,.28,.5), cloneMat(materials.towerDark));
+      foot.position.set(-2.95,71.65,side);
+      nacelleInside.add(foot);
+    }
+
+    // Brake assembly as rotor disc + caliper carrier
+    const brakeDisk = register(new THREE.Mesh(new THREE.CylinderGeometry(.92,.92,.25,52), cloneMat(materials.red)), 'brake');
     brakeDisk.rotation.z = Math.PI/2;
-    brakeDisk.position.set(.95,72.95,0);
+    brakeDisk.position.set(.85,72.95,0);
     nacelleInside.add(brakeDisk);
 
-    const brakeCaliper = new THREE.Mesh(new THREE.BoxGeometry(.7,1.1,1.1), cloneMat(materials.towerDark));
-    brakeCaliper.position.set(.85,73.95,.8);
+    const brakeHub = new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,.48,30), cloneMat(materials.steel));
+    brakeHub.rotation.z = Math.PI/2;
+    brakeHub.position.set(.85,72.95,0);
+    nacelleInside.add(brakeHub);
+
+    const brakeCaliper = new THREE.Mesh(makeRoundedBoxGeometry(.82, 1.05, .62, .12), cloneMat(materials.towerDark));
+    brakeCaliper.rotation.y = Math.PI / 2;
+    brakeCaliper.position.set(.88,73.88,.78);
     nacelleInside.add(brakeCaliper);
 
-    const highSpeedShaft = register(xCylinder(.17, 3.0, cloneMat(materials.black)), 'highSpeedShaft');
+    const brakeBracket = new THREE.Mesh(new THREE.BoxGeometry(.22,.9,1.1), cloneMat(materials.steel));
+    brakeBracket.position.set(1.12,73.65,.52);
+    nacelleInside.add(brakeBracket);
+
+    // High-speed shaft and couplings
+    const highSpeedShaft = register(xCylinder(.12, 2.95, cloneMat(materials.black)), 'highSpeedShaft');
     highSpeedShaft.position.set(2.25,72.95,0);
     nacelleInside.add(highSpeedShaft);
 
-    const generator = register(xCylinder(1.3, 3.1, cloneMat(materials.green)), 'generator');
+    const highSpeedCoupling = new THREE.Mesh(new THREE.CylinderGeometry(.24,.24,.4,26), cloneMat(materials.steel));
+    highSpeedCoupling.rotation.z = Math.PI / 2;
+    highSpeedCoupling.position.set(1.55,72.95,0);
+    nacelleInside.add(highSpeedCoupling);
+
+    // Generator body with end bells and terminal box
+    const generator = register(xCylinder(1.12, 3.25, cloneMat(materials.green)), 'generator');
     generator.position.set(5.0,72.95,0);
     nacelleInside.add(generator);
 
-    const controller = register(new THREE.Mesh(new THREE.BoxGeometry(1.8,1.9,1.35), cloneMat(materials.blue)), 'controllerCabinet');
+    const generatorFront = new THREE.Mesh(new THREE.CylinderGeometry(.92,.92,.26,36), cloneMat(materials.steel));
+    generatorFront.rotation.z = Math.PI / 2;
+    generatorFront.position.set(3.45,72.95,0);
+    nacelleInside.add(generatorFront);
+
+    const generatorRear = new THREE.Mesh(new THREE.CylinderGeometry(.98,.98,.34,36), cloneMat(materials.steel));
+    generatorRear.rotation.z = Math.PI / 2;
+    generatorRear.position.set(6.55,72.95,0);
+    nacelleInside.add(generatorRear);
+
+    for(let i=0;i<5;i++){
+      const rib = new THREE.Mesh(new THREE.BoxGeometry(.08,1.75,.08), cloneMat(materials.steel));
+      rib.position.set(4.15 + i*.35,72.95,.98);
+      rib.rotation.x = Math.PI / 2;
+      nacelleInside.add(rib);
+    }
+
+    const generatorTerminalBox = new THREE.Mesh(makeRoundedBoxGeometry(.92, .58, .72, .08), cloneMat(materials.blue));
+    generatorTerminalBox.position.set(4.82,74.12,-.92);
+    nacelleInside.add(generatorTerminalBox);
+
+    // Controller cabinet with door split and handles
+    const controller = register(new THREE.Mesh(makeRoundedBoxGeometry(1.72,1.9,1.22,.12), cloneMat(materials.blue)), 'controllerCabinet');
     controller.position.set(2.9,74.95,-1.55);
-    addEdges(controller, 0x0c4a6e, .5);
+    addEdges(controller, 0x0c4a6e, .35);
     nacelleInside.add(controller);
 
-    const radiator = register(new THREE.Mesh(new THREE.BoxGeometry(1.4,2.1,.42), cloneMat(materials.towerDark)), 'coolingSystem');
-    radiator.position.set(6.2,74.3,-1.55);
+    const controllerDoorLine = new THREE.Mesh(new THREE.BoxGeometry(.03,1.62,.03), cloneMat(materials.steel));
+    controllerDoorLine.position.set(2.9,74.95,-.92);
+    nacelleInside.add(controllerDoorLine);
+
+    for(const x of [2.72,3.08]){
+      const handle = new THREE.Mesh(new THREE.BoxGeometry(.04,.22,.04), cloneMat(materials.steel));
+      handle.position.set(x,74.95,-.9);
+      nacelleInside.add(handle);
+    }
+
+    // Cooling package with radiator core, fan shroud, and support stand
+    const radiator = register(new THREE.Mesh(makeRoundedBoxGeometry(1.45,2.22,.4,.08), cloneMat(materials.towerDark)), 'coolingSystem');
+    radiator.position.set(6.2,74.28,-1.55);
     nacelleInside.add(radiator);
-    for(let i=0;i<4;i++){
-      const fin = new THREE.Mesh(new THREE.BoxGeometry(1.15,.08,.05), cloneMat(materials.steel));
-      fin.position.set(6.2,73.55 + i*.35,-1.28);
+
+    for(let i=0;i<6;i++){
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(1.18,.06,.05), cloneMat(materials.steel));
+      fin.position.set(6.2,73.42 + i*.29,-1.28);
       nacelleInside.add(fin);
     }
-    const fan = register(new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,.28,32), cloneMat(materials.steel)), 'coolingSystem');
+
+    const fanShroud = new THREE.Mesh(new THREE.CylinderGeometry(.7,.7,.24,32), cloneMat(materials.towerDark));
+    fanShroud.rotation.x = Math.PI/2;
+    fanShroud.position.set(6.98,74.1,-1.55);
+    nacelleInside.add(fanShroud);
+
+    const fan = register(new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.2,28), cloneMat(materials.steel)), 'coolingSystem');
     fan.rotation.x = Math.PI/2;
-    fan.position.set(6.75,74.1,-1.55);
+    fan.position.set(7.0,74.1,-1.55);
     nacelleInside.add(fan);
+
+    for(let i=0;i<4;i++){
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(.08,.52,.16), cloneMat(materials.steel));
+      blade.position.set(7.0,74.1,-1.55);
+      blade.rotation.z = i * Math.PI / 2 + .35;
+      nacelleInside.add(blade);
+    }
+
+    const coolingStand = new THREE.Mesh(new THREE.BoxGeometry(.18,1.58,.18), cloneMat(materials.steel));
+    coolingStand.position.set(5.58,73.22,-1.55);
+    nacelleInside.add(coolingStand);
 
     const serviceDeck = new THREE.Mesh(new THREE.BoxGeometry(10.8,.12,4.05), cloneMat(materials.towerDark));
     serviceDeck.position.set(.8,70.72,0);
     nacelleInside.add(serviceDeck);
 
-    const yawDriveRack = register(new THREE.Mesh(new THREE.BoxGeometry(2.9,.55,2.5), cloneMat(materials.towerDark)), 'yawDrive');
-    yawDriveRack.position.set(0,69.95,0);
+    // Yaw machinery: ring-gear base, drive motor, and gearbox
+    const yawDriveRack = register(new THREE.Mesh(new THREE.CylinderGeometry(1.35,1.35,.28,44), cloneMat(materials.towerDark)), 'yawDrive');
+    yawDriveRack.position.set(0,70.02,0);
     nacelleInside.add(yawDriveRack);
+
+    const yawDriveGear = new THREE.Mesh(new THREE.TorusGeometry(1.38,.08,12,72), cloneMat(materials.steel));
+    yawDriveGear.rotation.x = Math.PI / 2;
+    yawDriveGear.position.set(0,70.17,0);
+    nacelleInside.add(yawDriveGear);
+
+    const yawMotor = new THREE.Mesh(new THREE.CylinderGeometry(.36,.36,1.15,26), cloneMat(materials.green));
+    yawMotor.rotation.z = Math.PI / 2;
+    yawMotor.position.set(1.18,70.42,.62);
+    nacelleInside.add(yawMotor);
+
+    const yawGearbox = new THREE.Mesh(makeRoundedBoxGeometry(.68,.62,.68,.08), cloneMat(materials.orange));
+    yawGearbox.position.set(.42,70.42,.62);
+    nacelleInside.add(yawGearbox);
+
+    // Trainer guide overlays. These are intentionally faint so they explain flow
+    // without covering the internal parts students need to inspect.
+    const nacelleMechanicalGuide = new THREE.Group();
+    nacelleMechanicalGuide.add(xGuideArrow(-7.15, -5.85, 74.72, 1.72, materials.mechGuide));
+    nacelleMechanicalGuide.add(xGuideArrow(-4.72, -3.15, 74.72, 1.72, materials.mechGuide));
+    nacelleMechanicalGuide.add(xGuideArrow(-1.15, .45, 74.72, 1.72, materials.mechGuide));
+    nacelleMechanicalGuide.add(xGuideArrow(1.35, 3.95, 74.72, 1.72, materials.mechGuide));
+    nacelleInside.add(nacelleMechanicalGuide);
+
+    const nacelleElectricalGuide = new THREE.Group();
+    const electricPath = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(5.15,74.35,-.9),
+        new THREE.Vector3(3.4,75.2,-1.55),
+        new THREE.Vector3(.2,74.95,-1.55),
+        new THREE.Vector3(.1,71.25,-.55)
+      ]),
+      new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: .58, depthWrite: false })
+    );
+    nacelleElectricalGuide.add(electricPath);
+    const electricArrow = new THREE.Mesh(new THREE.ConeGeometry(.16,.42,20), materials.electricGuide);
+    electricArrow.rotation.x = Math.PI;
+    electricArrow.position.set(.1,71.1,-.55);
+    nacelleElectricalGuide.add(electricArrow);
+    nacelleInside.add(nacelleElectricalGuide);
+
+    const nacelleYawGuide = new THREE.Group();
+    const yawGuideRing = new THREE.Mesh(new THREE.TorusGeometry(2.18, .04, 12, 80), materials.yawGuide);
+    yawGuideRing.rotation.x = Math.PI / 2;
+    yawGuideRing.position.set(0,70.18,0);
+    nacelleYawGuide.add(yawGuideRing);
+    for(let i=0; i<3; i++){
+      const tooth = new THREE.Mesh(new THREE.BoxGeometry(.35,.08,.12), materials.yawGuide);
+      const angle = i * Math.PI * 2 / 3 + .3;
+      tooth.position.set(Math.cos(angle) * 2.18, 70.18, Math.sin(angle) * 2.18);
+      tooth.rotation.y = -angle;
+      nacelleYawGuide.add(tooth);
+    }
+    nacelleInside.add(nacelleYawGuide);
 
     scene.add(nacelleInside);
 
@@ -1416,7 +1583,15 @@
       setCutawayTargets(null);
     }
 
+    function updateNacelleGuideVisuals(){
+      const nacelleOpen = insideGroups.get('nacelle')?.visible;
+      nacelleMechanicalGuide.visible = nacelleOpen && (!activeSystemKey || activeSystemKey === 'drivetrain');
+      nacelleElectricalGuide.visible = nacelleOpen && (!activeSystemKey || activeSystemKey === 'electrical');
+      nacelleYawGuide.visible = nacelleOpen && (!activeSystemKey || activeSystemKey === 'pitchYaw');
+    }
+
     function updateCutaways(delta){
+      updateNacelleGuideVisuals();
       for(const key of Object.keys(cutawayState)){
         const diff = cutawayTarget[key] - cutawayState[key];
         cutawayState[key] += diff * Math.min(1, delta * 5.5);
