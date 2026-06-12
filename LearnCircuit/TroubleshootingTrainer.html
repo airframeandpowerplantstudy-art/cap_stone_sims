@@ -419,7 +419,7 @@ function drawAmmeter(svg){
     <rect x="${x+17}" y="${y+17}" width="${w-34}" height="${h-34}" rx="12" fill="url(#glassAmmeterScreenGrad)" stroke="#254b63" stroke-width="1.6"></rect>
     <path d="M ${x+28} ${y+24} H ${x+w-28} V ${y+38} C ${x+w-86} ${y+31}, ${x+88} ${y+31}, ${x+28} ${y+48} Z" fill="rgba(255,255,255,.13)"></path>
 
-    <text x="${x+32}" y="${y+38}" fill="#78d7ff" font-size="10" font-weight="bold" letter-spacing="1.2">GLASS COCKPIT AMMETER</text>
+    <text x="${x+32}" y="${y+38}" fill="#78d7ff" font-size="10" font-weight="bold" letter-spacing="1.2">AMMETER</text>
     <text x="${x+w-32}" y="${y+38}" fill="${powerOn?'#39ff9d':'#ffd166'}" text-anchor="end" font-size="10" font-weight="bold">${powerOn?'ONLINE':'NO LOAD'}</text>
 
     <text x="${x+34}" y="${y+68}" fill="#39ff9d" font-size="28" font-family="Courier New, monospace" font-weight="bold">${displayA}</text>
@@ -433,7 +433,7 @@ function drawAmmeter(svg){
     <text x="${x+276}" y="${y+72}" fill="#78aaca" font-size="8" text-anchor="end">50 mA</text>
 
     <line x1="190" y1="270" x2="190" y2="${y+h}" stroke="#31536a" stroke-width="2" stroke-dasharray="4 4"></line>
-    <text x="202" y="${y+h+12}" fill="#78aaca" font-size="8">current sense</text>
+    <text x="202" y="${y+h+12}" fill="#78aaca" font-size="8">hooked up in series</text>
   </g>`;
 }
 function drawFuse(svg,x1,y1,x2,y2,label){let mid=(x1+x2)/2;svg.innerHTML+=line(x1,y1,mid-28,y1)+`<rect class="fuse componentShadow" x="${mid-28}" y="${y1-13}" width="56" height="26" rx="6"></rect><text class="componentLabel" x="${mid}" y="${y1+5}" text-anchor="middle">${label}</text>`+line(mid+28,y1,x2,y2)}
@@ -513,7 +513,7 @@ function terminal(svg,id){
 function drawGround(svg,x,y){svg.innerHTML+=line(x,y,x,y+30)+line(x-20,y+30,x+20,y+30)+line(x-14,y+40,x+14,y+40)+line(x-8,y+50,x+8,y+50)}
 
 function drawSvgMeter(svg){
-  const x=45, y=385, w=250, h=160;
+  const x=45, y=385, w=270, h=160;
   const screenClass = meterBlown ? "meterScreen blow" : "meterScreen";
   const textClass = meterBlown ? "meterText blow" : "meterText";
   const displayText = getMeterDisplayText();
