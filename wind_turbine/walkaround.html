@@ -554,7 +554,36 @@
     function updateWalk(delta){ const speed=keys.has('shift')?28:15; const forward=new THREE.Vector3().subVectors(controls.target,camera.position); forward.y=0; if(forward.lengthSq()<.001) return; forward.normalize(); const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize(); const move=new THREE.Vector3(); if(keys.has('w')||keys.has('arrowup')) move.add(forward); if(keys.has('s')||keys.has('arrowdown')) move.sub(forward); if(keys.has('d')||keys.has('arrowright')) move.add(right); if(keys.has('a')||keys.has('arrowleft')) move.sub(right); if(move.lengthSq()>0){ move.normalize().multiplyScalar(speed*delta); camera.position.add(move); controls.target.add(move); } }
     function updateCameraTween(){ if(!cameraTween) return; const raw=Math.min(1,(performance.now()-cameraTween.startTime)/cameraTween.duration); const t=easeInOutCubic(raw); camera.position.lerpVectors(cameraTween.fromPosition,cameraTween.toPosition,t); controls.target.lerpVectors(cameraTween.fromTarget,cameraTween.toTarget,t); if(raw>=1) cameraTween=null; }
     function updateMaterialFlashes(){ const now=performance.now(); const pulsePartId=getPulseTargetPartId(); const pulseValue=.12+((Math.sin(now*.0065)+1)*.5)*.16; for(const [partId,meshes] of partMeshes){ for(const mesh of meshes){ const mat=mesh.material; if(!mat?.emissive) continue; let intensity=0; if(mat.userData.flashUntil){ if(now>mat.userData.flashUntil) mat.userData.flashUntil=null; else intensity=Math.max(intensity,.55); } if(partId===hoveredPartId) intensity=Math.max(intensity,.22); if(partId===pulsePartId) intensity=Math.max(intensity,pulseValue); if(intensity>0){ mat.emissive.set(0x38bdf8); mat.emissiveIntensity=intensity; } else { mat.emissive.set(0x000000); mat.emissiveIntensity=0; } } } }
-    function animate(){ const delta=clock.getDelta(); updateWalk(delta); updateCameraTween(); updateMaterialFlashes(); updateCutaways(delta); applySystemFocusVisuals(); if(rotorSpin){ for(const assembly of bladeAssemblies){ assembly.group.rotation.x += delta*.22; } } controls.update(); updateLabels(); renderer.render(scene,camera); requestAnimationFrame(animate); }
+    function animate(){
+      const delta=clock.getDelta();
+      updateWalk(delta);
+      updateCameraTween();
+      updateMaterialFlashes();
+      updateCutaways(delta);
+      applySystemFocusVisuals();
+
+      // Spin the rotor pieces locally around the hub axis.
+      // Do NOT rotate rotorGroup itself: its origin is the world origin, so rotating
+      // rotorGroup makes the whole rotor orbit around the scene and appear near the ground.
+      if(rotorSpin){
+        const spinDelta = delta * .22;
+        hub.rotation.x += spinDelta;
+        hubRearCap.rotation.x += spinDelta;
+        rearFlangeRing.rotation.x += spinDelta;
+        spinner.rotation.x += spinDelta;
+        for(const collar of hubCollars){
+          collar.rotation.x += spinDelta;
+        }
+        for(const assembly of bladeAssemblies){
+          assembly.group.rotation.x += spinDelta;
+        }
+      }
+
+      controls.update();
+      updateLabels();
+      renderer.render(scene,camera);
+      requestAnimationFrame(animate);
+    }
     window.addEventListener('resize',()=>{ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight); });
 
     resetOverviewText(); updateProgress(); setTourStatus(); animate();
