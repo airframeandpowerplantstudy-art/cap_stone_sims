@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commercial Wind Turbine Trainer - MVP v9</title>
+  <title>Commercial Wind Turbine Trainer - MVP v10</title>
   <style>
     :root{
       --panel:#0f172a;
@@ -183,7 +183,7 @@
 
   <section class="hud">
     <h1>Commercial Wind Turbine Trainer</h1>
-    <div class="sub">MVP v9: visual realism pass with tapered blades, tower details, nacelle shaping, and site context.</div>
+    <div class="sub">MVP v10: cleaned up hub, spinner, blade roots, and pitch-system visibility.</div>
     <div class="chips">
       <span class="chip"><strong>Drag</strong> orbit</span>
       <span class="chip"><strong>Wheel</strong> zoom</span>
@@ -516,8 +516,8 @@
         whatDoes: 'It lets the turbine change blade angle for power control, startup, shutdown, and overspeed protection.',
         whyCare: 'Pitch bearing wear or lubrication problems can affect blade control and create serious reliability issues.',
         moreDetail: 'Each blade root uses a pitch bearing so the blade can rotate around its long axis. This is a core part of blade pitch control.',
-        focus: new THREE.Vector3(-8.92, 74.45, 0),
-        camera: new THREE.Vector3(-19.5, 77.8, 9.5),
+        focus: new THREE.Vector3(-8.9, 74.1, 0),
+        camera: new THREE.Vector3(-18.0, 76.8, 8.4),
         inside: 'hub'
       },
       pitchMotor: {
@@ -527,8 +527,8 @@
         whatDoes: 'It turns the blade through the pitch bearing to change aerodynamic angle.',
         whyCare: 'Pitch actuator faults can reduce power control, affect shutdown performance, or cause blade-position alarms.',
         moreDetail: 'The actuator works with pitch control hardware to move the blade toward a productive angle or toward a feathered, low-lift position when needed.',
-        focus: new THREE.Vector3(-7.82, 74.45, 0),
-        camera: new THREE.Vector3(-18.2, 77.6, 9.2),
+        focus: new THREE.Vector3(-8.15, 74.1, 0),
+        camera: new THREE.Vector3(-17.2, 76.6, 8.2),
         inside: 'hub'
       },
       bladeRoot: {
@@ -538,8 +538,8 @@
         whatDoes: 'It transfers aerodynamic loads from the blade into the hub and pitch system.',
         whyCare: 'Blade root hardware is critical because it carries heavy loads and interfaces directly with pitch components.',
         moreDetail: 'The blade root contains the structural connection between the blade and the hub. This area is heavily loaded and central to blade installation and inspection.',
-        focus: new THREE.Vector3(-9.2, 75.2, 0),
-        camera: new THREE.Vector3(-21.0, 80.0, 13.0),
+        focus: new THREE.Vector3(-9.2, 74.8, 0),
+        camera: new THREE.Vector3(-18.8, 77.7, 9.6),
         inside: 'blade'
       },
       internalSpar: {
@@ -595,9 +595,9 @@
       controllerCabinet: new THREE.Vector3(2.8, 77.1, -1.55),
       coolingSystem: new THREE.Vector3(6.3, 76.8, -1.55),
       yawDrive: new THREE.Vector3(0, 71.25, 0),
-      pitchBearing: new THREE.Vector3(-8.92, 74.55, 0),
-      pitchMotor: new THREE.Vector3(-7.82, 74.55, 0),
-      bladeRoot: new THREE.Vector3(-9.2, 76.1, 0),
+      pitchBearing: new THREE.Vector3(-8.9, 74.12, 0),
+      pitchMotor: new THREE.Vector3(-8.15, 74.12, 0),
+      bladeRoot: new THREE.Vector3(-9.2, 74.8, 0),
       internalSpar: new THREE.Vector3(-9.0, 88.4, 0.22),
       lightningProtection: new THREE.Vector3(-8.8, 86.6, -0.03),
       transformer: new THREE.Vector3(22, 6.3, 14)
@@ -1002,22 +1002,24 @@
     const rotorGroup = new THREE.Group();
     scene.add(rotorGroup);
 
-    const hub = register(new THREE.Mesh(new THREE.SphereGeometry(2.15, 48, 32), cloneMat(materials.hub)), 'hub');
-    hub.scale.set(.88, 1.0, 1.0);
+    const hub = register(new THREE.Mesh(new THREE.SphereGeometry(1.86, 48, 32), cloneMat(materials.hub)), 'hub');
+    hub.scale.set(.82, 1.02, 1.02);
     hub.position.set(-9.2, 73, 0);
     rotorGroup.add(hub);
 
-    const spinner = register(new THREE.Mesh(new THREE.ConeGeometry(1.75, 3.15, 48), cloneMat(materials.hub)), 'hub');
+    const spinner = register(new THREE.Mesh(new THREE.SphereGeometry(1.72, 48, 24, 0, Math.PI * 2, 0, Math.PI * 0.58), cloneMat(materials.hub)), 'hub');
+    spinner.scale.set(1.45, .82, .82);
     spinner.rotation.z = Math.PI / 2;
-    spinner.position.set(-11.18,73,0);
+    spinner.position.set(-10.65,73,0);
     rotorGroup.add(spinner);
 
     for(let i=0; i<3; i++){
       const angle = i * Math.PI * 2 / 3;
-      const collar = new THREE.Mesh(new THREE.TorusGeometry(.92,.12,12,48), cloneMat(materials.towerDark));
+      const collar = new THREE.Mesh(new THREE.TorusGeometry(.74,.075,12,44), cloneMat(materials.towerDark));
       collar.position.set(-9.2, 73, 0);
       collar.rotation.y = Math.PI / 2;
       collar.rotation.x = angle;
+      collar.castShadow = true;
       rotorGroup.add(collar);
     }
 
@@ -1026,34 +1028,34 @@
     insideGroups.set('hub', hubInside);
     scene.add(hubInside);
 
-    const hubCore = new THREE.Mesh(new THREE.SphereGeometry(.85, 32, 20), cloneMat(materials.steel));
+    const hubCore = new THREE.Mesh(new THREE.SphereGeometry(.62, 32, 20), cloneMat(materials.steel));
     hubCore.position.set(-9.2, 73, 0);
     hubInside.add(hubCore);
 
-    const pitchLabelRing = new THREE.Mesh(new THREE.TorusGeometry(1.62,.045,12,72), cloneMat(materials.magenta));
-    pitchLabelRing.position.set(-9.16,73,0);
+    const pitchLabelRing = new THREE.Mesh(new THREE.TorusGeometry(1.18,.035,12,72), cloneMat(materials.magenta));
+    pitchLabelRing.position.set(-9.05,73,0);
     pitchLabelRing.rotation.y = Math.PI / 2;
     hubInside.add(pitchLabelRing);
 
     for(let i=0;i<3;i++){
       const angle = i * Math.PI * 2 / 3;
 
-      const bearingY = 73 + Math.cos(angle)*1.45;
-      const bearingZ = Math.sin(angle)*1.45;
+      const bearingY = 73 + Math.cos(angle)*1.12;
+      const bearingZ = Math.sin(angle)*1.12;
 
-      const pitchBearing = register(new THREE.Mesh(new THREE.TorusGeometry(.78,.13,14,56), cloneMat(materials.yellow)), 'pitchBearing');
-      pitchBearing.position.set(-8.92, bearingY, bearingZ);
+      const pitchBearing = register(new THREE.Mesh(new THREE.TorusGeometry(.48,.075,14,48), cloneMat(materials.yellow)), 'pitchBearing');
+      pitchBearing.position.set(-8.9, bearingY, bearingZ);
       pitchBearing.rotation.y = Math.PI / 2;
       hubInside.add(pitchBearing);
 
-      const pitchMotor = register(new THREE.Mesh(new THREE.BoxGeometry(.72,.5,.5), cloneMat(materials.blue)), 'pitchMotor');
-      pitchMotor.position.set(-7.82, bearingY, bearingZ);
+      const pitchMotor = register(new THREE.Mesh(new THREE.BoxGeometry(.42,.28,.28), cloneMat(materials.blue)), 'pitchMotor');
+      pitchMotor.position.set(-8.15, bearingY, bearingZ);
       pitchMotor.rotation.x = angle;
       hubInside.add(pitchMotor);
 
-      const actuatorRod = new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,1.0,12), cloneMat(materials.black));
+      const actuatorRod = new THREE.Mesh(new THREE.CylinderGeometry(.032,.032,.72,12), cloneMat(materials.black));
       actuatorRod.rotation.z = Math.PI / 2;
-      actuatorRod.position.set(-8.35, bearingY, bearingZ);
+      actuatorRod.position.set(-8.52, bearingY, bearingZ);
       hubInside.add(actuatorRod);
     }
 
@@ -1070,16 +1072,15 @@
       rotorGroup.add(bladeGroup);
 
       const blade = register(new THREE.Mesh(makeBladeGeometry(27.5, 1.12, .18, .34, .07), cloneMat(materials.blade)), 'blade');
-      blade.position.set(0, 15.8, 0);
+      blade.position.set(0, 16.45, 0);
       bladeGroup.add(blade);
 
-      const root = register(new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,2.2,32), cloneMat(materials.towerDark)), 'bladeRoot');
-      root.rotation.z = Math.PI / 2;
-      root.position.set(0, 2.2, 0);
+      const root = register(new THREE.Mesh(new THREE.CylinderGeometry(.46,.62,1.15,32), cloneMat(materials.towerDark)), 'bladeRoot');
+      root.position.set(0, 1.55, 0);
       bladeGroup.add(root);
 
       const tip = register(new THREE.Mesh(new THREE.ConeGeometry(.20, 1.2, 24), cloneMat(materials.blade)), 'blade');
-      tip.position.set(-.22, 29.9, 0);
+      tip.position.set(-.22, 30.55, 0);
       tip.rotation.x = Math.PI;
       bladeGroup.add(tip);
 
@@ -1227,9 +1228,9 @@
 
       // Hub cutaway: fade the shell and slightly park the spinner nose.
       // Do not scale the hub or sweep the spinner far away, because that looked like the hub was growing.
-      hub.material.opacity = 1 - 0.76 * h;
-      spinner.material.opacity = 1 - 0.70 * h;
-      spinner.position.x = -11.18 - h * 0.38;
+      hub.material.opacity = 1 - 0.86 * h;
+      spinner.material.opacity = 1 - 0.82 * h;
+      spinner.position.x = -10.65 - h * 0.32;
       spinner.position.y = 73 + h * 0.22;
 
       const t = cutawayState.tower;
