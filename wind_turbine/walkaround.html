@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commercial Wind Turbine Trainer - MVP v16</title>
+  <title>Commercial Wind Turbine Trainer - MVP v22</title>
   <style>
     :root{
       --panel:#0f172a;
@@ -112,6 +112,26 @@
     .system-grid button{font-size:12px;padding:9px 10px;text-align:left}
     .system-grid button.active-system{border-color:rgba(56,189,248,.7);background:rgba(56,189,248,.18)}
     .system-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .system-flow-card{
+      border-color:rgba(56,189,248,.35);
+      background:linear-gradient(180deg,rgba(56,189,248,.10),rgba(255,255,255,.04));
+    }
+    .system-flow-card .big-action{
+      width:100%;
+      justify-content:center;
+      background:rgba(56,189,248,.24);
+      border-color:rgba(56,189,248,.70);
+      font-size:14px;
+      padding:12px 14px;
+    }
+    .step-pills{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+    .step-pill{
+      width:10px;height:10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.08);
+    }
+    .step-pill.current{background:var(--accent);border-color:rgba(56,189,248,.9)}
+    .step-pill.done{background:var(--good);border-color:rgba(34,197,94,.8)}
 
     .footer{
       position:fixed;
@@ -128,6 +148,35 @@
       box-shadow:0 12px 40px rgba(0,0,0,.28);
       backdrop-filter:blur(8px);
       white-space:nowrap;
+    }
+    .floating-next{
+      position:fixed;
+      left:50%;
+      bottom:58px;
+      transform:translateX(-50%);
+      z-index:4;
+      min-width:260px;
+      max-width:min(76vw, 460px);
+      padding:12px 18px;
+      border-radius:999px;
+      border:1px solid rgba(56,189,248,.42);
+      background:rgba(15,23,42,.44);
+      color:#e0f2fe;
+      font-size:14px;
+      font-weight:800;
+      box-shadow:0 12px 34px rgba(0,0,0,.22);
+      backdrop-filter:blur(8px);
+      opacity:.66;
+      transition:opacity .18s ease, transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+    .floating-next:hover{
+      opacity:.96;
+      transform:translateX(-50%) translateY(-1px);
+      background:rgba(56,189,248,.18);
+      border-color:rgba(56,189,248,.72);
+    }
+    .floating-next.hidden{
+      display:none;
     }
     .tiny{font-size:11px;color:var(--muted)}
     .active-name{color:var(--accent);font-weight:900}
@@ -188,7 +237,7 @@
 
   <section class="hud">
     <h1>Commercial Wind Turbine Trainer</h1>
-    <div class="sub">MVP v16: added system focus mode that dims unrelated parts and limits labels during system tours.</div>
+    <div class="sub">MVP v22: restored hub-first drivetrain flow and added inspected checkmark feedback.</div>
     <div class="chips">
       <span class="chip"><strong>Drag</strong> orbit</span>
       <span class="chip"><strong>Wheel</strong> zoom</span>
@@ -238,21 +287,32 @@
       <div class="tourtext" id="progressText">Visit each part once, then click again for deeper detail.</div>
     </div>
 
+    <div class="section-card system-flow-card" id="systemFlowCard" style="display:none">
+      <div class="section-title" id="systemFlowTitle">System flow</div>
+      <div class="section-body" id="systemFlowCurrent">Choose a system tour to begin.</div>
+      <div class="step-pills" id="systemStepPills"></div>
+      <div class="tourtext" id="systemFlowHint">The main action button will tell students exactly what to do next.</div>
+      <div class="system-actions">
+        <button class="primary big-action" id="systemFlowBtn">Start system flow</button>
+      </div>
+    </div>
+
     <div class="section-card" id="systemTourCard">
       <div class="section-title">System tours</div>
-      <div class="tourtext">Choose a major system. Unrelated parts dim, and only labels for that system appear.</div>
+      <div class="tourtext">Choose a major system. Then follow the large System Flow card that tells students exactly what to do next.</div>
       <div class="system-grid" id="systemButtons"></div>
       <div class="system-actions">
-        <button id="nextSystemBtn">Next system part</button>
+        <button id="nextSystemBtn">Use guided next</button>
         <button id="clearSystemBtn">Clear focus mode</button>
       </div>
     </div>
 
     <div class="part-grid" id="partButtons"></div>
-    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: system tours now dim unrelated parts and only show labels for the active system.</div>
+    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: choose a system, follow the pulsing part, then use the Next button. After the deeper view opens, the flow card marks that part inspected ✓.</div>
   </aside>
 
   <div class="footer" id="footerText">Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span></div>
+  <button class="floating-next hidden" id="floatingNextBtn">Next step</button>
   <div class="labels-layer" id="labelsLayer"></div>
 
   <script type="importmap">
@@ -327,6 +387,13 @@
       moreDetailText: document.getElementById('moreDetailText'),
       partButtons: document.getElementById('partButtons'),
       systemButtons: document.getElementById('systemButtons'),
+      systemFlowCard: document.getElementById('systemFlowCard'),
+      systemFlowTitle: document.getElementById('systemFlowTitle'),
+      systemFlowCurrent: document.getElementById('systemFlowCurrent'),
+      systemFlowHint: document.getElementById('systemFlowHint'),
+      systemFlowBtn: document.getElementById('systemFlowBtn'),
+      systemStepPills: document.getElementById('systemStepPills'),
+      floatingNextBtn: document.getElementById('floatingNextBtn'),
       labelsLayer: document.getElementById('labelsLayer'),
       tourTitle: document.getElementById('tourTitle'),
       progressFill: document.getElementById('progressFill'),
@@ -410,10 +477,10 @@
       yaw: {
         name: 'Yaw system',
         tag: 'DIRECTION CONTROL',
-        whatIs: 'The yaw system is the mechanism that turns the nacelle at the top of the tower.',
-        whatDoes: 'It keeps the rotor facing into the wind so the turbine can capture energy efficiently.',
-        whyCare: 'Yaw faults can cause poor wind alignment, abnormal loading, and lost production.',
-        moreDetail: 'A yaw bearing supports the nacelle, and yaw drives rotate it in a controlled way. Sensors and controls decide when the nacelle should turn to track changing wind direction.',
+        whatIs: 'The yaw system is the turning system at the bottom of the nacelle where it sits on top of the tower.',
+        whatDoes: 'It rotates the nacelle so the rotor can face into the wind and capture energy efficiently.',
+        whyCare: 'Yaw faults can cause poor wind alignment, abnormal loading, cable twist concerns, and lost production.',
+        moreDetail: 'The yaw bearing is at the tower-top / nacelle interface. Yaw drive machinery applies controlled turning force so the nacelle can track wind direction. This is separate from pitch, which happens out in the hub at the blade roots.',
         focus: new THREE.Vector3(0, 69, 0),
         camera: new THREE.Vector3(18, 75, 18),
         inside: 'yaw'
@@ -424,7 +491,7 @@
         whatIs: 'The rotor hub is the central rotating body that connects the blades to the drivetrain.',
         whatDoes: 'It transfers torque from the blades into the main shaft and holds the blade pitch hardware.',
         whyCare: 'The hub area contains critical pitch components that control power, speed, and shutdown behavior.',
-        moreDetail: 'Inside the hub are pitch bearings and pitch motors or actuators. In the deeper view, the nose cone shifts and the hub becomes transparent so students can see the pitch layout more clearly.',
+        moreDetail: 'Inside the hub are pitch bearings and pitch motors or actuators. Pitch changes blade angle at the blade roots. Yaw is not in the hub; yaw happens where the nacelle turns on top of the tower.',
         focus: new THREE.Vector3(-9.2, 73, 0),
         camera: new THREE.Vector3(-25, 76, 13),
         inside: 'hub'
@@ -605,8 +672,8 @@
       },
       drivetrain: {
         name: 'Drivetrain',
-        parts: ['hub','lowSpeedShaft','gearbox','highSpeedShaft','brake','generator'],
-        overview: 'Follows the path of mechanical power from the rotor hub through the shafts and gearbox to the generator.'
+        parts: ['hub','nacelle','lowSpeedShaft','gearbox','highSpeedShaft','brake','generator'],
+        overview: 'Starts at the rotor hub where wind-driven rotation enters the machine, then moves into the nacelle through the shafts, gearbox, brake, and generator.'
       },
       electrical: {
         name: 'Electrical',
@@ -615,8 +682,8 @@
       },
       pitchYaw: {
         name: 'Pitch & Yaw',
-        parts: ['hub','pitchBearing','pitchMotor','yaw','yawDrive'],
-        overview: 'Explains how the turbine changes blade angle and turns the nacelle into the wind.'
+        parts: ['nacelle','yaw','yawDrive','hub','pitchBearing','pitchMotor'],
+        overview: 'Starts at the yaw area where the nacelle turns on the tower, then moves to the hub where blade pitch changes angle.'
       },
       bladeSystem: {
         name: 'Blade System',
@@ -1430,6 +1497,7 @@
       activeSystemIndex = -1;
       updateSystemButtons();
       restoreSystemFocusVisuals();
+      updateSystemFlowCard();
       setTourStatus();
     }
 
@@ -1439,8 +1507,9 @@
       activeSystemIndex = 0;
       updateSystemButtons();
       const config = systemTours[systemKey];
-      ui.footerText.innerHTML = `<span class="active-name">${config.name}</span> focus mode active. Unrelated parts are dimmed and only this system's labels show.`;
+      ui.footerText.innerHTML = `<span class="active-name">${config.name}</span> flow active. Follow the large action button in the system flow card.`;
       selectPart(config.parts[0]);
+      updateSystemFlowCard();
     }
 
     function nextSystemPart(){
@@ -1450,17 +1519,81 @@
       }
       const config = systemTours[activeSystemKey];
       const currentId = config.parts[activeSystemIndex];
+
+      // First action on a part opens the deeper/cutaway view.
+      // Next action advances to the next system part.
       if(selectedPartId === currentId && selectedStage === 1){
         selectPart(currentId);
+        updateSystemFlowCard();
         return;
       }
+
       activeSystemIndex = (activeSystemIndex + 1) % config.parts.length;
       selectPart(config.parts[activeSystemIndex]);
+      updateSystemFlowCard();
+    }
+
+    function updateSystemFlowCard(){
+      if(!activeSystemKey){
+        ui.systemFlowCard.style.display = 'none';
+        ui.systemFlowBtn.textContent = 'Start system flow';
+        ui.floatingNextBtn.textContent = 'Next step';
+        ui.floatingNextBtn.classList.add('hidden');
+        return;
+      }
+
+      const config = systemTours[activeSystemKey];
+      const currentId = config.parts[Math.max(0, activeSystemIndex)];
+      const currentPart = parts[currentId];
+      const nextId = config.parts[(activeSystemIndex + 1) % config.parts.length];
+      const nextPart = parts[nextId];
+      const onCurrentPart = selectedPartId === currentId;
+      const inspected = (visitedStages.get(currentId) || 0) >= 2;
+      const needsDeepView = onCurrentPart && selectedStage === 1 && !inspected;
+
+      ui.systemFlowCard.style.display = 'block';
+      ui.systemFlowTitle.textContent = `${config.name} system flow`;
+      ui.systemFlowCurrent.textContent = inspected
+        ? `Step ${activeSystemIndex + 1} of ${config.parts.length}: ${currentPart.name} inspected ✓`
+        : `Step ${activeSystemIndex + 1} of ${config.parts.length}: ${currentPart.name}`;
+
+      ui.systemFlowHint.textContent = needsDeepView
+        ? `Read the panel, then open the deeper view for ${currentPart.name}.`
+        : inspected
+          ? `${currentPart.name} inspected ✓. Continue to ${nextPart.name}.`
+          : `Ready for the next system part: ${nextPart.name}.`;
+
+      const actionText = needsDeepView
+        ? `Open deeper view: ${currentPart.name}`
+        : `Next: ${nextPart.name}`;
+
+      ui.systemFlowBtn.textContent = actionText;
+      ui.floatingNextBtn.textContent = actionText;
+      ui.floatingNextBtn.classList.remove('hidden');
+
+      ui.systemStepPills.innerHTML = '';
+      config.parts.forEach((id, index) => {
+        const dot = document.createElement('span');
+        dot.className = 'step-pill';
+        const stepInspected = (visitedStages.get(id) || 0) >= 2;
+        if(index < activeSystemIndex || stepInspected) dot.classList.add('done');
+        if(index === activeSystemIndex) dot.classList.add('current');
+        dot.title = stepInspected ? `${parts[id].name} inspected` : parts[id].name;
+        ui.systemStepPills.appendChild(dot);
+      });
     }
 
     function getActiveSystemPartSet(){
       if(!activeSystemKey) return null;
       return new Set(systemTours[activeSystemKey].parts);
+    }
+
+    function getPulseTargetPartId(){
+      if(activeSystemKey){
+        const config = systemTours[activeSystemKey];
+        return config?.parts?.[Math.max(0, activeSystemIndex)] || null;
+      }
+      return selectedPartId || null;
     }
 
     function ensureFocusBaseMaterial(mat){
@@ -1508,7 +1641,7 @@
         const config = systemTours[activeSystemKey];
         const currentId = config.parts[Math.max(0, activeSystemIndex)];
         const currentName = parts[currentId]?.name || config.name;
-        ui.tourTitle.textContent = `System tour: ${config.name} ${Math.max(1, activeSystemIndex + 1)}/${config.parts.length} — ${currentName}`;
+        ui.tourTitle.textContent = `System flow: ${config.name} ${Math.max(1, activeSystemIndex + 1)}/${config.parts.length} — ${currentName}`;
         return;
       }
       if(tourIndex < 0){
@@ -1580,6 +1713,7 @@
       if(activeSystemKey){
         const idx = systemTours[activeSystemKey].parts.indexOf(partId);
         if(idx !== -1) activeSystemIndex = idx;
+        updateSystemFlowCard();
       }
       setTourStatus();
     }
@@ -1598,24 +1732,8 @@
 
     function updateHover(partId){
       if(hoveredPartId === partId) return;
-      if(hoveredPartId && partMeshes.has(hoveredPartId)){
-        for(const mesh of partMeshes.get(hoveredPartId)){
-          if(mesh.material?.emissive && !mesh.material.userData.flashUntil){
-            mesh.material.emissive.set(0x000000);
-            mesh.material.emissiveIntensity = 0;
-          }
-        }
-      }
       hoveredPartId = partId;
       document.body.style.cursor = partId ? 'pointer' : 'default';
-      if(partId && partMeshes.has(partId)){
-        for(const mesh of partMeshes.get(partId)){
-          if(mesh.material?.emissive){
-            mesh.material.emissive.set(0x38bdf8);
-            mesh.material.emissiveIntensity = .22;
-          }
-        }
-      }
     }
 
     function pickPart(event){
@@ -1695,7 +1813,7 @@
       ui.panelLead.textContent = 'Click a turbine part to zoom in, click it again for deeper detail, or use the new system tour buttons for a guided path.';
       ui.whatIsText.textContent = 'A commercial wind turbine is a machine that turns wind energy into electrical energy.';
       ui.whatDoesText.textContent = 'The rotor captures wind energy, the drivetrain transfers it, and the electrical system conditions and sends power away from the turbine.';
-      ui.whyCareText.textContent = 'Students and technicians need to understand where the major systems are, what they do, and why failures in those systems matter. System tours organize the model into Structure, Drivetrain, Electrical, Pitch & Yaw, and Blade System. Focus mode dims unrelated parts and keeps labels system-specific.';
+      ui.whyCareText.textContent = 'Students and technicians need to understand where the major systems are, what they do, and why failures in those systems matter. System flows organize the model into Structure, Drivetrain, Electrical, Pitch & Yaw, and Blade System. A large action button now guides students through the next step.';
       ui.moreDetailCard.style.display = 'none';
       ui.moreDetailText.textContent = '';
       ui.footerText.innerHTML = 'Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span>';
@@ -1743,6 +1861,8 @@
     document.getElementById('tourBtn').addEventListener('click', startTour);
     document.getElementById('nextTourBtn').addEventListener('click', nextTourStep);
     document.getElementById('nextSystemBtn').addEventListener('click', nextSystemPart);
+    ui.systemFlowBtn.addEventListener('click', nextSystemPart);
+    ui.floatingNextBtn.addEventListener('click', nextSystemPart);
     document.getElementById('clearSystemBtn').addEventListener('click', () => {
       clearSystemTour();
       resetOverviewText();
@@ -1793,19 +1913,34 @@
 
     function updateMaterialFlashes(){
       const now = performance.now();
-      for(const meshes of partMeshes.values()){
+      const pulsePartId = getPulseTargetPartId();
+      const pulseValue = 0.12 + ((Math.sin(now * 0.0065) + 1) * 0.5) * 0.16;
+
+      for(const [partId, meshes] of partMeshes){
         for(const mesh of meshes){
           const mat = mesh.material;
           if(!mat?.emissive) continue;
-          if(mat.userData.flashUntil && now > mat.userData.flashUntil){
-            mat.userData.flashUntil = null;
-            if(mesh.userData.partId === hoveredPartId){
-              mat.emissive.set(0x38bdf8);
-              mat.emissiveIntensity = .22;
-            } else {
-              mat.emissive.set(0x000000);
-              mat.emissiveIntensity = 0;
-            }
+
+          let intensity = 0;
+          if(mat.userData.flashUntil){
+            if(now > mat.userData.flashUntil) mat.userData.flashUntil = null;
+            else intensity = Math.max(intensity, 0.55);
+          }
+
+          if(partId === hoveredPartId){
+            intensity = Math.max(intensity, 0.22);
+          }
+
+          if(partId === pulsePartId){
+            intensity = Math.max(intensity, pulseValue);
+          }
+
+          if(intensity > 0){
+            mat.emissive.set(0x38bdf8);
+            mat.emissiveIntensity = intensity;
+          } else {
+            mat.emissive.set(0x000000);
+            mat.emissiveIntensity = 0;
           }
         }
       }
