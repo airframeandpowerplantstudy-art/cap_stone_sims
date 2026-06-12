@@ -513,7 +513,7 @@ function terminal(svg,id){
 function drawGround(svg,x,y){svg.innerHTML+=line(x,y,x,y+30)+line(x-20,y+30,x+20,y+30)+line(x-14,y+40,x+14,y+40)+line(x-8,y+50,x+8,y+50)}
 
 function drawSvgMeter(svg){
-  const x=45, y=385, w=270, h=160;
+  const x=45, y=385, w=300, h=180;
   const screenClass = meterBlown ? "meterScreen blow" : "meterScreen";
   const textClass = meterBlown ? "meterText blow" : "meterText";
   const displayText = getMeterDisplayText();
