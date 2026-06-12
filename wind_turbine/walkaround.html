@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commercial Wind Turbine Trainer - MVP v22</title>
+  <title>Commercial Wind Turbine Trainer - MVP v23</title>
   <style>
     :root{
       --panel:#0f172a;
@@ -237,7 +237,7 @@
 
   <section class="hud">
     <h1>Commercial Wind Turbine Trainer</h1>
-    <div class="sub">MVP v22: restored hub-first drivetrain flow and added inspected checkmark feedback.</div>
+    <div class="sub">MVP v23: added system intro cards before each guided system flow begins.</div>
     <div class="chips">
       <span class="chip"><strong>Drag</strong> orbit</span>
       <span class="chip"><strong>Wheel</strong> zoom</span>
@@ -299,7 +299,7 @@
 
     <div class="section-card" id="systemTourCard">
       <div class="section-title">System tours</div>
-      <div class="tourtext">Choose a major system. Then follow the large System Flow card that tells students exactly what to do next.</div>
+      <div class="tourtext">Choose a major system. Students now get a short system intro before the guided part-by-part flow begins.</div>
       <div class="system-grid" id="systemButtons"></div>
       <div class="system-actions">
         <button id="nextSystemBtn">Use guided next</button>
@@ -308,7 +308,7 @@
     </div>
 
     <div class="part-grid" id="partButtons"></div>
-    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: choose a system, follow the pulsing part, then use the Next button. After the deeper view opens, the flow card marks that part inspected ✓.</div>
+    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: choose a system, read the intro card, then use the Next button to start the guided flow.</div>
   </aside>
 
   <div class="footer" id="footerText">Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span></div>
@@ -374,6 +374,7 @@
     let rotorSpin = true;
     let activeSystemKey = null;
     let activeSystemIndex = -1;
+    let systemIntroPending = false;
     const focusDimColor = new THREE.Color(0x334155);
 
     const ui = {
@@ -668,27 +669,37 @@
       structure: {
         name: 'Structure',
         parts: ['foundation','tower','door','nacelle'],
-        overview: 'Covers the major structural and access parts that support the turbine and allow technicians to enter and work safely.'
+        overview: 'Covers the major structural and access parts that support the turbine and allow technicians to enter and work safely.',
+        introPurpose: 'Support the turbine, hold the nacelle and rotor at operating height, and provide safe technician access.',
+        introFlow: 'You will inspect the foundation, tower, access door, and nacelle shell as the main support/access structure.'
       },
       drivetrain: {
         name: 'Drivetrain',
         parts: ['hub','nacelle','lowSpeedShaft','gearbox','highSpeedShaft','brake','generator'],
-        overview: 'Starts at the rotor hub where wind-driven rotation enters the machine, then moves into the nacelle through the shafts, gearbox, brake, and generator.'
+        overview: 'Starts at the rotor hub where wind-driven rotation enters the machine, then moves into the nacelle through the shafts, gearbox, brake, and generator.',
+        introPurpose: 'Transfer mechanical rotation from the rotor into the generator so wind energy can become electrical energy.',
+        introFlow: 'Follow the path from the hub into the nacelle, then through the low-speed shaft, gearbox, high-speed shaft, brake, and generator.'
       },
       electrical: {
         name: 'Electrical',
         parts: ['generator','controllerCabinet','transformer'],
-        overview: 'Focuses on how electrical power is produced, monitored, and sent away from the turbine.'
+        overview: 'Focuses on how electrical power is produced, monitored, and sent away from the turbine.',
+        introPurpose: 'Produce, monitor, control, and route electrical power from the turbine to the collection system.',
+        introFlow: 'You will start at the generator, move to the controller cabinet, then finish at the transformer.'
       },
       pitchYaw: {
         name: 'Pitch & Yaw',
         parts: ['nacelle','yaw','yawDrive','hub','pitchBearing','pitchMotor'],
-        overview: 'Starts at the yaw area where the nacelle turns on the tower, then moves to the hub where blade pitch changes angle.'
+        overview: 'Starts at the yaw area where the nacelle turns on the tower, then moves to the hub where blade pitch changes angle.',
+        introPurpose: 'Keep the turbine pointed into the wind and adjust blade angle for control, efficiency, and protection.',
+        introFlow: 'Yaw is at the tower-top/nacelle interface. Pitch is in the hub at the blade roots. This flow shows both without mixing them up.'
       },
       bladeSystem: {
         name: 'Blade System',
         parts: ['blade','bladeRoot','internalSpar','lightningProtection'],
-        overview: 'Looks at the blade as an aerodynamic and structural component, including the root, spar, and lightning path.'
+        overview: 'Looks at the blade as an aerodynamic and structural component, including the root, spar, and lightning path.',
+        introPurpose: 'Capture wind energy, carry aerodynamic loads, and safely route lightning energy away from the blade.',
+        introFlow: 'You will inspect the blade surface, blade root, internal spar, and lightning protection path.'
       }
     };
     const systemButtonEls = new Map();
@@ -1495,6 +1506,7 @@
     function clearSystemTour(){
       activeSystemKey = null;
       activeSystemIndex = -1;
+      systemIntroPending = false;
       updateSystemButtons();
       restoreSystemFocusVisuals();
       updateSystemFlowCard();
@@ -1505,11 +1517,28 @@
       if(!systemTours[systemKey]) return;
       activeSystemKey = systemKey;
       activeSystemIndex = 0;
+      systemIntroPending = true;
       updateSystemButtons();
-      const config = systemTours[systemKey];
-      ui.footerText.innerHTML = `<span class="active-name">${config.name}</span> flow active. Follow the large action button in the system flow card.`;
-      selectPart(config.parts[0]);
+      setSystemIntroPanel(systemKey);
       updateSystemFlowCard();
+      setTourStatus();
+    }
+
+    function setSystemIntroPanel(systemKey){
+      const config = systemTours[systemKey];
+      if(!config) return;
+      const firstPart = parts[config.parts[0]];
+
+      ui.moreDetailCard.style.display = 'block';
+      ui.stageTag.textContent = 'SYSTEM INTRO';
+      ui.stageTag.style.background = 'var(--accent2)';
+      ui.partTitle.textContent = `${config.name} system`;
+      ui.panelLead.textContent = 'Start here before moving part-by-part through the guided system flow.';
+      ui.whatIsText.textContent = config.overview;
+      ui.whatDoesText.textContent = config.introPurpose;
+      ui.whyCareText.textContent = config.introFlow;
+      ui.moreDetailText.textContent = `When ready, start with ${firstPart.name}. Use the large Next button or the faded bottom-center button to begin.`;
+      ui.footerText.innerHTML = `<span class="active-name">${config.name}</span> intro active. Start the flow when students understand the system purpose.`;
     }
 
     function nextSystemPart(){
@@ -1518,6 +1547,15 @@
         return;
       }
       const config = systemTours[activeSystemKey];
+
+      if(systemIntroPending){
+        systemIntroPending = false;
+        activeSystemIndex = 0;
+        selectPart(config.parts[0]);
+        updateSystemFlowCard();
+        return;
+      }
+
       const currentId = config.parts[activeSystemIndex];
 
       // First action on a part opens the deeper/cutaway view.
@@ -1543,6 +1581,29 @@
       }
 
       const config = systemTours[activeSystemKey];
+
+      if(systemIntroPending){
+        const firstPart = parts[config.parts[0]];
+        ui.systemFlowCard.style.display = 'block';
+        ui.systemFlowTitle.textContent = `${config.name} system intro`;
+        ui.systemFlowCurrent.textContent = `Purpose: ${config.introPurpose}`;
+        ui.systemFlowHint.textContent = config.introFlow;
+
+        const actionText = `Start flow: ${firstPart.name}`;
+        ui.systemFlowBtn.textContent = actionText;
+        ui.floatingNextBtn.textContent = actionText;
+        ui.floatingNextBtn.classList.remove('hidden');
+
+        ui.systemStepPills.innerHTML = '';
+        config.parts.forEach((id) => {
+          const dot = document.createElement('span');
+          dot.className = 'step-pill';
+          dot.title = parts[id].name;
+          ui.systemStepPills.appendChild(dot);
+        });
+        return;
+      }
+
       const currentId = config.parts[Math.max(0, activeSystemIndex)];
       const currentPart = parts[currentId];
       const nextId = config.parts[(activeSystemIndex + 1) % config.parts.length];
@@ -1590,6 +1651,7 @@
 
     function getPulseTargetPartId(){
       if(activeSystemKey){
+        if(systemIntroPending) return null;
         const config = systemTours[activeSystemKey];
         return config?.parts?.[Math.max(0, activeSystemIndex)] || null;
       }
@@ -1639,6 +1701,10 @@
     function setTourStatus(){
       if(activeSystemKey){
         const config = systemTours[activeSystemKey];
+        if(systemIntroPending){
+          ui.tourTitle.textContent = `System intro: ${config.name}`;
+          return;
+        }
         const currentId = config.parts[Math.max(0, activeSystemIndex)];
         const currentName = parts[currentId]?.name || config.name;
         ui.tourTitle.textContent = `System flow: ${config.name} ${Math.max(1, activeSystemIndex + 1)}/${config.parts.length} — ${currentName}`;
@@ -1712,7 +1778,10 @@
 
       if(activeSystemKey){
         const idx = systemTours[activeSystemKey].parts.indexOf(partId);
-        if(idx !== -1) activeSystemIndex = idx;
+        if(idx !== -1){
+          activeSystemIndex = idx;
+          systemIntroPending = false;
+        }
         updateSystemFlowCard();
       }
       setTourStatus();
@@ -1813,7 +1882,7 @@
       ui.panelLead.textContent = 'Click a turbine part to zoom in, click it again for deeper detail, or use the new system tour buttons for a guided path.';
       ui.whatIsText.textContent = 'A commercial wind turbine is a machine that turns wind energy into electrical energy.';
       ui.whatDoesText.textContent = 'The rotor captures wind energy, the drivetrain transfers it, and the electrical system conditions and sends power away from the turbine.';
-      ui.whyCareText.textContent = 'Students and technicians need to understand where the major systems are, what they do, and why failures in those systems matter. System flows organize the model into Structure, Drivetrain, Electrical, Pitch & Yaw, and Blade System. A large action button now guides students through the next step.';
+      ui.whyCareText.textContent = 'Students and technicians need to understand where the major systems are, what they do, and why failures in those systems matter. System flows now begin with an intro card that explains the system purpose before students move part-by-part.';
       ui.moreDetailCard.style.display = 'none';
       ui.moreDetailText.textContent = '';
       ui.footerText.innerHTML = 'Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span>';
