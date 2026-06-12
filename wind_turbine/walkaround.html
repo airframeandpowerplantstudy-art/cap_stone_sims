@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commercial Wind Turbine Trainer - MVP v7</title>
+  <title>Commercial Wind Turbine Trainer - MVP v9</title>
   <style>
     :root{
       --panel:#0f172a;
@@ -183,7 +183,7 @@
 
   <section class="hud">
     <h1>Commercial Wind Turbine Trainer</h1>
-    <div class="sub">MVP v7: clickable internal nacelle and blade-pitch components added for deeper inspection.</div>
+    <div class="sub">MVP v9: visual realism pass with tapered blades, tower details, nacelle shaping, and site context.</div>
     <div class="chips">
       <span class="chip"><strong>Drag</strong> orbit</span>
       <span class="chip"><strong>Wheel</strong> zoom</span>
@@ -334,7 +334,13 @@
       black: new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.65, metalness: 0.15 }),
       copper: new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.4, metalness: 0.55 }),
       ground: new THREE.MeshStandardMaterial({ color: 0x5f8d52, roughness: 0.95 }),
-      steel: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.42, metalness: 0.55 })
+      gravel: new THREE.MeshStandardMaterial({ color: 0x8b8173, roughness: 0.98 }),
+      road: new THREE.MeshStandardMaterial({ color: 0x6b7280, roughness: 0.92 }),
+      towerSeam: new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.65, metalness: 0.15 }),
+      whiteLine: new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.7 }),
+      cone: new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.6, metalness: 0.05 }),
+      steel: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.42, metalness: 0.55 }),
+      magenta: new THREE.MeshStandardMaterial({ color: 0xd946ef, roughness: 0.45, metalness: 0.08 })
     };
 
     const parts = {
@@ -510,8 +516,8 @@
         whatDoes: 'It lets the turbine change blade angle for power control, startup, shutdown, and overspeed protection.',
         whyCare: 'Pitch bearing wear or lubrication problems can affect blade control and create serious reliability issues.',
         moreDetail: 'Each blade root uses a pitch bearing so the blade can rotate around its long axis. This is a core part of blade pitch control.',
-        focus: new THREE.Vector3(-8.95, 74.32, 0),
-        camera: new THREE.Vector3(-20.5, 78.0, 10.5),
+        focus: new THREE.Vector3(-8.92, 74.45, 0),
+        camera: new THREE.Vector3(-19.5, 77.8, 9.5),
         inside: 'hub'
       },
       pitchMotor: {
@@ -521,8 +527,8 @@
         whatDoes: 'It turns the blade through the pitch bearing to change aerodynamic angle.',
         whyCare: 'Pitch actuator faults can reduce power control, affect shutdown performance, or cause blade-position alarms.',
         moreDetail: 'The actuator works with pitch control hardware to move the blade toward a productive angle or toward a feathered, low-lift position when needed.',
-        focus: new THREE.Vector3(-7.85, 74.32, 0),
-        camera: new THREE.Vector3(-18.5, 77.8, 10.2),
+        focus: new THREE.Vector3(-7.82, 74.45, 0),
+        camera: new THREE.Vector3(-18.2, 77.6, 9.2),
         inside: 'hub'
       },
       bladeRoot: {
@@ -589,8 +595,8 @@
       controllerCabinet: new THREE.Vector3(2.8, 77.1, -1.55),
       coolingSystem: new THREE.Vector3(6.3, 76.8, -1.55),
       yawDrive: new THREE.Vector3(0, 71.25, 0),
-      pitchBearing: new THREE.Vector3(-8.95, 75.9, 0),
-      pitchMotor: new THREE.Vector3(-7.85, 75.4, 0),
+      pitchBearing: new THREE.Vector3(-8.92, 74.55, 0),
+      pitchMotor: new THREE.Vector3(-7.82, 74.55, 0),
       bladeRoot: new THREE.Vector3(-9.2, 76.1, 0),
       internalSpar: new THREE.Vector3(-9.0, 88.4, 0.22),
       lightningProtection: new THREE.Vector3(-8.8, 86.6, -0.03),
@@ -625,6 +631,107 @@
       return mesh;
     }
 
+    function makeRoundedBoxGeometry(width, height, depth, radius = 0.75){
+      const x = -width / 2;
+      const y = -height / 2;
+      const r = Math.min(radius, width / 2 - 0.01, height / 2 - 0.01);
+      const shape = new THREE.Shape();
+      shape.moveTo(x + r, y);
+      shape.lineTo(x + width - r, y);
+      shape.quadraticCurveTo(x + width, y, x + width, y + r);
+      shape.lineTo(x + width, y + height - r);
+      shape.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      shape.lineTo(x + r, y + height);
+      shape.quadraticCurveTo(x, y + height, x, y + height - r);
+      shape.lineTo(x, y + r);
+      shape.quadraticCurveTo(x, y, x + r, y);
+
+      const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth,
+        bevelEnabled: true,
+        bevelThickness: 0.08,
+        bevelSize: 0.08,
+        bevelSegments: 3,
+        curveSegments: 10
+      });
+      geometry.translate(0, 0, -depth / 2);
+      return geometry;
+    }
+
+    function makeBladeGeometry(length = 27, rootWidth = 1.12, tipWidth = 0.22, rootThick = 0.34, tipThick = 0.08){
+      const sections = 9;
+      const verts = [];
+      const faces = [];
+
+      for(let i=0; i<=sections; i++){
+        const t = i / sections;
+        const y = -length / 2 + t * length;
+        const width = rootWidth + (tipWidth - rootWidth) * Math.pow(t, 0.72);
+        const thick = rootThick + (tipThick - rootThick) * t;
+        const sweep = -0.22 * t * t;
+        const twist = (t - 0.5) * 0.22;
+
+        const left = -width / 2 + sweep;
+        const right = width / 2 + sweep;
+        const zTopLeft = thick / 2 + twist * left;
+        const zTopRight = thick / 2 + twist * right;
+        const zBottomLeft = -thick / 2 + twist * left;
+        const zBottomRight = -thick / 2 + twist * right;
+
+        verts.push(
+          left, y, zTopLeft,
+          right, y, zTopRight,
+          right, y, zBottomRight,
+          left, y, zBottomLeft
+        );
+      }
+
+      for(let i=0; i<sections; i++){
+        const a = i * 4;
+        const b = (i + 1) * 4;
+
+        faces.push(a, b, a+1, a+1, b, b+1);       // top surface
+        faces.push(a+1, b+1, a+2, a+2, b+1, b+2); // right edge
+        faces.push(a+2, b+2, a+3, a+3, b+2, b+3); // lower surface
+        faces.push(a+3, b+3, a, a, b+3, b);       // left edge
+      }
+
+      faces.push(0, 1, 2, 0, 2, 3);
+      const last = sections * 4;
+      faces.push(last, last+2, last+1, last, last+3, last+2);
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+      geometry.setIndex(faces);
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function towerRadiusAt(y){
+      const t = THREE.MathUtils.clamp((y - 1.1) / 68, 0, 1);
+      return 2.65 + (1.55 - 2.65) * t;
+    }
+
+    function addTowerFlange(y, radiusBoost = 0.08){
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(towerRadiusAt(y) + radiusBoost, .055, 10, 96),
+        cloneMat(materials.towerSeam)
+      );
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = y;
+      ring.castShadow = true;
+      scene.add(ring);
+
+      for(let i=0; i<16; i++){
+        const angle = i / 16 * Math.PI * 2;
+        const bolt = new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.08,10), cloneMat(materials.towerSeam));
+        bolt.position.set(Math.cos(angle)*(towerRadiusAt(y)+.18), y+.04, Math.sin(angle)*(towerRadiusAt(y)+.18));
+        bolt.rotation.x = Math.PI / 2;
+        bolt.castShadow = true;
+        scene.add(bolt);
+      }
+    }
+
     // Lighting
     scene.add(new THREE.HemisphereLight(0xe8f7ff, 0x52614e, 1.2));
     const sun = new THREE.DirectionalLight(0xffffff, 2.2);
@@ -647,8 +754,50 @@
 
     const grid = new THREE.GridHelper(260, 26, 0xffffff, 0xffffff);
     grid.material.transparent = true;
-    grid.material.opacity = 0.15;
+    grid.material.opacity = 0.12;
     scene.add(grid);
+
+    const gravelPad = new THREE.Mesh(new THREE.CircleGeometry(18, 80), cloneMat(materials.gravel));
+    gravelPad.rotation.x = -Math.PI / 2;
+    gravelPad.position.y = 0.012;
+    gravelPad.receiveShadow = true;
+    scene.add(gravelPad);
+
+    const serviceRoad = new THREE.Mesh(new THREE.PlaneGeometry(16, 92), cloneMat(materials.road));
+    serviceRoad.rotation.x = -Math.PI / 2;
+    serviceRoad.rotation.z = -0.72;
+    serviceRoad.position.set(33, 0.018, -30);
+    serviceRoad.receiveShadow = true;
+    scene.add(serviceRoad);
+
+    const roadStripe = new THREE.Mesh(new THREE.PlaneGeometry(.25, 70), cloneMat(materials.whiteLine));
+    roadStripe.rotation.copy(serviceRoad.rotation);
+    roadStripe.position.set(33, 0.024, -30);
+    roadStripe.material.transparent = true;
+    roadStripe.material.opacity = .32;
+    scene.add(roadStripe);
+
+    for(const [x,z] of [[9,8],[-8,7],[10,-7],[-7,-8]]){
+      const coneBase = new THREE.Mesh(new THREE.CylinderGeometry(.32,.42,.18,20), cloneMat(materials.cone));
+      coneBase.position.set(x,.11,z);
+      coneBase.castShadow = true;
+      scene.add(coneBase);
+
+      const coneTop = new THREE.Mesh(new THREE.ConeGeometry(.32,1.05,24), cloneMat(materials.cone));
+      coneTop.position.set(x,.72,z);
+      coneTop.castShadow = true;
+      scene.add(coneTop);
+    }
+
+    const tech = new THREE.Group();
+    const techBody = new THREE.Mesh(new THREE.CylinderGeometry(.22,.28,1.35,16), cloneMat(materials.blue));
+    techBody.position.y = .95;
+    const techHead = new THREE.Mesh(new THREE.SphereGeometry(.23,20,16), cloneMat(materials.yellow));
+    techHead.position.y = 1.75;
+    tech.add(techBody, techHead);
+    tech.position.set(-10,0,11);
+    tech.rotation.y = .55;
+    scene.add(tech);
 
     // Foundation
     const foundation = register(new THREE.Mesh(new THREE.CylinderGeometry(6.8, 7.8, 2.2, 64), cloneMat(materials.foundation)), 'foundation');
@@ -671,9 +820,19 @@
     scene.add(foundationInside);
 
     // Tower
-    const tower = register(new THREE.Mesh(new THREE.CylinderGeometry(1.55, 2.65, 68, 48), cloneMat(materials.tower)), 'tower');
+    const tower = register(new THREE.Mesh(new THREE.CylinderGeometry(1.55, 2.65, 68, 64), cloneMat(materials.tower)), 'tower');
     tower.position.y = 35.1;
     scene.add(tower);
+
+    for(const y of [10.5, 21.5, 32.5, 43.5, 54.5, 65.2]){
+      addTowerFlange(y);
+    }
+
+    const verticalSeam = new THREE.Mesh(new THREE.BoxGeometry(.035, 62, .035), cloneMat(materials.towerSeam));
+    verticalSeam.position.set(0, 36, -2.17);
+    verticalSeam.material.transparent = true;
+    verticalSeam.material.opacity = .42;
+    scene.add(verticalSeam);
 
     const towerInside = new THREE.Group();
     towerInside.visible = false;
@@ -697,10 +856,19 @@
     scene.add(towerInside);
 
     // Door
-    const door = register(new THREE.Mesh(new THREE.BoxGeometry(1.6, 4.4, .18), cloneMat(materials.towerDark)), 'door');
-    door.position.set(0, 4.6, -2.48);
+    const door = register(new THREE.Mesh(new THREE.BoxGeometry(1.55, 4.15, .18), cloneMat(materials.towerDark)), 'door');
+    door.position.set(0, 4.58, -2.48);
     addEdges(door, 0x0f172a, .65);
     scene.add(door);
+
+    const doorWindow = new THREE.Mesh(new THREE.BoxGeometry(.65,.42,.05), cloneMat(materials.blue));
+    doorWindow.position.set(0,5.72,-2.59);
+    scene.add(doorWindow);
+
+    const doorHandle = new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.42,12), cloneMat(materials.yellow));
+    doorHandle.rotation.x = Math.PI / 2;
+    doorHandle.position.set(.58,4.55,-2.62);
+    scene.add(doorHandle);
 
     // Yaw system
     const yawRing = register(new THREE.Mesh(new THREE.CylinderGeometry(2.75, 2.75, 1.2, 48), cloneMat(materials.blue)), 'yaw');
@@ -726,25 +894,45 @@
     scene.add(yawInside);
 
     // Nacelle shell and cutaway covers
-    const nacelle = register(new THREE.Mesh(new THREE.BoxGeometry(13.5, 5.2, 5.1), cloneMat(materials.nacelle)), 'nacelle');
+    const nacelle = register(new THREE.Mesh(makeRoundedBoxGeometry(13.5, 5.2, 5.1, .9), cloneMat(materials.nacelle)), 'nacelle');
     nacelle.position.set(0, 73, 0);
-    addEdges(nacelle, 0x1e293b, .32);
+    addEdges(nacelle, 0x1e293b, .22);
     scene.add(nacelle);
+
+    const rearGrille = new THREE.Group();
+    for(let i=0; i<6; i++){
+      const slat = new THREE.Mesh(new THREE.BoxGeometry(.08, .12, 3.1), cloneMat(materials.towerDark));
+      slat.position.set(6.86, 72.1 + i*.38, 0);
+      rearGrille.add(slat);
+    }
+    scene.add(rearGrille);
 
     const nacelleNose = register(new THREE.Mesh(new THREE.ConeGeometry(2.65, 2.6, 48), cloneMat(materials.nacelle)), 'nacelle');
     nacelleNose.rotation.z = Math.PI / 2;
     nacelleNose.position.set(-7.9, 73, 0);
     scene.add(nacelleNose);
 
-    const nacelleCoverTop = new THREE.Mesh(new THREE.BoxGeometry(12.9, .45, 4.8), cloneMat(materials.nacelleShadow));
+    const nacelleCoverTop = new THREE.Mesh(makeRoundedBoxGeometry(12.7, .52, 4.7, .3), cloneMat(materials.nacelleShadow));
     nacelleCoverTop.position.set(.1,75.38,0);
     addEdges(nacelleCoverTop, 0x334155, .28);
     scene.add(nacelleCoverTop);
 
-    const nacelleSideCover = new THREE.Mesh(new THREE.BoxGeometry(12.9, 4.75, .25), cloneMat(materials.nacelleShadow));
+    const nacelleSideCover = new THREE.Mesh(makeRoundedBoxGeometry(12.7, 4.55, .28, .35), cloneMat(materials.nacelleShadow));
     nacelleSideCover.position.set(.1,73,2.68);
     addEdges(nacelleSideCover, 0x334155, .2);
     scene.add(nacelleSideCover);
+
+    const nacelleAccessPanel = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.7, .045), cloneMat(materials.towerSeam));
+    nacelleAccessPanel.position.set(2.6,73.15,2.86);
+    nacelleAccessPanel.material.transparent = true;
+    nacelleAccessPanel.material.opacity = .30;
+    scene.add(nacelleAccessPanel);
+
+    const nacelleRoofLine = new THREE.Mesh(new THREE.BoxGeometry(8.6,.035,.055), cloneMat(materials.towerSeam));
+    nacelleRoofLine.position.set(.8,75.73,0);
+    nacelleRoofLine.material.transparent = true;
+    nacelleRoofLine.material.opacity = .35;
+    scene.add(nacelleRoofLine);
 
     // Nacelle internals
     const nacelleInside = new THREE.Group();
@@ -814,30 +1002,59 @@
     const rotorGroup = new THREE.Group();
     scene.add(rotorGroup);
 
-    const hub = register(new THREE.Mesh(new THREE.SphereGeometry(2.35, 48, 32), cloneMat(materials.hub)), 'hub');
+    const hub = register(new THREE.Mesh(new THREE.SphereGeometry(2.15, 48, 32), cloneMat(materials.hub)), 'hub');
+    hub.scale.set(.88, 1.0, 1.0);
     hub.position.set(-9.2, 73, 0);
     rotorGroup.add(hub);
 
-    const spinner = register(new THREE.Mesh(new THREE.ConeGeometry(1.6, 2.5, 48), cloneMat(materials.hub)), 'hub');
+    const spinner = register(new THREE.Mesh(new THREE.ConeGeometry(1.75, 3.15, 48), cloneMat(materials.hub)), 'hub');
     spinner.rotation.z = Math.PI / 2;
-    spinner.position.set(-11.0,73,0);
+    spinner.position.set(-11.18,73,0);
     rotorGroup.add(spinner);
+
+    for(let i=0; i<3; i++){
+      const angle = i * Math.PI * 2 / 3;
+      const collar = new THREE.Mesh(new THREE.TorusGeometry(.92,.12,12,48), cloneMat(materials.towerDark));
+      collar.position.set(-9.2, 73, 0);
+      collar.rotation.y = Math.PI / 2;
+      collar.rotation.x = angle;
+      rotorGroup.add(collar);
+    }
 
     const hubInside = new THREE.Group();
     hubInside.visible = false;
     insideGroups.set('hub', hubInside);
     scene.add(hubInside);
 
+    const hubCore = new THREE.Mesh(new THREE.SphereGeometry(.85, 32, 20), cloneMat(materials.steel));
+    hubCore.position.set(-9.2, 73, 0);
+    hubInside.add(hubCore);
+
+    const pitchLabelRing = new THREE.Mesh(new THREE.TorusGeometry(1.62,.045,12,72), cloneMat(materials.magenta));
+    pitchLabelRing.position.set(-9.16,73,0);
+    pitchLabelRing.rotation.y = Math.PI / 2;
+    hubInside.add(pitchLabelRing);
+
     for(let i=0;i<3;i++){
       const angle = i * Math.PI * 2 / 3;
-      const pitchBearing = register(new THREE.Mesh(new THREE.TorusGeometry(.72,.12,14,48), cloneMat(materials.yellow)), 'pitchBearing');
-      pitchBearing.position.set(-8.95, 73 + Math.cos(angle)*1.32, Math.sin(angle)*1.32);
+
+      const bearingY = 73 + Math.cos(angle)*1.45;
+      const bearingZ = Math.sin(angle)*1.45;
+
+      const pitchBearing = register(new THREE.Mesh(new THREE.TorusGeometry(.78,.13,14,56), cloneMat(materials.yellow)), 'pitchBearing');
+      pitchBearing.position.set(-8.92, bearingY, bearingZ);
       pitchBearing.rotation.y = Math.PI / 2;
       hubInside.add(pitchBearing);
 
-      const pitchMotor = register(new THREE.Mesh(new THREE.BoxGeometry(.68,.55,.48), cloneMat(materials.blue)), 'pitchMotor');
-      pitchMotor.position.set(-7.85, 73 + Math.cos(angle)*1.32, Math.sin(angle)*1.32);
+      const pitchMotor = register(new THREE.Mesh(new THREE.BoxGeometry(.72,.5,.5), cloneMat(materials.blue)), 'pitchMotor');
+      pitchMotor.position.set(-7.82, bearingY, bearingZ);
+      pitchMotor.rotation.x = angle;
       hubInside.add(pitchMotor);
+
+      const actuatorRod = new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,1.0,12), cloneMat(materials.black));
+      actuatorRod.rotation.z = Math.PI / 2;
+      actuatorRod.position.set(-8.35, bearingY, bearingZ);
+      hubInside.add(actuatorRod);
     }
 
     const bladeInside = new THREE.Group();
@@ -852,7 +1069,7 @@
       bladeGroup.rotation.x = angle;
       rotorGroup.add(bladeGroup);
 
-      const blade = register(new THREE.Mesh(new THREE.BoxGeometry(.75, 27, .28), cloneMat(materials.blade)), 'blade');
+      const blade = register(new THREE.Mesh(makeBladeGeometry(27.5, 1.12, .18, .34, .07), cloneMat(materials.blade)), 'blade');
       blade.position.set(0, 15.8, 0);
       bladeGroup.add(blade);
 
@@ -861,8 +1078,8 @@
       root.position.set(0, 2.2, 0);
       bladeGroup.add(root);
 
-      const tip = register(new THREE.Mesh(new THREE.ConeGeometry(.39, 2.0, 24), cloneMat(materials.blade)), 'blade');
-      tip.position.set(0, 30.1, 0);
+      const tip = register(new THREE.Mesh(new THREE.ConeGeometry(.20, 1.2, 24), cloneMat(materials.blade)), 'blade');
+      tip.position.set(-.22, 29.9, 0);
       tip.rotation.x = Math.PI;
       bladeGroup.add(tip);
 
@@ -1003,11 +1220,17 @@
       nacelleSideCover.rotation.y = -n * 0.12;
       nacelleCoverTop.material.opacity = 1 - 0.78 * n;
       nacelleSideCover.material.opacity = 1 - 0.88 * n;
+      nacelleAccessPanel.material.opacity = .30 * (1 - n);
+      nacelleRoofLine.material.opacity = .35 * (1 - n);
 
       const h = cutawayState.hub;
-      hub.material.opacity = 1 - 0.58 * h;
-      spinner.material.opacity = 1 - 0.22 * h;
-      spinner.position.x = -11.0 - h * 1.25;
+
+      // Hub cutaway: fade the shell and slightly park the spinner nose.
+      // Do not scale the hub or sweep the spinner far away, because that looked like the hub was growing.
+      hub.material.opacity = 1 - 0.76 * h;
+      spinner.material.opacity = 1 - 0.70 * h;
+      spinner.position.x = -11.18 - h * 0.38;
+      spinner.position.y = 73 + h * 0.22;
 
       const t = cutawayState.tower;
       tower.material.opacity = 1 - 0.62 * t;
@@ -1021,13 +1244,8 @@
       transformerTop.position.y = 4.88 + tr * 1.5;
 
       for(const assembly of bladeAssemblies){
-        if(h > 0.02){
-          const base = [0.55, 0.0, -0.38][assembly.index] || 0;
-          assembly.bladeMesh.rotation.y = base * h;
-          assembly.rootMesh.rotation.x = 0;
-        } else {
-          assembly.bladeMesh.rotation.y += (0 - assembly.bladeMesh.rotation.y) * Math.min(1, delta * 6);
-        }
+        const pitchAmount = [0.32, 0.0, -0.22][assembly.index] || 0;
+        assembly.bladeMesh.rotation.y += (pitchAmount * h - assembly.bladeMesh.rotation.y) * Math.min(1, delta * 5);
       }
     }
 
