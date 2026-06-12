@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commercial Wind Turbine Trainer - MVP v28 V80 Inspired</title>
+  <title>Commercial Wind Turbine Trainer - v29 Hub Polish</title>
   <style>
     :root{
       --panel:#0f172a;
@@ -21,215 +21,65 @@
     canvas{display:block}
 
     .hud{
-      position:fixed;
-      left:16px;
-      top:16px;
-      width:min(390px,calc(100vw - 32px));
+      position:fixed;left:16px;top:16px;width:min(390px,calc(100vw - 32px));
       background:linear-gradient(180deg,rgba(15,23,42,.94),rgba(17,24,39,.91));
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-      box-shadow:0 18px 60px rgba(0,0,0,.35);
-      backdrop-filter:blur(10px);
-      z-index:5;
+      border:1px solid var(--line);border-radius:18px;padding:16px;
+      box-shadow:0 18px 60px rgba(0,0,0,.35);backdrop-filter:blur(10px);z-index:5;
     }
     .hud h1{font-size:19px;line-height:1.15;margin:0 0 6px;font-weight:800;letter-spacing:.2px}
     .hud .sub{font-size:13px;color:var(--muted);line-height:1.35;margin-bottom:12px}
     .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
-    .chip{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.06);
-      color:var(--ink);
-      border-radius:999px;
-      padding:7px 10px;
-      font-size:12px;
-      user-select:none;
-    }
+    .chip{border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:999px;padding:7px 10px;font-size:12px;user-select:none}
     .chip strong{color:#fff}
 
     .panel{
-      position:fixed;
-      right:16px;
-      top:16px;
-      width:min(430px,calc(100vw - 32px));
-      max-height:calc(100vh - 32px);
-      overflow:auto;
+      position:fixed;right:16px;top:16px;width:min(430px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;
       background:linear-gradient(180deg,rgba(15,23,42,.96),rgba(17,24,39,.94));
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-      box-shadow:0 18px 60px rgba(0,0,0,.35);
-      backdrop-filter:blur(10px);
-      z-index:5;
+      border:1px solid var(--line);border-radius:18px;padding:16px;
+      box-shadow:0 18px 60px rgba(0,0,0,.35);backdrop-filter:blur(10px);z-index:5;
     }
     .panel h2{font-size:22px;margin:0 0 4px;line-height:1.1}
     .panel .tag{display:inline-flex;align-items:center;gap:6px;color:#0b1220;background:var(--accent2);font-weight:800;font-size:12px;border-radius:999px;padding:5px 9px;margin-bottom:10px}
     .panel .lead{font-size:13px;color:var(--muted);line-height:1.35;margin-bottom:10px}
-    .section-card{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      border-radius:14px;
-      padding:11px 12px;
-      margin:10px 0;
-    }
-    .section-title{
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:#bae6fd;
-      margin-bottom:6px;
-    }
-    .section-body{
-      font-size:14px;
-      line-height:1.45;
-      color:#dbeafe;
-    }
-    .section-body.muted{
-      color:#cbd5e1;
-    }
+    .section-card{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);border-radius:14px;padding:11px 12px;margin:10px 0}
+    .section-title{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#bae6fd;margin-bottom:6px}
+    .section-body{font-size:14px;line-height:1.45;color:#dbeafe}
+    .section-body.muted{color:#cbd5e1}
     .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    button{
-      cursor:pointer;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:rgba(255,255,255,.08);
-      color:var(--ink);
-      padding:10px 12px;
-      font-weight:700;
-      transition:transform .12s ease,background .12s ease,border-color .12s ease;
-    }
+    button{cursor:pointer;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.08);color:var(--ink);padding:10px 12px;font-weight:700;transition:transform .12s ease,background .12s ease,border-color .12s ease}
     button:hover{transform:translateY(-1px);background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.55)}
     button.primary{background:rgba(56,189,248,.22);border-color:rgba(56,189,248,.7)}
     button.warn{background:rgba(250,204,21,.13);border-color:rgba(250,204,21,.45)}
-
     .part-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
     .part-grid button{font-size:12px;padding:8px 9px;text-align:left}
     .part-grid button.done{border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.12)}
     .part-grid button.deep-done{border-color:rgba(250,204,21,.55);background:rgba(250,204,21,.12)}
-
     .system-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
     .system-grid button{font-size:12px;padding:9px 10px;text-align:left}
     .system-grid button.active-system{border-color:rgba(56,189,248,.7);background:rgba(56,189,248,.18)}
     .system-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .system-flow-card{
-      border-color:rgba(56,189,248,.35);
-      background:linear-gradient(180deg,rgba(56,189,248,.10),rgba(255,255,255,.04));
-    }
-    .system-flow-card .big-action{
-      width:100%;
-      justify-content:center;
-      background:rgba(56,189,248,.24);
-      border-color:rgba(56,189,248,.70);
-      font-size:14px;
-      padding:12px 14px;
-    }
+    .system-flow-card{border-color:rgba(56,189,248,.35);background:linear-gradient(180deg,rgba(56,189,248,.10),rgba(255,255,255,.04))}
+    .system-flow-card .big-action{width:100%;justify-content:center;background:rgba(56,189,248,.24);border-color:rgba(56,189,248,.70);font-size:14px;padding:12px 14px}
     .step-pills{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-    .step-pill{
-      width:10px;height:10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.22);
-      background:rgba(255,255,255,.08);
-    }
+    .step-pill{width:10px;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08)}
     .step-pill.current{background:var(--accent);border-color:rgba(56,189,248,.9)}
     .step-pill.done{background:var(--good);border-color:rgba(34,197,94,.8)}
-
-    .footer{
-      position:fixed;
-      left:50%;
-      bottom:14px;
-      transform:translateX(-50%);
-      background:rgba(15,23,42,.78);
-      border:1px solid var(--line);
-      color:#cbd5e1;
-      border-radius:999px;
-      padding:9px 14px;
-      font-size:13px;
-      z-index:4;
-      box-shadow:0 12px 40px rgba(0,0,0,.28);
-      backdrop-filter:blur(8px);
-      white-space:nowrap;
-    }
-    .floating-next{
-      position:fixed;
-      left:50%;
-      bottom:58px;
-      transform:translateX(-50%);
-      z-index:4;
-      min-width:260px;
-      max-width:min(76vw, 460px);
-      padding:12px 18px;
-      border-radius:999px;
-      border:1px solid rgba(56,189,248,.42);
-      background:rgba(15,23,42,.44);
-      color:#e0f2fe;
-      font-size:14px;
-      font-weight:800;
-      box-shadow:0 12px 34px rgba(0,0,0,.22);
-      backdrop-filter:blur(8px);
-      opacity:.66;
-      transition:opacity .18s ease, transform .18s ease, background .18s ease, border-color .18s ease;
-    }
-    .floating-next:hover{
-      opacity:.96;
-      transform:translateX(-50%) translateY(-1px);
-      background:rgba(56,189,248,.18);
-      border-color:rgba(56,189,248,.72);
-    }
-    .floating-next.hidden{
-      display:none;
-    }
+    .footer{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(15,23,42,.78);border:1px solid var(--line);color:#cbd5e1;border-radius:999px;padding:9px 14px;font-size:13px;z-index:4;box-shadow:0 12px 40px rgba(0,0,0,.28);backdrop-filter:blur(8px);white-space:nowrap}
+    .floating-next{position:fixed;left:50%;bottom:58px;transform:translateX(-50%);z-index:4;min-width:260px;max-width:min(76vw, 460px);padding:12px 18px;border-radius:999px;border:1px solid rgba(56,189,248,.42);background:rgba(15,23,42,.44);color:#e0f2fe;font-size:14px;font-weight:800;box-shadow:0 12px 34px rgba(0,0,0,.22);backdrop-filter:blur(8px);opacity:.66;transition:opacity .18s ease,transform .18s ease,background .18s ease,border-color .18s ease}
+    .floating-next:hover{opacity:.96;transform:translateX(-50%) translateY(-1px);background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.72)}
+    .floating-next.hidden{display:none}
     .tiny{font-size:11px;color:var(--muted)}
     .active-name{color:var(--accent);font-weight:900}
-
-    .labels-layer{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:3;
-    }
-    .label-pill{
-      position:absolute;
-      transform:translate(-50%,-50%);
-      pointer-events:auto;
-      border:1px solid rgba(56,189,248,.28);
-      background:rgba(15,23,42,.44);
-      color:rgba(224,242,254,.76);
-      border-radius:999px;
-      padding:4px 7px;
-      font-size:10.5px;
-      font-weight:700;
-      opacity:.72;
-      box-shadow:0 8px 24px rgba(0,0,0,.16);
-      backdrop-filter:blur(5px);
-      white-space:nowrap;
-      user-select:none;
-      cursor:pointer;
-      transition:opacity .15s ease, transform .15s ease, background .15s ease, border-color .15s ease;
-    }
-    .label-pill:hover,
-    .label-pill.active{
-      opacity:.95;
-      background:rgba(56,189,248,.18);
-      border-color:rgba(56,189,248,.62);
-      transform:translate(-50%,-50%) scale(1.04);
-    }
+    .labels-layer{position:fixed;inset:0;pointer-events:none;z-index:3}
+    .label-pill{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;border:1px solid rgba(56,189,248,.28);background:rgba(15,23,42,.44);color:rgba(224,242,254,.76);border-radius:999px;padding:4px 7px;font-size:10.5px;font-weight:700;opacity:.72;box-shadow:0 8px 24px rgba(0,0,0,.16);backdrop-filter:blur(5px);white-space:nowrap;user-select:none;cursor:pointer;transition:opacity .15s ease,transform .15s ease,background .15s ease,border-color .15s ease}
+    .label-pill:hover,.label-pill.active{opacity:.95;background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.62);transform:translate(-50%,-50%) scale(1.04)}
     .label-pill.deep{border-color:rgba(250,204,21,.5);color:rgba(254,249,195,.86)}
     .label-pill.hidden{display:none}
-
     .tourbar{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
-    .meter{
-      width:100%;height:9px;border-radius:999px;overflow:hidden;
-      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);margin:7px 0 6px;
-    }
+    .meter{width:100%;height:9px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);margin:7px 0 6px}
     .meter-fill{width:0%;height:100%;background:linear-gradient(90deg,var(--accent),var(--good));transition:width .25s ease}
     .tourtext{font-size:12px;color:var(--muted);line-height:1.35}
-
-    @media (max-width: 850px){
-      .hud{display:none}
-      .panel{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:52vh;padding:14px}
-      .footer{display:none}
-      .part-grid{grid-template-columns:1fr}
-    }
+    @media (max-width:850px){.hud{display:none}.panel{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:52vh;padding:14px}.footer{display:none}.part-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -237,7 +87,7 @@
 
   <section class="hud">
     <h1>Commercial Wind Turbine Trainer</h1>
-    <div class="sub">MVP v28: V80-inspired visual pass with a more realistic nacelle silhouette, rooftop cooling housing, roof hardware, and cleaner blade/root proportions.</div>
+    <div class="sub">v29: same trainer flow, with the hub/pitch system polished into a heavier V80-inspired cast assembly with bolted pitch-bearing collars and blue pitch actuators.</div>
     <div class="chips">
       <span class="chip"><strong>Drag</strong> orbit</span>
       <span class="chip"><strong>Wheel</strong> zoom</span>
@@ -251,26 +101,10 @@
     <span class="tag" id="stageTag">READY</span>
     <h2 id="partTitle">Wind turbine overview</h2>
     <div class="lead" id="panelLead">Click a turbine part to zoom in. Click the same part again for a deeper cutaway training view.</div>
-
-    <div class="section-card">
-      <div class="section-title">What it is</div>
-      <div class="section-body" id="whatIsText">A commercial wind turbine converts wind energy into electrical energy.</div>
-    </div>
-
-    <div class="section-card">
-      <div class="section-title">What it does</div>
-      <div class="section-body" id="whatDoesText">The rotor captures wind energy, the drivetrain transfers it, and the electrical system sends power to the grid.</div>
-    </div>
-
-    <div class="section-card">
-      <div class="section-title">Why a technician cares</div>
-      <div class="section-body" id="whyCareText">Technicians inspect, maintain, and troubleshoot each of these systems to keep the turbine safe and producing power.</div>
-    </div>
-
-    <div class="section-card" id="moreDetailCard">
-      <div class="section-title">More detail</div>
-      <div class="section-body muted" id="moreDetailText">Click this same part again to see the deeper cutaway view and more detail.</div>
-    </div>
+    <div class="section-card"><div class="section-title">What it is</div><div class="section-body" id="whatIsText">A commercial wind turbine converts wind energy into electrical energy.</div></div>
+    <div class="section-card"><div class="section-title">What it does</div><div class="section-body" id="whatDoesText">The rotor captures wind energy, the drivetrain transfers it, and the electrical system sends power to the grid.</div></div>
+    <div class="section-card"><div class="section-title">Why a technician cares</div><div class="section-body" id="whyCareText">Technicians inspect, maintain, and troubleshoot each system to keep the turbine safe and producing power.</div></div>
+    <div class="section-card" id="moreDetailCard"><div class="section-title">More detail</div><div class="section-body muted" id="moreDetailText">Click this same part again to see the deeper cutaway view and more detail.</div></div>
 
     <div class="buttons">
       <button class="primary" id="resetBtn">Reset view</button>
@@ -291,24 +125,19 @@
       <div class="section-title" id="systemFlowTitle">System flow</div>
       <div class="section-body" id="systemFlowCurrent">Choose a system tour to begin.</div>
       <div class="step-pills" id="systemStepPills"></div>
-      <div class="tourtext" id="systemFlowHint">The main action button will tell students exactly what to do next.</div>
-      <div class="system-actions">
-        <button class="primary big-action" id="systemFlowBtn">Start system flow</button>
-      </div>
+      <div class="tourtext" id="systemFlowHint">The main action button tells students exactly what to do next.</div>
+      <div class="system-actions"><button class="primary big-action" id="systemFlowBtn">Start system flow</button></div>
     </div>
 
     <div class="section-card" id="systemTourCard">
       <div class="section-title">System tours</div>
-      <div class="tourtext">Choose a major system. Students now get a short system intro before the guided part-by-part flow begins.</div>
+      <div class="tourtext">Choose a major system. Students get a short system intro before the guided part-by-part flow begins.</div>
       <div class="system-grid" id="systemButtons"></div>
-      <div class="system-actions">
-        <button id="nextSystemBtn">Use guided next</button>
-        <button id="clearSystemBtn">Clear focus mode</button>
-      </div>
+      <div class="system-actions"><button id="nextSystemBtn">Use guided next</button><button id="clearSystemBtn">Clear focus mode</button></div>
     </div>
 
     <div class="part-grid" id="partButtons"></div>
-    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: this V80-inspired pass focuses on the nacelle shell, rooftop cooling house, roof hardware, and slightly more realistic blade/root proportions.</div>
+    <div class="tourtext" id="clickHint" style="margin-top:12px">Tip: use Pitch & Yaw or Drivetrain to show that pitch is in the hub, while yaw is at the nacelle/tower interface.</div>
   </aside>
 
   <div class="footer" id="footerText">Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span></div>
@@ -316,12 +145,7 @@
   <div class="labels-layer" id="labelsLayer"></div>
 
   <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
-      }
-    }
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}
   </script>
 
   <script type="module">
@@ -378,41 +202,25 @@
     const focusDimColor = new THREE.Color(0x334155);
 
     const ui = {
-      stageTag: document.getElementById('stageTag'),
-      partTitle: document.getElementById('partTitle'),
-      panelLead: document.getElementById('panelLead'),
-      whatIsText: document.getElementById('whatIsText'),
-      whatDoesText: document.getElementById('whatDoesText'),
-      whyCareText: document.getElementById('whyCareText'),
-      moreDetailCard: document.getElementById('moreDetailCard'),
-      moreDetailText: document.getElementById('moreDetailText'),
-      partButtons: document.getElementById('partButtons'),
-      systemButtons: document.getElementById('systemButtons'),
-      systemFlowCard: document.getElementById('systemFlowCard'),
-      systemFlowTitle: document.getElementById('systemFlowTitle'),
-      systemFlowCurrent: document.getElementById('systemFlowCurrent'),
-      systemFlowHint: document.getElementById('systemFlowHint'),
-      systemFlowBtn: document.getElementById('systemFlowBtn'),
-      systemStepPills: document.getElementById('systemStepPills'),
-      floatingNextBtn: document.getElementById('floatingNextBtn'),
-      labelsLayer: document.getElementById('labelsLayer'),
-      tourTitle: document.getElementById('tourTitle'),
-      progressFill: document.getElementById('progressFill'),
-      progressText: document.getElementById('progressText'),
-      labelsBtn: document.getElementById('labelsBtn'),
-      spinBtn: document.getElementById('spinBtn'),
-      footerText: document.getElementById('footerText')
+      stageTag: document.getElementById('stageTag'), partTitle: document.getElementById('partTitle'), panelLead: document.getElementById('panelLead'),
+      whatIsText: document.getElementById('whatIsText'), whatDoesText: document.getElementById('whatDoesText'), whyCareText: document.getElementById('whyCareText'),
+      moreDetailCard: document.getElementById('moreDetailCard'), moreDetailText: document.getElementById('moreDetailText'), partButtons: document.getElementById('partButtons'),
+      systemButtons: document.getElementById('systemButtons'), systemFlowCard: document.getElementById('systemFlowCard'), systemFlowTitle: document.getElementById('systemFlowTitle'),
+      systemFlowCurrent: document.getElementById('systemFlowCurrent'), systemFlowHint: document.getElementById('systemFlowHint'), systemFlowBtn: document.getElementById('systemFlowBtn'),
+      systemStepPills: document.getElementById('systemStepPills'), floatingNextBtn: document.getElementById('floatingNextBtn'), labelsLayer: document.getElementById('labelsLayer'),
+      tourTitle: document.getElementById('tourTitle'), progressFill: document.getElementById('progressFill'), progressText: document.getElementById('progressText'),
+      labelsBtn: document.getElementById('labelsBtn'), spinBtn: document.getElementById('spinBtn'), footerText: document.getElementById('footerText')
     };
 
     const materials = {
       tower: new THREE.MeshStandardMaterial({ color: 0xd9e2ec, roughness: 0.55, metalness: 0.18 }),
-      towerDark: new THREE.MeshStandardMaterial({ color: 0xaab6c4, roughness: 0.6, metalness: 0.15 }),
+      towerDark: new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.62, metalness: 0.24 }),
       blade: new THREE.MeshStandardMaterial({ color: 0xf4f7fb, roughness: 0.45, metalness: 0.05 }),
       hub: new THREE.MeshStandardMaterial({ color: 0xc7d2de, roughness: 0.5, metalness: 0.2 }),
       nacelle: new THREE.MeshStandardMaterial({ color: 0xf7fafc, roughness: 0.42, metalness: 0.06, transparent: true, opacity: 1 }),
       nacelleShadow: new THREE.MeshStandardMaterial({ color: 0xe6eef5, roughness: 0.5, metalness: 0.06, transparent: true, opacity: 1 }),
       foundation: new THREE.MeshStandardMaterial({ color: 0x757575, roughness: 0.8, metalness: 0.03 }),
-      transformer: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65, metalness: 0.25 }),
+      transformer: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65, metalness: 0.25, transparent:true, opacity:1 }),
       yellow: new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.55, metalness: 0.08 }),
       orange: new THREE.MeshStandardMaterial({ color: 0xfb923c, roughness: 0.55, metalness: 0.08 }),
       green: new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.55, metalness: 0.08 }),
@@ -423,2005 +231,333 @@
       ground: new THREE.MeshStandardMaterial({ color: 0x5f8d52, roughness: 0.95 }),
       gravel: new THREE.MeshStandardMaterial({ color: 0x8b8173, roughness: 0.98 }),
       road: new THREE.MeshStandardMaterial({ color: 0x6b7280, roughness: 0.92 }),
-      towerSeam: new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.65, metalness: 0.15 }),
+      towerSeam: new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.65, metalness: 0.15, transparent:true, opacity:1 }),
       whiteLine: new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.7 }),
       cone: new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.6, metalness: 0.05 }),
       steel: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.42, metalness: 0.55 }),
       magenta: new THREE.MeshStandardMaterial({ color: 0xd946ef, roughness: 0.45, metalness: 0.08 }),
-      mechGuide: new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.48, depthWrite: false }),
-      electricGuide: new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.46, depthWrite: false }),
-      yawGuide: new THREE.MeshBasicMaterial({ color: 0xd946ef, transparent: true, opacity: 0.42, depthWrite: false }),
       sensorWhite: new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35, metalness: 0.08 }),
       sensorDark: new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.42, metalness: 0.35 }),
       obstructionRed: new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4, metalness: 0.08 }),
-      ventDark: new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65, metalness: 0.22 })
+      ventDark: new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65, metalness: 0.22 }),
+      mechGuide: new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.48, depthWrite: false }),
+      electricGuide: new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.46, depthWrite: false }),
+      yawGuide: new THREE.MeshBasicMaterial({ color: 0xd946ef, transparent: true, opacity: 0.42, depthWrite: false })
     };
-
-    const parts = {
-      foundation: {
-        name: 'Foundation',
-        tag: 'EXTERIOR PART',
-        whatIs: 'The foundation is the reinforced base that anchors the turbine to the ground.',
-        whatDoes: 'It transfers tower and rotor loads safely into the soil or rock beneath the turbine.',
-        whyCare: 'Loose anchor hardware, cracks, or settlement can create major structural and safety problems.',
-        moreDetail: 'Commercial wind turbines need large engineered foundations because the machine sees compression, bending, vibration, and overturning loads. The anchor bolt circle ties the tower base into the concrete mass.',
-        focus: new THREE.Vector3(0, 2.5, 0),
-        camera: new THREE.Vector3(22, 9, 25),
-        inside: 'foundation'
-      },
-      tower: {
-        name: 'Tower',
-        tag: 'STRUCTURE',
-        whatIs: 'The tower is the tall support structure that raises the nacelle and rotor high above the ground.',
-        whatDoes: 'It places the rotor in stronger, smoother wind and provides the main vertical route for access, power cables, and communication wiring.',
-        whyCare: 'Technicians care because the tower is both a structural member and the access path to the nacelle.',
-        moreDetail: 'Inside the tower are ladders or lifts, power cables, communication lines, and service platforms. Tower condition, door seals, grounding, and internal cable routing all matter during inspection.',
-        focus: new THREE.Vector3(0, 39, 0),
-        camera: new THREE.Vector3(24, 45, 28),
-        inside: 'tower'
-      },
-      door: {
-        name: 'Tower access door',
-        tag: 'ACCESS POINT',
-        whatIs: 'The tower access door is the service entry point into the turbine base.',
-        whatDoes: 'It allows technicians to enter the tower and access internal equipment safely.',
-        whyCare: 'Door condition, locks, seals, and safe access matter every time a technician enters the turbine.',
-        moreDetail: 'The tower base often contains grounding points, switchgear, safety gear, and access systems. Door integrity helps control weather intrusion and site security.',
-        focus: new THREE.Vector3(0, 5, -2.2),
-        camera: new THREE.Vector3(9, 7, -13),
-        inside: 'tower'
-      },
-      nacelle: {
-        name: 'Nacelle',
-        tag: 'MAIN MACHINE HOUSING',
-        whatIs: 'The nacelle is the large housing at the top of the tower.',
-        whatDoes: 'It protects and supports the main drivetrain and electrical conversion components.',
-        whyCare: 'Most of the major mechanical and electrical maintenance work happens in or around the nacelle.',
-        moreDetail: 'In this geared turbine layout, the nacelle contains the low-speed shaft, gearbox, brake, high-speed shaft, generator, control cabinet, cooling equipment, and yaw machinery. This version pushes the exterior toward a V80-style silhouette with roof cooling hardware and cleaner cutaway paneling. In the deeper view, the cover panels slide open and subtle guide paths show mechanical rotation, electrical routing, or yaw movement depending on the active system.',
-        focus: new THREE.Vector3(0, 73, 0),
-        camera: new THREE.Vector3(-24, 79, 21),
-        inside: 'nacelle'
-      },
-      yaw: {
-        name: 'Yaw system',
-        tag: 'DIRECTION CONTROL',
-        whatIs: 'The yaw system is the turning system at the bottom of the nacelle where it sits on top of the tower.',
-        whatDoes: 'It rotates the nacelle so the rotor can face into the wind and capture energy efficiently.',
-        whyCare: 'Yaw faults can cause poor wind alignment, abnormal loading, cable twist concerns, and lost production.',
-        moreDetail: 'The yaw bearing is at the tower-top / nacelle interface. Yaw drive machinery applies controlled turning force so the nacelle can track wind direction. This is separate from pitch, which happens out in the hub at the blade roots.',
-        focus: new THREE.Vector3(0, 69, 0),
-        camera: new THREE.Vector3(18, 75, 18),
-        inside: 'yaw'
-      },
-      hub: {
-        name: 'Rotor hub',
-        tag: 'ROTOR ASSEMBLY',
-        whatIs: 'The rotor hub is the central rotating body that connects the blades to the drivetrain.',
-        whatDoes: 'It transfers torque from the blades into the main shaft and holds the blade pitch hardware.',
-        whyCare: 'The hub area contains critical pitch components that control power, speed, and shutdown behavior.',
-        moreDetail: 'Inside the hub are pitch bearings and pitch motors or actuators. Pitch changes blade angle at the blade roots. Yaw is not in the hub; yaw happens where the nacelle turns on top of the tower.',
-        focus: new THREE.Vector3(-9.2, 73, 0),
-        camera: new THREE.Vector3(-25, 76, 13),
-        inside: 'hub'
-      },
-      blade: {
-        name: 'Rotor blade',
-        tag: 'AERODYNAMIC PART',
-        whatIs: 'The rotor blade is the long aerodynamic surface that captures wind energy.',
-        whatDoes: 'Its airfoil shape creates lift, which turns the rotor and drives the turbine.',
-        whyCare: 'Blade condition, lightning protection, and pitch control directly affect output and safety.',
-        moreDetail: 'At the blade root, the pitch bearing and pitch motor rotate the blade to change angle. A blade can move toward a power-producing angle or toward a feathered position to reduce aerodynamic force during shutdown or overspeed protection.',
-        focus: new THREE.Vector3(-8.5, 92, 0),
-        camera: new THREE.Vector3(-36, 95, 28),
-        inside: 'blade'
-      },
-      gearbox: {
-        name: 'Gearbox',
-        tag: 'INSIDE NACELLE',
-        whatIs: 'The gearbox is a speed-increasing mechanical transmission inside the nacelle.',
-        whatDoes: 'It takes low-speed rotation from the rotor shaft and increases it to a higher speed for the generator.',
-        whyCare: 'Gearbox lubrication, temperature, vibration, and wear are major maintenance concerns in geared turbines.',
-        moreDetail: 'The low-speed shaft enters the gearbox from the rotor side. The gearbox output drives the high-speed shaft, brake, and generator. Some turbines use direct-drive designs and skip this component entirely.',
-        focus: new THREE.Vector3(-2.5, 72.6, 0),
-        camera: new THREE.Vector3(-16, 77, 10),
-        inside: 'nacelle'
-      },
-      generator: {
-        name: 'Generator',
-        tag: 'INSIDE NACELLE',
-        whatIs: 'The generator is the electrical machine that produces electricity.',
-        whatDoes: 'It converts mechanical rotation from the drivetrain into electrical power.',
-        whyCare: 'Generator faults can lead to overheating, low output, insulation problems, vibration, or turbine shutdowns.',
-        moreDetail: 'The high-speed shaft drives the generator. Inside, electromagnetic action creates electrical output that then moves through cables and power conversion equipment toward the transformer and grid connection.',
-        focus: new THREE.Vector3(4.5, 72.6, 0),
-        camera: new THREE.Vector3(-10, 77, 12),
-        inside: 'nacelle'
-      },
-      brake: {
-        name: 'Mechanical brake',
-        tag: 'INSIDE NACELLE',
-        whatIs: 'The mechanical brake is a stopping and holding device in the drivetrain.',
-        whatDoes: 'It helps stop or secure the drivetrain during shutdown, maintenance, or abnormal conditions.',
-        whyCare: 'A brake that drags, overheats, or fails to hold can create both safety and maintenance issues.',
-        moreDetail: 'Modern turbines usually manage rotor speed primarily with blade pitch and electrical control. The mechanical brake serves as a supplemental or parking brake rather than the main operating speed control device.',
-        focus: new THREE.Vector3(1.2, 72.6, 0),
-        camera: new THREE.Vector3(-13, 76, 11),
-        inside: 'nacelle'
-      },
-      lowSpeedShaft: {
-        name: 'Low-speed shaft',
-        tag: 'INSIDE NACELLE',
-        whatIs: 'The low-speed shaft connects the rotor hub to the gearbox.',
-        whatDoes: 'It carries high-torque, low-speed rotation from the rotor into the drivetrain.',
-        whyCare: 'Shaft alignment, bearings, and vibration issues can damage downstream drivetrain components.',
-        moreDetail: 'This shaft turns relatively slowly compared with the generator side, but it carries very high torque. It is one of the first major drivetrain parts after the rotor hub.',
-        focus: new THREE.Vector3(-5.25, 72.95, 0),
-        camera: new THREE.Vector3(-18, 76.2, 8.5),
-        inside: 'nacelle'
-      },
-      highSpeedShaft: {
-        name: 'High-speed shaft',
-        tag: 'INSIDE NACELLE',
-        whatIs: 'The high-speed shaft is the faster rotating shaft between the gearbox and generator.',
-        whatDoes: 'It transfers increased rotational speed from the gearbox output to the generator.',
-        whyCare: 'High-speed shaft issues can show up as vibration, misalignment, overheating, or brake-related wear.',
-        moreDetail: 'After the gearbox increases speed, the high-speed shaft drives the brake and generator. This part spins faster than the low-speed side and is closely tied to generator performance.',
-        focus: new THREE.Vector3(2.25, 72.95, 0),
-        camera: new THREE.Vector3(-9.8, 76.0, 8.8),
-        inside: 'nacelle'
-      },
-      controllerCabinet: {
-        name: 'Controller cabinet',
-        tag: 'INSIDE NACELLE',
-        whatIs: 'The controller cabinet houses control hardware and system electronics.',
-        whatDoes: 'It monitors turbine conditions and helps manage operating logic, protection, and system responses.',
-        whyCare: 'Faults in control hardware can cause nuisance shutdowns, lost communication, or improper turbine behavior.',
-        moreDetail: 'The controller receives information from sensors and coordinates functions such as startup, shutdown, yaw behavior, and protective actions. Clean wiring and reliable electronics are critical here.',
-        focus: new THREE.Vector3(2.9, 74.95, -1.55),
-        camera: new THREE.Vector3(-7.8, 78.3, 10.2),
-        inside: 'nacelle'
-      },
-      coolingSystem: {
-        name: 'Cooling fan / radiator',
-        tag: 'INSIDE NACELLE',
-        whatIs: 'The cooling system is the fan-and-radiator section that helps remove heat from turbine equipment.',
-        whatDoes: 'It helps control operating temperatures for components such as the generator, power electronics, or lubricating systems.',
-        whyCare: 'Poor cooling can lead to overheating, reduced efficiency, alarms, or automatic shutdowns.',
-        moreDetail: 'Commercial turbines often use fans, heat exchangers, or radiators to control temperature inside the nacelle. Airflow and heat transfer matter a lot for reliable operation.',
-        focus: new THREE.Vector3(6.4, 74.2, -1.55),
-        camera: new THREE.Vector3(-2.5, 78.0, 11.2),
-        inside: 'nacelle'
-      },
-      yawDrive: {
-        name: 'Yaw drive machinery',
-        tag: 'INSIDE NACELLE',
-        whatIs: 'Yaw drive machinery is the internal hardware that helps rotate the nacelle on the yaw bearing.',
-        whatDoes: 'It applies controlled turning force so the nacelle can align the rotor with changing wind direction.',
-        whyCare: 'Wear, lubrication issues, and drive faults can cause poor wind tracking or excessive loading.',
-        moreDetail: 'The yaw system includes the yaw bearing and drive components that move the nacelle a little at a time. Proper operation helps maintain good energy capture and reduces uneven stress.',
-        focus: new THREE.Vector3(0, 69.95, 0),
-        camera: new THREE.Vector3(12.5, 74.0, 10.5),
-        inside: 'nacelle'
-      },
-      pitchBearing: {
-        name: 'Pitch bearing',
-        tag: 'HUB INTERIOR',
-        whatIs: 'The pitch bearing is the large bearing at the blade root that allows the blade to rotate.',
-        whatDoes: 'It lets the turbine change blade angle for power control, startup, shutdown, and overspeed protection.',
-        whyCare: 'Pitch bearing wear or lubrication problems can affect blade control and create serious reliability issues.',
-        moreDetail: 'Each blade root uses a pitch bearing so the blade can rotate around its long axis. This is a core part of blade pitch control.',
-        focus: new THREE.Vector3(-8.92, 74.05, 0),
-        camera: new THREE.Vector3(-17.0, 76.2, 7.4),
-        inside: 'hub'
-      },
-      pitchMotor: {
-        name: 'Pitch motor / actuator',
-        tag: 'HUB INTERIOR',
-        whatIs: 'The pitch motor or actuator is the device that drives blade pitch movement.',
-        whatDoes: 'It turns the blade through the pitch bearing to change aerodynamic angle.',
-        whyCare: 'Pitch actuator faults can reduce power control, affect shutdown performance, or cause blade-position alarms.',
-        moreDetail: 'The actuator works with pitch control hardware to move the blade toward a productive angle or toward a feathered, low-lift position when needed.',
-        focus: new THREE.Vector3(-8.35, 74.05, 0),
-        camera: new THREE.Vector3(-16.5, 76.0, 7.2),
-        inside: 'hub'
-      },
-      bladeRoot: {
-        name: 'Blade root',
-        tag: 'BLADE INTERIOR',
-        whatIs: 'The blade root is the inboard end of the blade where it attaches to the hub.',
-        whatDoes: 'It transfers aerodynamic loads from the blade into the hub and pitch system.',
-        whyCare: 'Blade root hardware is critical because it carries heavy loads and interfaces directly with pitch components.',
-        moreDetail: 'The blade root contains the structural connection between the blade and the hub. This area is heavily loaded and central to blade installation and inspection.',
-        focus: new THREE.Vector3(-9.0, 74.15, 0),
-        camera: new THREE.Vector3(-17.5, 76.6, 8.0),
-        inside: 'blade'
-      },
-      internalSpar: {
-        name: 'Internal spar',
-        tag: 'BLADE INTERIOR',
-        whatIs: 'The internal spar is a major structural member inside the blade.',
-        whatDoes: 'It helps carry bending loads and gives the blade much of its internal strength.',
-        whyCare: 'Damage to the main structural members of a blade can affect stiffness, strength, and serviceability.',
-        moreDetail: 'Large blades use internal structural elements such as spars and shear webs to resist aerodynamic and gravitational loads while keeping weight manageable.',
-        focus: new THREE.Vector3(-9.0, 88.5, 0.22),
-        camera: new THREE.Vector3(-23.0, 91.0, 16.5),
-        inside: 'blade'
-      },
-      lightningProtection: {
-        name: 'Lightning protection path',
-        tag: 'BLADE INTERIOR',
-        whatIs: 'The lightning protection path is the conductive route that helps carry lightning current safely through the blade system.',
-        whatDoes: 'It provides a controlled electrical path so lightning energy is less likely to damage blade structure and internal components.',
-        whyCare: 'Poor lightning protection can lead to blade damage, electrical faults, and expensive repairs.',
-        moreDetail: 'Wind turbine blades are exposed to weather and may experience lightning strikes. Internal conductors help route that energy safely toward the rest of the protection system.',
-        focus: new THREE.Vector3(-8.8, 86.8, -0.03),
-        camera: new THREE.Vector3(-22.0, 90.0, 16.0),
-        inside: 'blade'
-      },
-      transformer: {
-        name: 'Pad-mounted transformer',
-        tag: 'ELECTRICAL SYSTEM',
-        whatIs: 'The pad-mounted transformer is the ground-level electrical unit near the tower.',
-        whatDoes: 'It steps turbine output voltage to a higher level for efficient transfer to the collection system or grid.',
-        whyCare: 'Transformer condition affects electrical quality, efficiency, protection, and site safety.',
-        moreDetail: 'Power generated in the nacelle travels down the tower through cables before reaching transformer equipment. Increasing voltage allows the same power to move with lower current and reduced losses.',
-        focus: new THREE.Vector3(22, 4, 14),
-        camera: new THREE.Vector3(36, 11, 28),
-        inside: 'transformer'
-      }
-    };
-
-    const tourOrder = ['foundation','tower','door','transformer','yaw','nacelle','hub','blade','gearbox','brake','generator'];
-    const systemTours = {
-      structure: {
-        name: 'Structure',
-        parts: ['foundation','tower','door','nacelle'],
-        overview: 'Covers the major structural and access parts that support the turbine and allow technicians to enter and work safely.',
-        introPurpose: 'Support the turbine, hold the nacelle and rotor at operating height, and provide safe technician access.',
-        introFlow: 'You will inspect the foundation, tower, access door, and nacelle shell as the main support/access structure.'
-      },
-      drivetrain: {
-        name: 'Drivetrain',
-        parts: ['hub','nacelle','lowSpeedShaft','gearbox','highSpeedShaft','brake','generator'],
-        overview: 'Starts at the rotor hub where wind-driven rotation enters the machine, then moves into the nacelle through the shafts, gearbox, brake, and generator.',
-        introPurpose: 'Transfer mechanical rotation from the rotor into the generator so wind energy can become electrical energy.',
-        introFlow: 'Follow the path from the hub into the nacelle, then through the low-speed shaft, gearbox, high-speed shaft, brake, and generator.'
-      },
-      electrical: {
-        name: 'Electrical',
-        parts: ['generator','controllerCabinet','transformer'],
-        overview: 'Focuses on how electrical power is produced, monitored, and sent away from the turbine.',
-        introPurpose: 'Produce, monitor, control, and route electrical power from the turbine to the collection system.',
-        introFlow: 'You will start at the generator, move to the controller cabinet, then finish at the transformer.'
-      },
-      pitchYaw: {
-        name: 'Pitch & Yaw',
-        parts: ['nacelle','yaw','yawDrive','hub','pitchBearing','pitchMotor'],
-        overview: 'Starts at the yaw area where the nacelle turns on the tower, then moves to the hub where blade pitch changes angle.',
-        introPurpose: 'Keep the turbine pointed into the wind and adjust blade angle for control, efficiency, and protection.',
-        introFlow: 'Yaw is at the tower-top/nacelle interface. Pitch is in the hub at the blade roots. This flow shows both without mixing them up.'
-      },
-      bladeSystem: {
-        name: 'Blade System',
-        parts: ['blade','bladeRoot','internalSpar','lightningProtection'],
-        overview: 'Looks at the blade as an aerodynamic and structural component, including the root, spar, and lightning path.',
-        introPurpose: 'Capture wind energy, carry aerodynamic loads, and safely route lightning energy away from the blade.',
-        introFlow: 'You will inspect the blade surface, blade root, internal spar, and lightning protection path.'
-      }
-    };
-    const systemButtonEls = new Map();
-    const internalPartIds = new Set(['gearbox','brake','generator','lowSpeedShaft','highSpeedShaft','controllerCabinet','coolingSystem','yawDrive','pitchBearing','pitchMotor','bladeRoot','internalSpar','lightningProtection']);
-    const labelPositions = {
-      foundation: new THREE.Vector3(0, 3.5, 0),
-      tower: new THREE.Vector3(0, 39, 2.8),
-      door: new THREE.Vector3(0, 5.4, -3.1),
-      yaw: new THREE.Vector3(0, 70.7, 3.4),
-      nacelle: new THREE.Vector3(0, 77.1, 3.7),
-      hub: new THREE.Vector3(-10.45, 75.3, 0),
-      blade: new THREE.Vector3(-9.2, 95.2, 0),
-      gearbox: new THREE.Vector3(-2.5, 75.5, 0),
-      lowSpeedShaft: new THREE.Vector3(-5.25, 75.0, 0),
-      brake: new THREE.Vector3(.65, 75.2, 0),
-      highSpeedShaft: new THREE.Vector3(2.2, 75.15, 0),
-      generator: new THREE.Vector3(4.7, 75.3, 0),
-      controllerCabinet: new THREE.Vector3(2.8, 77.1, -1.55),
-      coolingSystem: new THREE.Vector3(6.3, 76.8, -1.55),
-      yawDrive: new THREE.Vector3(0, 71.25, 0),
-      pitchBearing: new THREE.Vector3(-8.92, 74.05, 0),
-      pitchMotor: new THREE.Vector3(-8.35, 74.05, 0),
-      bladeRoot: new THREE.Vector3(-9.0, 74.15, 0),
-      internalSpar: new THREE.Vector3(-9.0, 88.4, 0.22),
-      lightningProtection: new THREE.Vector3(-8.8, 86.6, -0.03),
-      transformer: new THREE.Vector3(22, 6.3, 14)
-    };
-
-    const labelActivationDistance = {
-      foundation: 42,
-      tower: 34,
-      door: 18,
-      yaw: 24,
-      nacelle: 28,
-      hub: 18,
-      blade: 24,
-      gearbox: 15,
-      lowSpeedShaft: 16,
-      brake: 14,
-      highSpeedShaft: 14,
-      generator: 16,
-      controllerCabinet: 14,
-      coolingSystem: 14,
-      yawDrive: 13,
-      pitchBearing: 11,
-      pitchMotor: 11,
-      bladeRoot: 13,
-      internalSpar: 18,
-      lightningProtection: 18,
-      transformer: 24
-    };
-
-    const cutawayState = { nacelle: 0, hub: 0, tower: 0, foundation: 0, transformer: 0 };
-    const cutawayTarget = { nacelle: 0, hub: 0, tower: 0, foundation: 0, transformer: 0 };
 
     function cloneMat(mat){ return mat.clone(); }
-
     function register(mesh, partId){
       mesh.userData.partId = partId;
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
+      mesh.castShadow = true; mesh.receiveShadow = true;
       clickable.push(mesh);
       if(!partMeshes.has(partId)) partMeshes.set(partId, []);
       partMeshes.get(partId).push(mesh);
       return mesh;
     }
-
     function addEdges(mesh, color = 0x334155, opacity = 0.35){
       const edges = new THREE.EdgesGeometry(mesh.geometry);
-      const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color, transparent: true, opacity }));
-      mesh.add(line);
-      return line;
+      const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color, transparent:true, opacity }));
+      mesh.add(line); return line;
     }
-
     function xCylinder(radius, length, mat){
       const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 32), mat);
-      mesh.rotation.z = Math.PI / 2;
-      return mesh;
+      mesh.rotation.z = Math.PI / 2; return mesh;
     }
-
-    function xGuideArrow(x1, x2, y, z, mat){
-      const group = new THREE.Group();
-      const length = Math.abs(x2 - x1);
-      const direction = x2 >= x1 ? 1 : -1;
-
-      const shaft = xCylinder(.035, Math.max(.15, length - .38), mat);
-      shaft.position.set((x1 + x2) / 2 - direction * .12, y, z);
-      group.add(shaft);
-
-      const head = new THREE.Mesh(new THREE.ConeGeometry(.16, .42, 20), mat);
-      head.rotation.z = direction > 0 ? -Math.PI / 2 : Math.PI / 2;
-      head.position.set(x2, y, z);
-      group.add(head);
-
-      return group;
-    }
-
     function makeRoundedBoxGeometry(width, height, depth, radius = 0.75){
-      const x = -width / 2;
-      const y = -height / 2;
+      const x = -width / 2, y = -height / 2;
       const r = Math.min(radius, width / 2 - 0.01, height / 2 - 0.01);
       const shape = new THREE.Shape();
-      shape.moveTo(x + r, y);
-      shape.lineTo(x + width - r, y);
-      shape.quadraticCurveTo(x + width, y, x + width, y + r);
-      shape.lineTo(x + width, y + height - r);
-      shape.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
-      shape.lineTo(x + r, y + height);
-      shape.quadraticCurveTo(x, y + height, x, y + height - r);
-      shape.lineTo(x, y + r);
-      shape.quadraticCurveTo(x, y, x + r, y);
-
-      const geometry = new THREE.ExtrudeGeometry(shape, {
-        depth,
-        bevelEnabled: true,
-        bevelThickness: 0.08,
-        bevelSize: 0.08,
-        bevelSegments: 3,
-        curveSegments: 10
-      });
-      geometry.translate(0, 0, -depth / 2);
-      return geometry;
+      shape.moveTo(x+r,y); shape.lineTo(x+width-r,y); shape.quadraticCurveTo(x+width,y,x+width,y+r);
+      shape.lineTo(x+width,y+height-r); shape.quadraticCurveTo(x+width,y+height,x+width-r,y+height);
+      shape.lineTo(x+r,y+height); shape.quadraticCurveTo(x,y+height,x,y+height-r);
+      shape.lineTo(x,y+r); shape.quadraticCurveTo(x,y,x+r,y);
+      const geometry = new THREE.ExtrudeGeometry(shape,{ depth, bevelEnabled:true, bevelThickness:.08, bevelSize:.08, bevelSegments:3, curveSegments:10 });
+      geometry.translate(0,0,-depth/2); return geometry;
     }
-
-    function makeBladeGeometry(length = 27, rootWidth = 1.12, tipWidth = 0.22, rootThick = 0.34, tipThick = 0.08){
-      const sections = 9;
-      const verts = [];
-      const faces = [];
-
-      for(let i=0; i<=sections; i++){
-        const t = i / sections;
-        const y = -length / 2 + t * length;
-        const width = rootWidth + (tipWidth - rootWidth) * Math.pow(t, 0.72);
-        const thick = rootThick + (tipThick - rootThick) * t;
-        const sweep = -0.22 * t * t;
-        const twist = (t - 0.5) * 0.22;
-
-        const left = -width / 2 + sweep;
-        const right = width / 2 + sweep;
-        const zTopLeft = thick / 2 + twist * left;
-        const zTopRight = thick / 2 + twist * right;
-        const zBottomLeft = -thick / 2 + twist * left;
-        const zBottomRight = -thick / 2 + twist * right;
-
-        verts.push(
-          left, y, zTopLeft,
-          right, y, zTopRight,
-          right, y, zBottomRight,
-          left, y, zBottomLeft
-        );
+    function makeBladeGeometry(length = 28, rootWidth = 1.18, tipWidth = .13, rootThick = .34, tipThick = .045){
+      const sections = 10, verts=[], faces=[];
+      for(let i=0;i<=sections;i++){
+        const t=i/sections, y=-length/2+t*length;
+        const width=rootWidth+(tipWidth-rootWidth)*Math.pow(t,.72);
+        const thick=rootThick+(tipThick-rootThick)*t;
+        const sweep=-.22*t*t, twist=(t-.5)*.22;
+        const left=-width/2+sweep, right=width/2+sweep;
+        verts.push(left,y,thick/2+twist*left, right,y,thick/2+twist*right, right,y,-thick/2+twist*right, left,y,-thick/2+twist*left);
       }
-
-      for(let i=0; i<sections; i++){
-        const a = i * 4;
-        const b = (i + 1) * 4;
-
-        faces.push(a, b, a+1, a+1, b, b+1);
-        faces.push(a+1, b+1, a+2, a+2, b+1, b+2);
-        faces.push(a+2, b+2, a+3, a+3, b+2, b+3);
-        faces.push(a+3, b+3, a, a, b+3, b);
+      for(let i=0;i<sections;i++){
+        const a=i*4,b=(i+1)*4;
+        faces.push(a,b,a+1,a+1,b,b+1, a+1,b+1,a+2,a+2,b+1,b+2, a+2,b+2,a+3,a+3,b+2,b+3, a+3,b+3,a,a,b+3,b);
       }
-
-      faces.push(0, 1, 2, 0, 2, 3);
-      const last = sections * 4;
-      faces.push(last, last+2, last+1, last, last+3, last+2);
-
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
-      geometry.setIndex(faces);
-      geometry.computeVertexNormals();
-      return geometry;
+      faces.push(0,1,2,0,2,3);
+      const last=sections*4; faces.push(last,last+2,last+1,last,last+3,last+2);
+      const geometry=new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(verts,3)); geometry.setIndex(faces); geometry.computeVertexNormals(); return geometry;
     }
-
     function makeSpinnerGeometry(){
-      // Lathe profile creates a smooth nacelle-style spinner cover instead of a cone/sphere blob.
-      const points = [
-        new THREE.Vector2(0.05, -1.75),
-        new THREE.Vector2(0.42, -1.45),
-        new THREE.Vector2(0.92, -0.82),
-        new THREE.Vector2(1.32, 0.12),
-        new THREE.Vector2(1.47, 0.95),
-        new THREE.Vector2(1.38, 1.38),
-        new THREE.Vector2(0.92, 1.55),
-        new THREE.Vector2(0.18, 1.62)
-      ];
-      const geometry = new THREE.LatheGeometry(points, 72);
-      geometry.computeVertexNormals();
-      return geometry;
+      const points=[new THREE.Vector2(.05,-1.75),new THREE.Vector2(.42,-1.45),new THREE.Vector2(.92,-.82),new THREE.Vector2(1.32,.12),new THREE.Vector2(1.47,.95),new THREE.Vector2(1.38,1.38),new THREE.Vector2(.92,1.55),new THREE.Vector2(.18,1.62)];
+      const geometry=new THREE.LatheGeometry(points,72); geometry.computeVertexNormals(); return geometry;
     }
-
-    function towerRadiusAt(y){
-      const t = THREE.MathUtils.clamp((y - 1.1) / 68, 0, 1);
-      return 2.65 + (1.55 - 2.65) * t;
-    }
-
-    function addTowerFlange(y, radiusBoost = 0.08){
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(towerRadiusAt(y) + radiusBoost, .055, 10, 96),
-        cloneMat(materials.towerSeam)
-      );
-      ring.rotation.x = Math.PI / 2;
-      ring.position.y = y;
-      ring.castShadow = true;
-      scene.add(ring);
-
-      for(let i=0; i<16; i++){
-        const angle = i / 16 * Math.PI * 2;
-        const bolt = new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.08,10), cloneMat(materials.towerSeam));
-        bolt.position.set(Math.cos(angle)*(towerRadiusAt(y)+.18), y+.04, Math.sin(angle)*(towerRadiusAt(y)+.18));
-        bolt.rotation.x = Math.PI / 2;
-        bolt.castShadow = true;
-        scene.add(bolt);
+    function makeHubBoltFace(radius = 1.12, count = 24, x = 0){
+      const group = new THREE.Group();
+      for(let i=0;i<count;i++){
+        const a = i / count * Math.PI * 2;
+        const bolt = xCylinder(.035, .075, cloneMat(materials.steel));
+        bolt.position.set(x, Math.cos(a)*radius, Math.sin(a)*radius); bolt.castShadow = true; group.add(bolt);
       }
+      return group;
     }
+    function xGuideArrow(x1, x2, y, z, mat){
+      const group = new THREE.Group();
+      const length = Math.abs(x2-x1), direction = x2 >= x1 ? 1 : -1;
+      const shaft = xCylinder(.035, Math.max(.15, length-.38), mat);
+      shaft.position.set((x1+x2)/2 - direction*.12, y, z); group.add(shaft);
+      const head = new THREE.Mesh(new THREE.ConeGeometry(.16,.42,20), mat);
+      head.rotation.z = direction > 0 ? -Math.PI/2 : Math.PI/2; head.position.set(x2,y,z); group.add(head);
+      return group;
+    }
+    function towerRadiusAt(y){ const t = THREE.MathUtils.clamp((y - 1.1) / 68, 0, 1); return 2.65 + (1.55 - 2.65) * t; }
 
-    // Lighting
+    const parts = {
+      foundation:{name:'Foundation',tag:'EXTERIOR PART',whatIs:'The foundation is the reinforced base that anchors the turbine to the ground.',whatDoes:'It transfers tower and rotor loads safely into the soil or rock beneath the turbine.',whyCare:'Loose anchor hardware, cracks, or settlement can create major structural and safety problems.',moreDetail:'Commercial wind turbines need large engineered foundations because the machine sees compression, bending, vibration, and overturning loads. The anchor bolt circle ties the tower base into the concrete mass.',focus:new THREE.Vector3(0,2.5,0),camera:new THREE.Vector3(22,9,25),inside:'foundation'},
+      tower:{name:'Tower',tag:'STRUCTURE',whatIs:'The tower is the tall support structure that raises the nacelle and rotor high above the ground.',whatDoes:'It places the rotor in stronger, smoother wind and provides the main vertical route for access, power cables, and communication wiring.',whyCare:'Technicians care because the tower is both a structural member and the access path to the nacelle.',moreDetail:'Inside the tower are ladders or lifts, power cables, communication lines, and service platforms. Tower condition, door seals, grounding, and internal cable routing all matter during inspection.',focus:new THREE.Vector3(0,39,0),camera:new THREE.Vector3(24,45,28),inside:'tower'},
+      door:{name:'Tower access door',tag:'ACCESS POINT',whatIs:'The tower access door is the service entry point into the turbine base.',whatDoes:'It allows technicians to enter the tower and access internal equipment safely.',whyCare:'Door condition, locks, seals, and safe access matter every time a technician enters the turbine.',moreDetail:'The tower base often contains grounding points, switchgear, safety gear, and access systems. Door integrity helps control weather intrusion and site security.',focus:new THREE.Vector3(0,5,-2.2),camera:new THREE.Vector3(9,7,-13),inside:'tower'},
+      nacelle:{name:'Nacelle',tag:'MAIN MACHINE HOUSING',whatIs:'The nacelle is the large housing at the top of the tower.',whatDoes:'It protects and supports the main drivetrain and electrical conversion components.',whyCare:'Most of the major mechanical and electrical maintenance work happens in or around the nacelle.',moreDetail:'In this geared turbine layout, the nacelle contains the low-speed shaft, gearbox, brake, high-speed shaft, generator, control cabinet, cooling equipment, and yaw machinery. The cover panels slide open in deeper view.',focus:new THREE.Vector3(0,73,0),camera:new THREE.Vector3(-24,79,21),inside:'nacelle'},
+      yaw:{name:'Yaw system',tag:'DIRECTION CONTROL',whatIs:'The yaw system is the turning system at the bottom of the nacelle where it sits on top of the tower.',whatDoes:'It rotates the nacelle so the rotor can face into the wind and capture energy efficiently.',whyCare:'Yaw faults can cause poor wind alignment, abnormal loading, cable twist concerns, and lost production.',moreDetail:'The yaw bearing is at the tower-top / nacelle interface. This is separate from pitch, which happens out in the hub at the blade roots.',focus:new THREE.Vector3(0,69,0),camera:new THREE.Vector3(18,75,18),inside:'yaw'},
+      hub:{name:'Rotor hub',tag:'ROTOR ASSEMBLY',whatIs:'The rotor hub is the central rotating body that connects the blades to the drivetrain.',whatDoes:'It transfers torque from the blades into the main shaft and holds the blade pitch hardware.',whyCare:'The hub area contains critical pitch components that control power, speed, and shutdown behavior.',moreDetail:'Inside the hub are pitch bearings and blue pitch actuators. Pitch changes blade angle at the blade roots. Yaw is not in the hub; yaw happens where the nacelle turns on top of the tower.',focus:new THREE.Vector3(-9.2,73,0),camera:new THREE.Vector3(-25,76,13),inside:'hub'},
+      blade:{name:'Rotor blade',tag:'AERODYNAMIC PART',whatIs:'The rotor blade is the long aerodynamic surface that captures wind energy.',whatDoes:'Its airfoil shape creates lift, which turns the rotor and drives the turbine.',whyCare:'Blade condition, lightning protection, and pitch control directly affect output and safety.',moreDetail:'At the blade root, the pitch bearing and pitch actuator rotate the blade to change angle. A blade can move toward a power-producing angle or a feathered position.',focus:new THREE.Vector3(-8.5,92,0),camera:new THREE.Vector3(-36,95,28),inside:'blade'},
+      gearbox:{name:'Gearbox',tag:'INSIDE NACELLE',whatIs:'The gearbox is a speed-increasing mechanical transmission inside the nacelle.',whatDoes:'It takes low-speed rotation from the rotor shaft and increases it to a higher speed for the generator.',whyCare:'Gearbox lubrication, temperature, vibration, and wear are major maintenance concerns in geared turbines.',moreDetail:'The low-speed shaft enters the gearbox from the rotor side. The gearbox output drives the high-speed shaft, brake, and generator.',focus:new THREE.Vector3(-2.5,72.6,0),camera:new THREE.Vector3(-16,77,10),inside:'nacelle'},
+      generator:{name:'Generator',tag:'INSIDE NACELLE',whatIs:'The generator is the electrical machine that produces electricity.',whatDoes:'It converts mechanical rotation from the drivetrain into electrical power.',whyCare:'Generator faults can lead to overheating, low output, insulation problems, vibration, or turbine shutdowns.',moreDetail:'The high-speed shaft drives the generator. Electromagnetic action creates electrical output that moves toward the transformer and grid connection.',focus:new THREE.Vector3(4.5,72.6,0),camera:new THREE.Vector3(-10,77,12),inside:'nacelle'},
+      brake:{name:'Mechanical brake',tag:'INSIDE NACELLE',whatIs:'The mechanical brake is a stopping and holding device in the drivetrain.',whatDoes:'It helps stop or secure the drivetrain during shutdown, maintenance, or abnormal conditions.',whyCare:'A brake that drags, overheats, or fails to hold can create both safety and maintenance issues.',moreDetail:'Modern turbines manage rotor speed primarily with blade pitch and electrical control. The mechanical brake serves as a supplemental or parking brake.',focus:new THREE.Vector3(1.2,72.6,0),camera:new THREE.Vector3(-13,76,11),inside:'nacelle'},
+      lowSpeedShaft:{name:'Low-speed shaft',tag:'INSIDE NACELLE',whatIs:'The low-speed shaft connects the rotor hub to the gearbox.',whatDoes:'It carries high-torque, low-speed rotation from the rotor into the drivetrain.',whyCare:'Shaft alignment, bearings, and vibration issues can damage downstream drivetrain components.',moreDetail:'This shaft turns relatively slowly compared with the generator side, but it carries very high torque.',focus:new THREE.Vector3(-5.25,72.95,0),camera:new THREE.Vector3(-18,76.2,8.5),inside:'nacelle'},
+      highSpeedShaft:{name:'High-speed shaft',tag:'INSIDE NACELLE',whatIs:'The high-speed shaft is the faster rotating shaft between the gearbox and generator.',whatDoes:'It transfers increased rotational speed from the gearbox output to the generator.',whyCare:'High-speed shaft issues can show up as vibration, misalignment, overheating, or brake-related wear.',moreDetail:'After the gearbox increases speed, the high-speed shaft drives the brake and generator.',focus:new THREE.Vector3(2.25,72.95,0),camera:new THREE.Vector3(-9.8,76,8.8),inside:'nacelle'},
+      controllerCabinet:{name:'Controller cabinet',tag:'INSIDE NACELLE',whatIs:'The controller cabinet houses control hardware and system electronics.',whatDoes:'It monitors turbine conditions and helps manage operating logic, protection, and system responses.',whyCare:'Faults in control hardware can cause nuisance shutdowns, lost communication, or improper turbine behavior.',moreDetail:'The controller receives information from sensors and coordinates startup, shutdown, yaw behavior, and protective actions.',focus:new THREE.Vector3(2.9,74.95,-1.55),camera:new THREE.Vector3(-7.8,78.3,10.2),inside:'nacelle'},
+      coolingSystem:{name:'Cooling fan / radiator',tag:'INSIDE NACELLE',whatIs:'The cooling system is the fan-and-radiator section that helps remove heat from turbine equipment.',whatDoes:'It helps control operating temperatures for components such as the generator, power electronics, or lubricating systems.',whyCare:'Poor cooling can lead to overheating, reduced efficiency, alarms, or automatic shutdowns.',moreDetail:'Commercial turbines often use fans, heat exchangers, or radiators to control temperature inside the nacelle.',focus:new THREE.Vector3(6.4,74.2,-1.55),camera:new THREE.Vector3(-2.5,78,11.2),inside:'nacelle'},
+      yawDrive:{name:'Yaw drive machinery',tag:'INSIDE NACELLE',whatIs:'Yaw drive machinery is the internal hardware that helps rotate the nacelle on the yaw bearing.',whatDoes:'It applies controlled turning force so the nacelle can align the rotor with changing wind direction.',whyCare:'Wear, lubrication issues, and drive faults can cause poor wind tracking or excessive loading.',moreDetail:'The yaw system includes the yaw bearing and drive components that move the nacelle a little at a time.',focus:new THREE.Vector3(0,69.95,0),camera:new THREE.Vector3(12.5,74,10.5),inside:'nacelle'},
+      pitchBearing:{name:'Pitch bearing',tag:'HUB INTERIOR',whatIs:'The pitch bearing is the large bearing at the blade root that allows the blade to rotate.',whatDoes:'It lets the turbine change blade angle for power control, startup, shutdown, and overspeed protection.',whyCare:'Pitch bearing wear or lubrication problems can affect blade control and create serious reliability issues.',moreDetail:'Each blade root uses a large bolted pitch bearing so the blade can rotate around its long axis. This is the core of blade pitch control.',focus:new THREE.Vector3(-8.92,74.05,0),camera:new THREE.Vector3(-17,76.2,7.4),inside:'hub'},
+      pitchMotor:{name:'Pitch motor / actuator',tag:'HUB INTERIOR',whatIs:'The pitch motor or actuator is the device that drives blade pitch movement.',whatDoes:'It turns the blade through the pitch bearing to change aerodynamic angle.',whyCare:'Pitch actuator faults can reduce power control, affect shutdown performance, or cause blade-position alarms.',moreDetail:'The blue actuator hardware works with pitch control to move the blade toward productive or feathered positions.',focus:new THREE.Vector3(-8.35,74.05,0),camera:new THREE.Vector3(-16.5,76,7.2),inside:'hub'},
+      bladeRoot:{name:'Blade root',tag:'BLADE INTERIOR',whatIs:'The blade root is the inboard end of the blade where it attaches to the hub.',whatDoes:'It transfers aerodynamic loads from the blade into the hub and pitch system.',whyCare:'Blade root hardware carries heavy loads and interfaces directly with pitch components.',moreDetail:'The blade root contains the structural connection between the blade and the hub. This area is heavily loaded and central to blade inspection.',focus:new THREE.Vector3(-9,74.15,0),camera:new THREE.Vector3(-17.5,76.6,8),inside:'blade'},
+      internalSpar:{name:'Internal spar',tag:'BLADE INTERIOR',whatIs:'The internal spar is a major structural member inside the blade.',whatDoes:'It helps carry bending loads and gives the blade much of its internal strength.',whyCare:'Damage to blade structural members can affect stiffness, strength, and serviceability.',moreDetail:'Large blades use spars and shear webs to resist aerodynamic and gravitational loads while keeping weight manageable.',focus:new THREE.Vector3(-9,88.5,.22),camera:new THREE.Vector3(-23,91,16.5),inside:'blade'},
+      lightningProtection:{name:'Lightning protection path',tag:'BLADE INTERIOR',whatIs:'The lightning protection path is the conductive route that carries lightning current safely through the blade system.',whatDoes:'It gives lightning energy a controlled path so it is less likely to damage blade structure.',whyCare:'Poor lightning protection can lead to blade damage, electrical faults, and expensive repairs.',moreDetail:'Internal conductors help route strike energy toward the rest of the protection system.',focus:new THREE.Vector3(-8.8,86.8,-.03),camera:new THREE.Vector3(-22,90,16),inside:'blade'},
+      transformer:{name:'Pad-mounted transformer',tag:'ELECTRICAL SYSTEM',whatIs:'The pad-mounted transformer is the ground-level electrical unit near the tower.',whatDoes:'It steps turbine output voltage to a higher level for efficient transfer to the collection system or grid.',whyCare:'Transformer condition affects electrical quality, efficiency, protection, and site safety.',moreDetail:'Power generated in the nacelle travels down the tower through cables before reaching transformer equipment.',focus:new THREE.Vector3(22,4,14),camera:new THREE.Vector3(36,11,28),inside:'transformer'}
+    };
+
+    const tourOrder = ['foundation','tower','door','transformer','yaw','nacelle','hub','blade','gearbox','brake','generator'];
+    const systemTours = {
+      structure:{name:'Structure',parts:['foundation','tower','door','nacelle'],overview:'Covers the structural and access parts that support the turbine and allow technicians to work safely.',introPurpose:'Support the turbine, hold the nacelle and rotor at operating height, and provide safe technician access.',introFlow:'Inspect the foundation, tower, access door, and nacelle shell.'},
+      drivetrain:{name:'Drivetrain',parts:['hub','nacelle','lowSpeedShaft','gearbox','highSpeedShaft','brake','generator'],overview:'Starts at the rotor hub where wind-driven rotation enters the machine, then moves into the nacelle.',introPurpose:'Transfer mechanical rotation from the rotor into the generator so wind energy can become electrical energy.',introFlow:'Follow the path from hub to low-speed shaft, gearbox, high-speed shaft, brake, and generator.'},
+      electrical:{name:'Electrical',parts:['generator','controllerCabinet','transformer'],overview:'Focuses on how electrical power is produced, monitored, and sent away from the turbine.',introPurpose:'Produce, monitor, control, and route electrical power from the turbine.',introFlow:'Start at the generator, move to the controller cabinet, then finish at the transformer.'},
+      pitchYaw:{name:'Pitch & Yaw',parts:['nacelle','yaw','yawDrive','hub','pitchBearing','pitchMotor'],overview:'Starts at the yaw area where the nacelle turns on the tower, then moves to the hub where blade pitch changes angle.',introPurpose:'Keep the turbine pointed into the wind and adjust blade angle for control, efficiency, and protection.',introFlow:'Yaw is at the tower-top/nacelle interface. Pitch is in the hub at the blade roots.'},
+      bladeSystem:{name:'Blade System',parts:['blade','bladeRoot','internalSpar','lightningProtection'],overview:'Looks at the blade as an aerodynamic and structural component.',introPurpose:'Capture wind energy, carry aerodynamic loads, and route lightning energy away from the blade.',introFlow:'Inspect the blade surface, blade root, internal spar, and lightning protection path.'}
+    };
+
+    const systemButtonEls = new Map();
+    const internalPartIds = new Set(['gearbox','brake','generator','lowSpeedShaft','highSpeedShaft','controllerCabinet','coolingSystem','yawDrive','pitchBearing','pitchMotor','bladeRoot','internalSpar','lightningProtection']);
+    const labelPositions = {
+      foundation:new THREE.Vector3(0,3.5,0), tower:new THREE.Vector3(0,39,2.8), door:new THREE.Vector3(0,5.4,-3.1), yaw:new THREE.Vector3(0,70.7,3.4), nacelle:new THREE.Vector3(0,77.1,3.7), hub:new THREE.Vector3(-10.45,75.3,0), blade:new THREE.Vector3(-9.2,95.2,0), gearbox:new THREE.Vector3(-2.5,75.5,0), lowSpeedShaft:new THREE.Vector3(-5.25,75,0), brake:new THREE.Vector3(.65,75.2,0), highSpeedShaft:new THREE.Vector3(2.2,75.15,0), generator:new THREE.Vector3(4.7,75.3,0), controllerCabinet:new THREE.Vector3(2.8,77.1,-1.55), coolingSystem:new THREE.Vector3(6.3,76.8,-1.55), yawDrive:new THREE.Vector3(0,71.25,0), pitchBearing:new THREE.Vector3(-8.92,74.05,0), pitchMotor:new THREE.Vector3(-8.35,74.05,0), bladeRoot:new THREE.Vector3(-9,74.15,0), internalSpar:new THREE.Vector3(-9,88.4,.22), lightningProtection:new THREE.Vector3(-8.8,86.6,-.03), transformer:new THREE.Vector3(22,6.3,14)
+    };
+    const labelActivationDistance = {foundation:42,tower:34,door:18,yaw:24,nacelle:28,hub:20,blade:24,gearbox:15,lowSpeedShaft:16,brake:14,highSpeedShaft:14,generator:16,controllerCabinet:14,coolingSystem:14,yawDrive:13,pitchBearing:13,pitchMotor:13,bladeRoot:13,internalSpar:18,lightningProtection:18,transformer:24};
+    const cutawayState = { nacelle:0, hub:0, tower:0, foundation:0, transformer:0 };
+    const cutawayTarget = { nacelle:0, hub:0, tower:0, foundation:0, transformer:0 };
+
     scene.add(new THREE.HemisphereLight(0xe8f7ff, 0x52614e, 1.2));
-    const sun = new THREE.DirectionalLight(0xffffff, 2.2);
-    sun.position.set(-40, 90, 60);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
-    sun.shadow.camera.near = 1;
-    sun.shadow.camera.far = 180;
-    sun.shadow.camera.left = -90;
-    sun.shadow.camera.right = 90;
-    sun.shadow.camera.top = 100;
-    sun.shadow.camera.bottom = -90;
-    scene.add(sun);
+    const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-40,90,60); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.near=1; sun.shadow.camera.far=180; sun.shadow.camera.left=-90; sun.shadow.camera.right=90; sun.shadow.camera.top=100; sun.shadow.camera.bottom=-90; scene.add(sun);
 
-    // Ground
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(260, 260), materials.ground);
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(260,260), materials.ground); ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
+    const grid = new THREE.GridHelper(260,26,0xffffff,0xffffff); grid.material.transparent=true; grid.material.opacity=.12; scene.add(grid);
+    const gravelPad = new THREE.Mesh(new THREE.CircleGeometry(18,80), cloneMat(materials.gravel)); gravelPad.rotation.x=-Math.PI/2; gravelPad.position.y=.012; gravelPad.receiveShadow=true; scene.add(gravelPad);
+    const serviceRoad = new THREE.Mesh(new THREE.PlaneGeometry(16,92), cloneMat(materials.road)); serviceRoad.rotation.x=-Math.PI/2; serviceRoad.rotation.z=-.72; serviceRoad.position.set(33,.018,-30); serviceRoad.receiveShadow=true; scene.add(serviceRoad);
+    const roadStripe = new THREE.Mesh(new THREE.PlaneGeometry(.25,70), cloneMat(materials.whiteLine)); roadStripe.rotation.copy(serviceRoad.rotation); roadStripe.position.set(33,.024,-30); roadStripe.material.transparent=true; roadStripe.material.opacity=.32; scene.add(roadStripe);
 
-    const grid = new THREE.GridHelper(260, 26, 0xffffff, 0xffffff);
-    grid.material.transparent = true;
-    grid.material.opacity = 0.12;
-    scene.add(grid);
+    for(const [x,z] of [[9,8],[-8,7],[10,-7],[-7,-8]]){ const base=new THREE.Mesh(new THREE.CylinderGeometry(.32,.42,.18,20), cloneMat(materials.cone)); base.position.set(x,.11,z); base.castShadow=true; scene.add(base); const top=new THREE.Mesh(new THREE.ConeGeometry(.32,1.05,24), cloneMat(materials.cone)); top.position.set(x,.72,z); top.castShadow=true; scene.add(top); }
 
-    const gravelPad = new THREE.Mesh(new THREE.CircleGeometry(18, 80), cloneMat(materials.gravel));
-    gravelPad.rotation.x = -Math.PI / 2;
-    gravelPad.position.y = 0.012;
-    gravelPad.receiveShadow = true;
-    scene.add(gravelPad);
+    const tech = new THREE.Group(); const techBody = new THREE.Mesh(new THREE.CylinderGeometry(.22,.28,1.35,16), cloneMat(materials.blue)); techBody.position.y=.95; const techHead = new THREE.Mesh(new THREE.SphereGeometry(.23,20,16), cloneMat(materials.yellow)); techHead.position.y=1.75; tech.add(techBody, techHead); tech.position.set(-10,0,11); tech.rotation.y=.55; scene.add(tech);
 
-    const serviceRoad = new THREE.Mesh(new THREE.PlaneGeometry(16, 92), cloneMat(materials.road));
-    serviceRoad.rotation.x = -Math.PI / 2;
-    serviceRoad.rotation.z = -0.72;
-    serviceRoad.position.set(33, 0.018, -30);
-    serviceRoad.receiveShadow = true;
-    scene.add(serviceRoad);
+    const foundation = register(new THREE.Mesh(new THREE.CylinderGeometry(6.8,7.8,2.2,64), cloneMat(materials.foundation)), 'foundation'); foundation.position.y=1.1; scene.add(foundation);
+    const foundationInside = new THREE.Group(); foundationInside.visible=false; insideGroups.set('foundation', foundationInside); for(let i=0;i<12;i++){ const a=i/12*Math.PI*2; const bolt=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,1.2,16), cloneMat(materials.yellow)); bolt.position.set(Math.cos(a)*5.5,2.45,Math.sin(a)*5.5); foundationInside.add(bolt); } const rebar=new THREE.Mesh(new THREE.TorusGeometry(3.6,.045,8,80), cloneMat(materials.copper)); rebar.rotation.x=Math.PI/2; rebar.position.y=2.35; foundationInside.add(rebar); scene.add(foundationInside);
 
-    const roadStripe = new THREE.Mesh(new THREE.PlaneGeometry(.25, 70), cloneMat(materials.whiteLine));
-    roadStripe.rotation.copy(serviceRoad.rotation);
-    roadStripe.position.set(33, 0.024, -30);
-    roadStripe.material.transparent = true;
-    roadStripe.material.opacity = .32;
-    scene.add(roadStripe);
+    const tower = register(new THREE.Mesh(new THREE.CylinderGeometry(1.55,2.65,68,64), cloneMat(materials.tower)), 'tower'); tower.position.y=35.1; tower.material.transparent=true; scene.add(tower);
+    for(const y of [10.5,21.5,32.5,43.5,54.5,65.2]){ const ring=new THREE.Mesh(new THREE.TorusGeometry(towerRadiusAt(y)+.08,.055,10,96), cloneMat(materials.towerSeam)); ring.rotation.x=Math.PI/2; ring.position.y=y; ring.castShadow=true; scene.add(ring); }
+    const seam = new THREE.Mesh(new THREE.BoxGeometry(.035,62,.035), cloneMat(materials.towerSeam)); seam.position.set(0,36,-2.17); seam.material.transparent=true; seam.material.opacity=.42; scene.add(seam);
 
-    for(const [x,z] of [[9,8],[-8,7],[10,-7],[-7,-8]]){
-      const coneBase = new THREE.Mesh(new THREE.CylinderGeometry(.32,.42,.18,20), cloneMat(materials.cone));
-      coneBase.position.set(x,.11,z);
-      coneBase.castShadow = true;
-      scene.add(coneBase);
+    const towerInside = new THREE.Group(); towerInside.visible=false; insideGroups.set('tower', towerInside);
+    const towerCable = new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,64,12), cloneMat(materials.black)); towerCable.position.set(.55,36,0); towerInside.add(towerCable);
+    const towerCable2 = new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,64,12), cloneMat(materials.copper)); towerCable2.position.set(.85,36,.25); towerInside.add(towerCable2);
+    for(let y=7;y<65;y+=6){ const rung=new THREE.Mesh(new THREE.BoxGeometry(1.15,.05,.08), cloneMat(materials.yellow)); rung.position.set(-.72,y,-.15); towerInside.add(rung); }
+    const ladderA = new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,60,8), cloneMat(materials.yellow)); ladderA.position.set(-1.25,36,-.15); const ladderB=ladderA.clone(); ladderB.position.x=-.25; towerInside.add(ladderA,ladderB); scene.add(towerInside);
 
-      const coneTop = new THREE.Mesh(new THREE.ConeGeometry(.32,1.05,24), cloneMat(materials.cone));
-      coneTop.position.set(x,.72,z);
-      coneTop.castShadow = true;
-      scene.add(coneTop);
-    }
+    const doorSurfaceZ = -(towerRadiusAt(4.58)+.11);
+    const doorRecess = new THREE.Mesh(new THREE.BoxGeometry(1.9,4.45,.08), cloneMat(materials.black)); doorRecess.position.set(0,4.58,doorSurfaceZ+.035); scene.add(doorRecess);
+    const door = register(new THREE.Mesh(new THREE.BoxGeometry(1.55,4.15,.16), cloneMat(materials.towerDark)), 'door'); door.position.set(0,4.58,doorSurfaceZ-.045); addEdges(door,0x0f172a,.65); scene.add(door);
+    const doorWindow = new THREE.Mesh(new THREE.BoxGeometry(.65,.42,.04), cloneMat(materials.blue)); doorWindow.position.set(0,5.72,doorSurfaceZ-.14); scene.add(doorWindow);
+    const doorHandle = new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.42,12), cloneMat(materials.yellow)); doorHandle.rotation.x=Math.PI/2; doorHandle.position.set(.58,4.55,doorSurfaceZ-.19); scene.add(doorHandle);
 
-    const tech = new THREE.Group();
-    const techBody = new THREE.Mesh(new THREE.CylinderGeometry(.22,.28,1.35,16), cloneMat(materials.blue));
-    techBody.position.y = .95;
-    const techHead = new THREE.Mesh(new THREE.SphereGeometry(.23,20,16), cloneMat(materials.yellow));
-    techHead.position.y = 1.75;
-    tech.add(techBody, techHead);
-    tech.position.set(-10,0,11);
-    tech.rotation.y = .55;
-    scene.add(tech);
+    const yawRing = register(new THREE.Mesh(new THREE.CylinderGeometry(2.75,2.75,1.2,48), cloneMat(materials.blue)), 'yaw'); yawRing.position.y=69.5; scene.add(yawRing);
+    const yawInside = new THREE.Group(); yawInside.visible=false; insideGroups.set('yaw', yawInside); for(let i=0;i<8;i++){ const a=i/8*Math.PI*2; const tooth=new THREE.Mesh(new THREE.BoxGeometry(.35,.25,.7), cloneMat(materials.yellow)); tooth.position.set(Math.cos(a)*2.55,70.25,Math.sin(a)*2.55); tooth.rotation.y=-a; yawInside.add(tooth); } scene.add(yawInside);
 
-    // Foundation
-    const foundation = register(new THREE.Mesh(new THREE.CylinderGeometry(6.8, 7.8, 2.2, 64), cloneMat(materials.foundation)), 'foundation');
-    foundation.position.y = 1.1;
-    scene.add(foundation);
+    const nacelle = register(new THREE.Mesh(makeRoundedBoxGeometry(12.9,4.95,4.85,.78), cloneMat(materials.nacelle)), 'nacelle'); nacelle.position.set(.35,73,0); addEdges(nacelle,0x1e293b,.18); scene.add(nacelle);
+    const nacelleBellyFairing = new THREE.Mesh(makeRoundedBoxGeometry(8.7,1.55,4.35,.32), cloneMat(materials.nacelleShadow)); nacelleBellyFairing.position.set(1.25,70.95,0); scene.add(nacelleBellyFairing);
+    const nacelleNose = register(new THREE.Mesh(makeRoundedBoxGeometry(2.5,4.7,4.55,.65), cloneMat(materials.nacelle)), 'nacelle'); nacelleNose.position.set(-7.18,73,0); addEdges(nacelleNose,0x1e293b,.16); scene.add(nacelleNose);
+    const nacelleNoseFace = new THREE.Mesh(new THREE.BoxGeometry(.05,4.25,4.15), cloneMat(materials.towerSeam)); nacelleNoseFace.position.set(-8.42,73,0); nacelleNoseFace.material.transparent=true; nacelleNoseFace.material.opacity=.18; scene.add(nacelleNoseFace);
+    const nacelleCoverTop = new THREE.Mesh(makeRoundedBoxGeometry(12.15,.48,4.5,.26), cloneMat(materials.nacelleShadow)); nacelleCoverTop.position.set(.35,75.28,0); addEdges(nacelleCoverTop,0x334155,.22); scene.add(nacelleCoverTop);
+    const nacelleSideCover = new THREE.Mesh(makeRoundedBoxGeometry(12.15,4.25,.26,.28), cloneMat(materials.nacelleShadow)); nacelleSideCover.position.set(.35,73,2.56); addEdges(nacelleSideCover,0x334155,.16); scene.add(nacelleSideCover);
+    const nacelleAccessPanel = new THREE.Mesh(new THREE.BoxGeometry(2.85,1.58,.04), cloneMat(materials.towerSeam)); nacelleAccessPanel.position.set(2.75,73.18,2.72); nacelleAccessPanel.material.transparent=true; nacelleAccessPanel.material.opacity=.24; scene.add(nacelleAccessPanel);
+    const nacellePanelSeam = new THREE.Mesh(new THREE.BoxGeometry(11.25,.03,.05), cloneMat(materials.towerSeam)); nacellePanelSeam.position.set(.95,73.92,2.62); nacellePanelSeam.material.opacity=.22; scene.add(nacellePanelSeam);
+    const nacelleRoofLine = new THREE.Mesh(new THREE.BoxGeometry(8.2,.03,.05), cloneMat(materials.towerSeam)); nacelleRoofLine.position.set(1,75.63,0); nacelleRoofLine.material.opacity=.28; scene.add(nacelleRoofLine);
 
-    const foundationInside = new THREE.Group();
-    foundationInside.visible = false;
-    insideGroups.set('foundation', foundationInside);
-    for(let i=0;i<12;i++){
-      const angle = i / 12 * Math.PI * 2;
-      const bolt = new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,1.2,16), cloneMat(materials.yellow));
-      bolt.position.set(Math.cos(angle)*5.5,2.45,Math.sin(angle)*5.5);
-      foundationInside.add(bolt);
-    }
-    const rebar1 = new THREE.Mesh(new THREE.TorusGeometry(3.6,.045,8,80), cloneMat(materials.copper));
-    rebar1.rotation.x = Math.PI/2;
-    rebar1.position.y = 2.35;
-    foundationInside.add(rebar1);
-    scene.add(foundationInside);
-
-    // Tower
-    const tower = register(new THREE.Mesh(new THREE.CylinderGeometry(1.55, 2.65, 68, 64), cloneMat(materials.tower)), 'tower');
-    tower.position.y = 35.1;
-    scene.add(tower);
-
-    for(const y of [10.5, 21.5, 32.5, 43.5, 54.5, 65.2]){
-      addTowerFlange(y);
-    }
-
-    const verticalSeam = new THREE.Mesh(new THREE.BoxGeometry(.035, 62, .035), cloneMat(materials.towerSeam));
-    verticalSeam.position.set(0, 36, -2.17);
-    verticalSeam.material.transparent = true;
-    verticalSeam.material.opacity = .42;
-    scene.add(verticalSeam);
-
-    const towerInside = new THREE.Group();
-    towerInside.visible = false;
-    insideGroups.set('tower', towerInside);
-    const cable = new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,64,12), cloneMat(materials.black));
-    cable.position.set(.55,36,0);
-    towerInside.add(cable);
-    const cable2 = new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,64,12), cloneMat(materials.copper));
-    cable2.position.set(.85,36,.25);
-    towerInside.add(cable2);
-    for(let y=7; y<65; y+=6){
-      const rung = new THREE.Mesh(new THREE.BoxGeometry(1.15,.05,.08), cloneMat(materials.yellow));
-      rung.position.set(-.72,y,-.15);
-      towerInside.add(rung);
-    }
-    const ladderSideA = new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,60,8), cloneMat(materials.yellow));
-    ladderSideA.position.set(-1.25,36,-.15);
-    const ladderSideB = ladderSideA.clone();
-    ladderSideB.position.x = -.25;
-    towerInside.add(ladderSideA, ladderSideB);
-    scene.add(towerInside);
-
-    // Door
-    // Door assembly sits just outside the tower skin. This prevents the tower cylinder
-    // from visually cutting through the door at the bottom of the tapered tower.
-    const doorSurfaceZ = -(towerRadiusAt(4.58) + 0.11);
-
-    const doorRecess = new THREE.Mesh(new THREE.BoxGeometry(1.9, 4.45, .08), cloneMat(materials.black));
-    doorRecess.position.set(0, 4.58, doorSurfaceZ + .035);
-    doorRecess.castShadow = true;
-    scene.add(doorRecess);
-
-    const door = register(new THREE.Mesh(new THREE.BoxGeometry(1.55, 4.15, .16), cloneMat(materials.towerDark)), 'door');
-    door.position.set(0, 4.58, doorSurfaceZ - .045);
-    addEdges(door, 0x0f172a, .65);
-    scene.add(door);
-
-    const doorWindow = new THREE.Mesh(new THREE.BoxGeometry(.65,.42,.04), cloneMat(materials.blue));
-    doorWindow.position.set(0,5.72,doorSurfaceZ - .14);
-    scene.add(doorWindow);
-
-    const doorHandle = new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.42,12), cloneMat(materials.yellow));
-    doorHandle.rotation.x = Math.PI / 2;
-    doorHandle.position.set(.58,4.55,doorSurfaceZ - .19);
-    scene.add(doorHandle);
-
-    // Yaw system
-    const yawRing = register(new THREE.Mesh(new THREE.CylinderGeometry(2.75, 2.75, 1.2, 48), cloneMat(materials.blue)), 'yaw');
-    yawRing.position.y = 69.5;
-    scene.add(yawRing);
-
-    const yawInside = new THREE.Group();
-    yawInside.visible = false;
-    insideGroups.set('yaw', yawInside);
-    for(let i=0;i<8;i++){
-      const angle = i / 8 * Math.PI * 2;
-      const tooth = new THREE.Mesh(new THREE.BoxGeometry(.35,.25,.7), cloneMat(materials.yellow));
-      tooth.position.set(Math.cos(angle)*2.55,70.25,Math.sin(angle)*2.55);
-      tooth.rotation.y = -angle;
-      yawInside.add(tooth);
-    }
-    for(let i=0;i<3;i++){
-      const drive = new THREE.Mesh(new THREE.BoxGeometry(.9,.65,1.1), cloneMat(materials.towerDark));
-      const a = i / 3 * Math.PI * 2 + 0.35;
-      drive.position.set(Math.cos(a)*3.2,69.9,Math.sin(a)*3.2);
-      yawInside.add(drive);
-    }
-    scene.add(yawInside);
-
-    // Nacelle shell and cutaway covers
-    // This pass pushes the exterior silhouette toward a V80-style look:
-    // a cleaner boxy nacelle body, a blunter front cap, and a rear roof cooling house.
-    const nacelle = register(new THREE.Mesh(makeRoundedBoxGeometry(12.9, 4.95, 4.85, .78), cloneMat(materials.nacelle)), 'nacelle');
-    nacelle.position.set(.35, 73, 0);
-    addEdges(nacelle, 0x1e293b, .18);
-    scene.add(nacelle);
-
-    const nacelleBellyFairing = new THREE.Mesh(makeRoundedBoxGeometry(8.7, 1.55, 4.35, .32), cloneMat(materials.nacelleShadow));
-    nacelleBellyFairing.position.set(1.25,70.95,0);
-    nacelleBellyFairing.material.transparent = true;
-    scene.add(nacelleBellyFairing);
-
-    const rearGrille = new THREE.Group();
-    for(let i=0; i<7; i++){
-      const slat = new THREE.Mesh(new THREE.BoxGeometry(.09, .12, 3.0), cloneMat(materials.ventDark));
-      slat.position.set(6.62, 71.95 + i*.39, 0);
-      rearGrille.add(slat);
-    }
-    scene.add(rearGrille);
-
-    const nacelleNose = register(new THREE.Mesh(makeRoundedBoxGeometry(2.5, 4.7, 4.55, .65), cloneMat(materials.nacelle)), 'nacelle');
-    nacelleNose.position.set(-7.18, 73, 0);
-    addEdges(nacelleNose, 0x1e293b, .16);
-    scene.add(nacelleNose);
-
-    const nacelleNoseFace = new THREE.Mesh(new THREE.BoxGeometry(.05, 4.25, 4.15), cloneMat(materials.towerSeam));
-    nacelleNoseFace.position.set(-8.42, 73, 0);
-    nacelleNoseFace.material.transparent = true;
-    nacelleNoseFace.material.opacity = .18;
-    scene.add(nacelleNoseFace);
-
-    const nacelleCoverTop = new THREE.Mesh(makeRoundedBoxGeometry(12.15, .48, 4.5, .26), cloneMat(materials.nacelleShadow));
-    nacelleCoverTop.position.set(.35,75.28,0);
-    addEdges(nacelleCoverTop, 0x334155, .22);
-    scene.add(nacelleCoverTop);
-
-    const nacelleSideCover = new THREE.Mesh(makeRoundedBoxGeometry(12.15, 4.25, .26, .28), cloneMat(materials.nacelleShadow));
-    nacelleSideCover.position.set(.35,73,2.56);
-    addEdges(nacelleSideCover, 0x334155, .16);
-    scene.add(nacelleSideCover);
-
-    const nacelleAccessPanel = new THREE.Mesh(new THREE.BoxGeometry(2.85, 1.58, .04), cloneMat(materials.towerSeam));
-    nacelleAccessPanel.position.set(2.75,73.18,2.72);
-    nacelleAccessPanel.material.transparent = true;
-    nacelleAccessPanel.material.opacity = .24;
-    scene.add(nacelleAccessPanel);
-
-    const nacellePanelSeam = new THREE.Mesh(new THREE.BoxGeometry(11.25,.03,.05), cloneMat(materials.towerSeam));
-    nacellePanelSeam.position.set(.95,73.92,2.62);
-    nacellePanelSeam.material.transparent = true;
-    nacellePanelSeam.material.opacity = .22;
-    scene.add(nacellePanelSeam);
-
-    const nacelleRoofLine = new THREE.Mesh(new THREE.BoxGeometry(8.2,.03,.05), cloneMat(materials.towerSeam));
-    nacelleRoofLine.position.set(1.0,75.63,0);
-    nacelleRoofLine.material.transparent = true;
-    nacelleRoofLine.material.opacity = .28;
-    scene.add(nacelleRoofLine);
-
-    // Roof cooling house / fairing inspired by V80 references.
-    const roofCoolingHouse = new THREE.Group();
-    roofCoolingHouse.position.set(4.5,1.05,0);
-
-    const radiatorCore = new THREE.Mesh(makeRoundedBoxGeometry(1.22, 2.15, 2.55, .12), cloneMat(materials.ventDark));
-    radiatorCore.position.set(.55,1.1,0);
-    roofCoolingHouse.add(radiatorCore);
-
-    for(let i=0; i<6; i++){
-      const fin = new THREE.Mesh(new THREE.BoxGeometry(.07,.08,2.12), cloneMat(materials.steel));
-      fin.position.set(.95,0.38 + i*.29,0);
-      fin.material.transparent = true;
-      fin.material.opacity = .62;
-      roofCoolingHouse.add(fin);
-    }
-
-    const roofFairing = new THREE.Mesh(new THREE.BoxGeometry(3.65,.18,2.72), cloneMat(materials.nacelle));
-    roofFairing.position.set(-0.45,.88,0);
-    roofFairing.rotation.z = -0.9;
-    roofCoolingHouse.add(roofFairing);
-
-    const roofFairingCap = new THREE.Mesh(new THREE.BoxGeometry(2.45,.12,2.72), cloneMat(materials.nacelle));
-    roofFairingCap.position.set(-.1,1.98,0);
-    roofCoolingHouse.add(roofFairingCap);
-
-    const roofSupportA = new THREE.Mesh(new THREE.BoxGeometry(.12,1.85,.16), cloneMat(materials.steel));
-    roofSupportA.position.set(-1.05,.72,-.95);
-    roofCoolingHouse.add(roofSupportA);
-
-    const roofSupportB = roofSupportA.clone();
-    roofSupportB.position.z = .95;
-    roofCoolingHouse.add(roofSupportB);
-
-    // Two obstruction lights on top of the cooling house.
-    for(const x of [-.45, 1.05]){
-      const base = new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.1,16), cloneMat(materials.steel));
-      base.position.set(x,2.34,0);
-      roofCoolingHouse.add(base);
-
-      const beacon = new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.32,20), cloneMat(materials.obstructionRed));
-      beacon.position.set(x,2.54,0);
-      roofCoolingHouse.add(beacon);
-    }
-
-    // Two simple loop antennas near the rear.
-    for(const x of [-1.0, .4]){
-      const post = new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.42,8), cloneMat(materials.sensorDark));
-      post.position.set(x,2.24,.72);
-      roofCoolingHouse.add(post);
-
-      const loop = new THREE.Mesh(new THREE.TorusGeometry(.17,.012,6,24), cloneMat(materials.sensorDark));
-      loop.rotation.x = Math.PI / 2;
-      loop.position.set(x,2.47,.72);
-      roofCoolingHouse.add(loop);
-    }
-
+    const roofCoolingHouse = new THREE.Group(); roofCoolingHouse.position.set(4.5,1.05,0);
+    const radiatorCore = new THREE.Mesh(makeRoundedBoxGeometry(1.22,2.15,2.55,.12), cloneMat(materials.ventDark)); radiatorCore.position.set(.55,1.1,0); roofCoolingHouse.add(radiatorCore);
+    for(let i=0;i<6;i++){ const fin=new THREE.Mesh(new THREE.BoxGeometry(.07,.08,2.12), cloneMat(materials.steel)); fin.position.set(.95,.38+i*.29,0); fin.material.transparent=true; fin.material.opacity=.62; roofCoolingHouse.add(fin); }
+    const roofFairing = new THREE.Mesh(new THREE.BoxGeometry(3.65,.18,2.72), cloneMat(materials.nacelle)); roofFairing.position.set(-.45,.88,0); roofFairing.rotation.z=-.9; roofCoolingHouse.add(roofFairing);
+    const roofFairingCap = new THREE.Mesh(new THREE.BoxGeometry(2.45,.12,2.72), cloneMat(materials.nacelle)); roofFairingCap.position.set(-.1,1.98,0); roofCoolingHouse.add(roofFairingCap);
+    for(const x of [-.45,1.05]){ const base=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.1,16), cloneMat(materials.steel)); base.position.set(x,2.34,0); roofCoolingHouse.add(base); const beacon=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.32,20), cloneMat(materials.obstructionRed)); beacon.position.set(x,2.54,0); roofCoolingHouse.add(beacon); }
     nacelleCoverTop.add(roofCoolingHouse);
 
-    // Roof wind sensors inspired by cutaway reference diagrams:
-    // anemometer cups and a simple wind vane at the rear/top of the nacelle.
-    const sensorMast = new THREE.Group();
-    sensorMast.position.set(5.95,75.8,-1.15);
+    const sensorMast = new THREE.Group(); sensorMast.position.set(5.95,75.8,-1.15); const mastPole=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,1.65,12), cloneMat(materials.sensorWhite)); mastPole.position.set(0,.82,0); sensorMast.add(mastPole); const cupHub=new THREE.Mesh(new THREE.SphereGeometry(.09,16,12), cloneMat(materials.sensorDark)); cupHub.position.set(0,1.52,0); sensorMast.add(cupHub); for(let i=0;i<3;i++){ const a=i*Math.PI*2/3; const cup=new THREE.Mesh(new THREE.SphereGeometry(.09,14,10), cloneMat(materials.sensorWhite)); cup.scale.set(1.18,.7,1.18); cup.position.set(Math.cos(a)*.42,1.52,Math.sin(a)*.42); sensorMast.add(cup); } scene.add(sensorMast);
 
-    const mastPole = new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,1.65,12), cloneMat(materials.sensorWhite));
-    mastPole.position.set(0,.82,0);
-    sensorMast.add(mastPole);
-
-    const sensorArm = new THREE.Mesh(new THREE.CylinderGeometry(.022,.022,1.18,10), cloneMat(materials.sensorWhite));
-    sensorArm.rotation.z = Math.PI / 2;
-    sensorArm.position.set(0,1.52,0);
-    sensorMast.add(sensorArm);
-
-    const cupHub = new THREE.Mesh(new THREE.SphereGeometry(.09,16,12), cloneMat(materials.sensorDark));
-    cupHub.position.set(0,1.52,0);
-    sensorMast.add(cupHub);
-
-    for(let i=0;i<3;i++){
-      const angle = i * Math.PI * 2 / 3;
-      const cupArm = new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.42,8), cloneMat(materials.sensorDark));
-      cupArm.rotation.z = Math.PI / 2;
-      cupArm.rotation.y = angle;
-      cupArm.position.set(Math.cos(angle)*.18,1.52,Math.sin(angle)*.18);
-      sensorMast.add(cupArm);
-
-      const cup = new THREE.Mesh(new THREE.SphereGeometry(.09,14,10), cloneMat(materials.sensorWhite));
-      cup.scale.set(1.18,.7,1.18);
-      cup.position.set(Math.cos(angle)*.42,1.52,Math.sin(angle)*.42);
-      sensorMast.add(cup);
-    }
-
-    const vaneBoom = new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,1.0,8), cloneMat(materials.sensorWhite));
-    vaneBoom.rotation.z = Math.PI / 2;
-    vaneBoom.position.set(.02,.95,0);
-    sensorMast.add(vaneBoom);
-
-    const vaneTail = new THREE.Mesh(new THREE.ConeGeometry(.14,.34,3), cloneMat(materials.sensorWhite));
-    vaneTail.rotation.z = -Math.PI / 2;
-    vaneTail.position.set(.55,.95,0);
-    sensorMast.add(vaneTail);
-
-    scene.add(sensorMast);
-
-    // Nacelle internals
-    const nacelleInside = new THREE.Group();
-    nacelleInside.visible = false;
-    insideGroups.set('nacelle', nacelleInside);
-
-    // Low-speed shaft, hub-side flange, and coupling
-    const lowSpeedShaft = register(xCylinder(.24, 5.15, cloneMat(materials.black)), 'lowSpeedShaft');
-    lowSpeedShaft.position.set(-5.25, 72.95, 0);
-    nacelleInside.add(lowSpeedShaft);
-
-    const lowSpeedHubFlange = new THREE.Mesh(new THREE.CylinderGeometry(.62,.62,.45,40), cloneMat(materials.steel));
-    lowSpeedHubFlange.rotation.z = Math.PI / 2;
-    lowSpeedHubFlange.position.set(-7.45,72.95,0);
-    nacelleInside.add(lowSpeedHubFlange);
-
-    const lowSpeedCoupling = new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.72,32), cloneMat(materials.steel));
-    lowSpeedCoupling.rotation.z = Math.PI / 2;
-    lowSpeedCoupling.position.set(-4.15,72.95,0);
-    nacelleInside.add(lowSpeedCoupling);
-
-    // Main shaft bearing support. This gives students a clearer visual cue
-    // that the heavy low-speed shaft is supported before entering the gearbox.
-    const mainBearingBase = new THREE.Mesh(makeRoundedBoxGeometry(1.18,.62,1.28,.1), cloneMat(materials.towerDark));
-    mainBearingBase.rotation.y = Math.PI / 2;
-    mainBearingBase.position.set(-5.75,72.18,0);
-    nacelleInside.add(mainBearingBase);
-
-    const mainBearingRing = new THREE.Mesh(new THREE.TorusGeometry(.54,.09,14,42), cloneMat(materials.steel));
-    mainBearingRing.rotation.y = Math.PI / 2;
-    mainBearingRing.position.set(-5.75,72.95,0);
-    nacelleInside.add(mainBearingRing);
-
-    const mainBearingCap = new THREE.Mesh(makeRoundedBoxGeometry(.58,.36,1.0,.08), cloneMat(materials.steel));
-    mainBearingCap.rotation.y = Math.PI / 2;
-    mainBearingCap.position.set(-5.75,73.48,0);
-    nacelleInside.add(mainBearingCap);
-
-    // Gearbox housing with top cover, inspection cap, and mounting feet
-    const gearbox = register(new THREE.Mesh(makeRoundedBoxGeometry(2.95, 2.2, 2.05, .22), cloneMat(materials.orange)), 'gearbox');
-    gearbox.rotation.y = Math.PI / 2;
-    gearbox.position.set(-2.45, 72.95, 0);
-    addEdges(gearbox, 0x7c2d12, .45);
-    nacelleInside.add(gearbox);
-
-    const gearboxTop = new THREE.Mesh(new THREE.BoxGeometry(2.2,.24,1.45), cloneMat(materials.orange));
-    gearboxTop.position.set(-2.45,74.15,0);
-    nacelleInside.add(gearboxTop);
-
-    const gearboxCap = new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.2,24), cloneMat(materials.steel));
-    gearboxCap.rotation.x = Math.PI / 2;
-    gearboxCap.position.set(-2.05,74.22,.62);
-    nacelleInside.add(gearboxCap);
-
-    for(let i=0;i<4;i++){
-      const gearRib = new THREE.Mesh(new THREE.BoxGeometry(.06,1.6,.08), cloneMat(materials.steel));
-      gearRib.position.set(-3.35 + i*.55,73.03,1.06);
-      gearRib.material.transparent = true;
-      gearRib.material.opacity = .55;
-      nacelleInside.add(gearRib);
-    }
-
-    const gearboxInputSeal = new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,.22,28), cloneMat(materials.steel));
-    gearboxInputSeal.rotation.z = Math.PI / 2;
-    gearboxInputSeal.position.set(-3.98,72.95,0);
-    nacelleInside.add(gearboxInputSeal);
-
-    const gearboxOutputSeal = new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.18,28), cloneMat(materials.steel));
-    gearboxOutputSeal.rotation.z = Math.PI / 2;
-    gearboxOutputSeal.position.set(-.9,72.95,0);
-    nacelleInside.add(gearboxOutputSeal);
-
-    for(const side of [-0.82, 0.82]){
-      const foot = new THREE.Mesh(new THREE.BoxGeometry(.4,.28,.5), cloneMat(materials.towerDark));
-      foot.position.set(-2.95,71.65,side);
-      nacelleInside.add(foot);
-    }
-
-    // Brake assembly as rotor disc + caliper carrier
-    const brakeDisk = register(new THREE.Mesh(new THREE.CylinderGeometry(.92,.92,.25,52), cloneMat(materials.red)), 'brake');
-    brakeDisk.rotation.z = Math.PI/2;
-    brakeDisk.position.set(.85,72.95,0);
-    nacelleInside.add(brakeDisk);
-
-    const brakeHub = new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,.48,30), cloneMat(materials.steel));
-    brakeHub.rotation.z = Math.PI/2;
-    brakeHub.position.set(.85,72.95,0);
-    nacelleInside.add(brakeHub);
-
-    const brakeCaliper = new THREE.Mesh(makeRoundedBoxGeometry(.82, 1.05, .62, .12), cloneMat(materials.towerDark));
-    brakeCaliper.rotation.y = Math.PI / 2;
-    brakeCaliper.position.set(.88,73.88,.78);
-    nacelleInside.add(brakeCaliper);
-
-    const brakeBracket = new THREE.Mesh(new THREE.BoxGeometry(.22,.9,1.1), cloneMat(materials.steel));
-    brakeBracket.position.set(1.12,73.65,.52);
-    nacelleInside.add(brakeBracket);
-
-    // High-speed shaft and couplings
-    const highSpeedShaft = register(xCylinder(.12, 2.95, cloneMat(materials.black)), 'highSpeedShaft');
-    highSpeedShaft.position.set(2.25,72.95,0);
-    nacelleInside.add(highSpeedShaft);
-
-    const highSpeedCoupling = new THREE.Mesh(new THREE.CylinderGeometry(.24,.24,.4,26), cloneMat(materials.steel));
-    highSpeedCoupling.rotation.z = Math.PI / 2;
-    highSpeedCoupling.position.set(1.55,72.95,0);
-    nacelleInside.add(highSpeedCoupling);
-
-    // Generator body with end bells and terminal box
-    const generator = register(xCylinder(1.12, 3.25, cloneMat(materials.green)), 'generator');
-    generator.position.set(5.0,72.95,0);
-    nacelleInside.add(generator);
-
-    const generatorFront = new THREE.Mesh(new THREE.CylinderGeometry(.92,.92,.26,36), cloneMat(materials.steel));
-    generatorFront.rotation.z = Math.PI / 2;
-    generatorFront.position.set(3.45,72.95,0);
-    nacelleInside.add(generatorFront);
-
-    const generatorRear = new THREE.Mesh(new THREE.CylinderGeometry(.98,.98,.34,36), cloneMat(materials.steel));
-    generatorRear.rotation.z = Math.PI / 2;
-    generatorRear.position.set(6.55,72.95,0);
-    nacelleInside.add(generatorRear);
-
-    for(const x of [4.28,5.78]){
-      for(const z of [-.68,.68]){
-        const genFoot = new THREE.Mesh(makeRoundedBoxGeometry(.42,.46,.42,.08), cloneMat(materials.towerDark));
-        genFoot.position.set(x,71.82,z);
-        nacelleInside.add(genFoot);
-      }
-    }
-
-    const generatorBaseRailA = new THREE.Mesh(new THREE.BoxGeometry(3.75,.12,.16), cloneMat(materials.steel));
-    generatorBaseRailA.position.set(5.0,71.58,-.82);
-    nacelleInside.add(generatorBaseRailA);
-
-    const generatorBaseRailB = new THREE.Mesh(new THREE.BoxGeometry(3.75,.12,.16), cloneMat(materials.steel));
-    generatorBaseRailB.position.set(5.0,71.58,.82);
-    nacelleInside.add(generatorBaseRailB);
-
-    // Subtle generator cooling ribs. Earlier stick-style ribs looked like random rods,
-    // so these read more like bands around the generator housing.
-    for(let i=0;i<5;i++){
-      const ribBand = new THREE.Mesh(new THREE.CylinderGeometry(1.17,1.17,.07,36), cloneMat(materials.steel));
-      ribBand.rotation.z = Math.PI / 2;
-      ribBand.position.set(4.15 + i*.35,72.95,0);
-      ribBand.material.transparent = true;
-      ribBand.material.opacity = .42;
-      nacelleInside.add(ribBand);
-    }
-
-    const generatorTerminalBox = new THREE.Mesh(makeRoundedBoxGeometry(.92, .58, .72, .08), cloneMat(materials.blue));
-    generatorTerminalBox.position.set(4.82,74.12,-.92);
-    nacelleInside.add(generatorTerminalBox);
-
-    // Controller cabinet with door split and handles
-    const controller = register(new THREE.Mesh(makeRoundedBoxGeometry(1.72,1.9,1.22,.12), cloneMat(materials.blue)), 'controllerCabinet');
-    controller.position.set(2.9,74.95,-1.55);
-    addEdges(controller, 0x0c4a6e, .35);
-    nacelleInside.add(controller);
-
-    const controllerDoorLine = new THREE.Mesh(new THREE.BoxGeometry(.03,1.62,.03), cloneMat(materials.steel));
-    controllerDoorLine.position.set(2.9,74.95,-.92);
-    nacelleInside.add(controllerDoorLine);
-
-    for(const x of [2.72,3.08]){
-      const handle = new THREE.Mesh(new THREE.BoxGeometry(.04,.22,.04), cloneMat(materials.steel));
-      handle.position.set(x,74.95,-.9);
-      nacelleInside.add(handle);
-    }
-
-    // Cooling package with radiator core, fan shroud, and support stand
-    const radiator = register(new THREE.Mesh(makeRoundedBoxGeometry(1.45,2.22,.4,.08), cloneMat(materials.towerDark)), 'coolingSystem');
-    radiator.position.set(6.2,74.28,-1.55);
-    nacelleInside.add(radiator);
-
-    for(let i=0;i<6;i++){
-      const fin = new THREE.Mesh(new THREE.BoxGeometry(1.18,.06,.05), cloneMat(materials.steel));
-      fin.position.set(6.2,73.42 + i*.29,-1.28);
-      nacelleInside.add(fin);
-    }
-
-    const fanShroud = new THREE.Mesh(new THREE.CylinderGeometry(.7,.7,.24,32), cloneMat(materials.towerDark));
-    fanShroud.rotation.x = Math.PI/2;
-    fanShroud.position.set(6.98,74.1,-1.55);
-    nacelleInside.add(fanShroud);
-
-    const fan = register(new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.2,28), cloneMat(materials.steel)), 'coolingSystem');
-    fan.rotation.x = Math.PI/2;
-    fan.position.set(7.0,74.1,-1.55);
-    nacelleInside.add(fan);
-
-    for(let i=0;i<4;i++){
-      const blade = new THREE.Mesh(new THREE.BoxGeometry(.08,.52,.16), cloneMat(materials.steel));
-      blade.position.set(7.0,74.1,-1.55);
-      blade.rotation.z = i * Math.PI / 2 + .35;
-      nacelleInside.add(blade);
-    }
-
-    const coolingStand = new THREE.Mesh(new THREE.BoxGeometry(.18,1.58,.18), cloneMat(materials.steel));
-    coolingStand.position.set(5.58,73.22,-1.55);
-    nacelleInside.add(coolingStand);
-
-    const serviceDeck = new THREE.Mesh(new THREE.BoxGeometry(10.8,.12,4.05), cloneMat(materials.towerDark));
-    serviceDeck.position.set(.8,70.72,0);
-    nacelleInside.add(serviceDeck);
-
-    for(let i=0;i<5;i++){
-      const deckRib = new THREE.Mesh(new THREE.BoxGeometry(.08,.08,3.86), cloneMat(materials.steel));
-      deckRib.position.set(-4.4 + i*2.15,70.88,0);
-      deckRib.material.transparent = true;
-      deckRib.material.opacity = .55;
-      nacelleInside.add(deckRib);
-    }
-
-    for(let i=0;i<4;i++){
-      const roofFrame = new THREE.Mesh(new THREE.BoxGeometry(.08,1.28,.08), cloneMat(materials.steel));
-      roofFrame.position.set(-3.8 + i*2.65,75.48,-1.92);
-      roofFrame.material.transparent = true;
-      roofFrame.material.opacity = .45;
-      nacelleInside.add(roofFrame);
-    }
-
-    // Yaw machinery: ring-gear base, drive motor, and gearbox
-    const yawDriveRack = register(new THREE.Mesh(new THREE.CylinderGeometry(1.35,1.35,.28,44), cloneMat(materials.towerDark)), 'yawDrive');
-    yawDriveRack.position.set(0,70.02,0);
-    nacelleInside.add(yawDriveRack);
-
-    const yawDriveGear = new THREE.Mesh(new THREE.TorusGeometry(1.38,.08,12,72), cloneMat(materials.steel));
-    yawDriveGear.rotation.x = Math.PI / 2;
-    yawDriveGear.position.set(0,70.17,0);
-    nacelleInside.add(yawDriveGear);
-
-    const yawMotor = new THREE.Mesh(new THREE.CylinderGeometry(.36,.36,1.15,26), cloneMat(materials.green));
-    yawMotor.rotation.z = Math.PI / 2;
-    yawMotor.position.set(1.18,70.42,.62);
-    nacelleInside.add(yawMotor);
-
-    const yawGearbox = new THREE.Mesh(makeRoundedBoxGeometry(.68,.62,.68,.08), cloneMat(materials.orange));
-    yawGearbox.position.set(.42,70.42,.62);
-    nacelleInside.add(yawGearbox);
-
-    // Trainer guide overlays. These are intentionally faint so they explain flow
-    // without covering the internal parts students need to inspect.
-    const nacelleMechanicalGuide = new THREE.Group();
-    nacelleMechanicalGuide.add(xGuideArrow(-7.15, -5.85, 74.72, 1.72, materials.mechGuide));
-    nacelleMechanicalGuide.add(xGuideArrow(-4.72, -3.15, 74.72, 1.72, materials.mechGuide));
-    nacelleMechanicalGuide.add(xGuideArrow(-1.15, .45, 74.72, 1.72, materials.mechGuide));
-    nacelleMechanicalGuide.add(xGuideArrow(1.35, 3.95, 74.72, 1.72, materials.mechGuide));
-    nacelleInside.add(nacelleMechanicalGuide);
-
-    const nacelleElectricalGuide = new THREE.Group();
-    const electricPath = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(5.15,74.35,-.9),
-        new THREE.Vector3(3.4,75.2,-1.55),
-        new THREE.Vector3(.2,74.95,-1.55),
-        new THREE.Vector3(.1,71.25,-.55)
-      ]),
-      new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: .58, depthWrite: false })
-    );
-    nacelleElectricalGuide.add(electricPath);
-    const electricArrow = new THREE.Mesh(new THREE.ConeGeometry(.16,.42,20), materials.electricGuide);
-    electricArrow.rotation.x = Math.PI;
-    electricArrow.position.set(.1,71.1,-.55);
-    nacelleElectricalGuide.add(electricArrow);
-    nacelleInside.add(nacelleElectricalGuide);
-
-    const nacelleYawGuide = new THREE.Group();
-    const yawGuideRing = new THREE.Mesh(new THREE.TorusGeometry(2.18, .04, 12, 80), materials.yawGuide);
-    yawGuideRing.rotation.x = Math.PI / 2;
-    yawGuideRing.position.set(0,70.18,0);
-    nacelleYawGuide.add(yawGuideRing);
-    for(let i=0; i<3; i++){
-      const tooth = new THREE.Mesh(new THREE.BoxGeometry(.35,.08,.12), materials.yawGuide);
-      const angle = i * Math.PI * 2 / 3 + .3;
-      tooth.position.set(Math.cos(angle) * 2.18, 70.18, Math.sin(angle) * 2.18);
-      tooth.rotation.y = -angle;
-      nacelleYawGuide.add(tooth);
-    }
-    nacelleInside.add(nacelleYawGuide);
-
+    const nacelleInside = new THREE.Group(); nacelleInside.visible=false; insideGroups.set('nacelle', nacelleInside);
+    const lowSpeedShaft = register(xCylinder(.24,5.15,cloneMat(materials.black)), 'lowSpeedShaft'); lowSpeedShaft.position.set(-5.25,72.95,0); nacelleInside.add(lowSpeedShaft);
+    const lowSpeedHubFlange = new THREE.Mesh(new THREE.CylinderGeometry(.62,.62,.45,40), cloneMat(materials.steel)); lowSpeedHubFlange.rotation.z=Math.PI/2; lowSpeedHubFlange.position.set(-7.45,72.95,0); nacelleInside.add(lowSpeedHubFlange);
+    const mainBearingBase = new THREE.Mesh(makeRoundedBoxGeometry(1.18,.62,1.28,.1), cloneMat(materials.towerDark)); mainBearingBase.rotation.y=Math.PI/2; mainBearingBase.position.set(-5.75,72.18,0); nacelleInside.add(mainBearingBase);
+    const mainBearingRing = new THREE.Mesh(new THREE.TorusGeometry(.54,.09,14,42), cloneMat(materials.steel)); mainBearingRing.rotation.y=Math.PI/2; mainBearingRing.position.set(-5.75,72.95,0); nacelleInside.add(mainBearingRing);
+    const gearbox = register(new THREE.Mesh(makeRoundedBoxGeometry(2.95,2.2,2.05,.22), cloneMat(materials.orange)), 'gearbox'); gearbox.rotation.y=Math.PI/2; gearbox.position.set(-2.45,72.95,0); addEdges(gearbox,0x7c2d12,.45); nacelleInside.add(gearbox);
+    const gearboxTop = new THREE.Mesh(new THREE.BoxGeometry(2.2,.24,1.45), cloneMat(materials.orange)); gearboxTop.position.set(-2.45,74.15,0); nacelleInside.add(gearboxTop);
+    const brakeDisk = register(new THREE.Mesh(new THREE.CylinderGeometry(.92,.92,.25,52), cloneMat(materials.red)), 'brake'); brakeDisk.rotation.z=Math.PI/2; brakeDisk.position.set(.85,72.95,0); nacelleInside.add(brakeDisk);
+    const brakeCaliper = new THREE.Mesh(makeRoundedBoxGeometry(.82,1.05,.62,.12), cloneMat(materials.towerDark)); brakeCaliper.rotation.y=Math.PI/2; brakeCaliper.position.set(.88,73.88,.78); nacelleInside.add(brakeCaliper);
+    const highSpeedShaft = register(xCylinder(.12,2.95,cloneMat(materials.black)), 'highSpeedShaft'); highSpeedShaft.position.set(2.25,72.95,0); nacelleInside.add(highSpeedShaft);
+    const generator = register(xCylinder(1.12,3.25,cloneMat(materials.green)), 'generator'); generator.position.set(5,72.95,0); nacelleInside.add(generator);
+    const generatorFront = new THREE.Mesh(new THREE.CylinderGeometry(.92,.92,.26,36), cloneMat(materials.steel)); generatorFront.rotation.z=Math.PI/2; generatorFront.position.set(3.45,72.95,0); nacelleInside.add(generatorFront);
+    const generatorRear = new THREE.Mesh(new THREE.CylinderGeometry(.98,.98,.34,36), cloneMat(materials.steel)); generatorRear.rotation.z=Math.PI/2; generatorRear.position.set(6.55,72.95,0); nacelleInside.add(generatorRear);
+    for(let i=0;i<5;i++){ const rib=new THREE.Mesh(new THREE.CylinderGeometry(1.17,1.17,.07,36), cloneMat(materials.steel)); rib.rotation.z=Math.PI/2; rib.position.set(4.15+i*.35,72.95,0); rib.material.transparent=true; rib.material.opacity=.42; nacelleInside.add(rib); }
+    const controller = register(new THREE.Mesh(makeRoundedBoxGeometry(1.72,1.9,1.22,.12), cloneMat(materials.blue)), 'controllerCabinet'); controller.position.set(2.9,74.95,-1.55); addEdges(controller,0x0c4a6e,.35); nacelleInside.add(controller);
+    const radiator = register(new THREE.Mesh(makeRoundedBoxGeometry(1.45,2.22,.4,.08), cloneMat(materials.towerDark)), 'coolingSystem'); radiator.position.set(6.2,74.28,-1.55); nacelleInside.add(radiator);
+    const fan = register(new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.2,28), cloneMat(materials.steel)), 'coolingSystem'); fan.rotation.x=Math.PI/2; fan.position.set(7,74.1,-1.55); nacelleInside.add(fan);
+    const serviceDeck = new THREE.Mesh(new THREE.BoxGeometry(10.8,.12,4.05), cloneMat(materials.towerDark)); serviceDeck.position.set(.8,70.72,0); nacelleInside.add(serviceDeck);
+    const yawDriveRack = register(new THREE.Mesh(new THREE.CylinderGeometry(1.35,1.35,.28,44), cloneMat(materials.towerDark)), 'yawDrive'); yawDriveRack.position.set(0,70.02,0); nacelleInside.add(yawDriveRack);
+    const yawMotor = new THREE.Mesh(new THREE.CylinderGeometry(.36,.36,1.15,26), cloneMat(materials.green)); yawMotor.rotation.z=Math.PI/2; yawMotor.position.set(1.18,70.42,.62); nacelleInside.add(yawMotor);
+    const nacelleMechanicalGuide = new THREE.Group(); nacelleMechanicalGuide.add(xGuideArrow(-7.15,-5.85,74.72,1.72,materials.mechGuide)); nacelleMechanicalGuide.add(xGuideArrow(-4.72,-3.15,74.72,1.72,materials.mechGuide)); nacelleMechanicalGuide.add(xGuideArrow(-1.15,.45,74.72,1.72,materials.mechGuide)); nacelleMechanicalGuide.add(xGuideArrow(1.35,3.95,74.72,1.72,materials.mechGuide)); nacelleInside.add(nacelleMechanicalGuide);
+    const nacelleElectricalGuide = new THREE.Group(); const electricPath = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(5.15,74.35,-.9),new THREE.Vector3(3.4,75.2,-1.55),new THREE.Vector3(.2,74.95,-1.55),new THREE.Vector3(.1,71.25,-.55)]), new THREE.LineBasicMaterial({color:0x38bdf8,transparent:true,opacity:.58,depthWrite:false})); nacelleElectricalGuide.add(electricPath); nacelleInside.add(nacelleElectricalGuide);
+    const nacelleYawGuide = new THREE.Group(); const yawGuideRing = new THREE.Mesh(new THREE.TorusGeometry(2.18,.04,12,80), materials.yawGuide); yawGuideRing.rotation.x=Math.PI/2; yawGuideRing.position.set(0,70.18,0); nacelleYawGuide.add(yawGuideRing); nacelleInside.add(nacelleYawGuide);
     scene.add(nacelleInside);
 
-    // Rotor assembly
-    const rotorGroup = new THREE.Group();
-    scene.add(rotorGroup);
+    // Rotor assembly - v29 hub polish pass
+    const rotorGroup = new THREE.Group(); scene.add(rotorGroup);
+    const hub = register(new THREE.Mesh(new THREE.SphereGeometry(1.48,64,32), cloneMat(materials.hub)), 'hub'); hub.scale.set(.92,1,1); hub.position.set(-9.15,73,0); hub.material.transparent=true; addEdges(hub,0x334155,.16); rotorGroup.add(hub);
+    const hubRearCap = register(xCylinder(1.03,.58,cloneMat(materials.hub)), 'hub'); hubRearCap.position.set(-8.18,73,0); hubRearCap.material.transparent=true; addEdges(hubRearCap,0x334155,.18); rotorGroup.add(hubRearCap);
+    const rearFlangeRing = new THREE.Mesh(new THREE.TorusGeometry(1.02,.055,12,72), cloneMat(materials.steel)); rearFlangeRing.rotation.y=Math.PI/2; rearFlangeRing.position.set(-7.86,73,0); rotorGroup.add(rearFlangeRing);
 
-    const hub = register(new THREE.Mesh(new THREE.CylinderGeometry(1.08, 1.08, 1.55, 64), cloneMat(materials.hub)), 'hub');
-    hub.rotation.z = Math.PI / 2;
-    hub.position.set(-9.0, 73, 0);
-    rotorGroup.add(hub);
-
-    const hubRearCap = register(new THREE.Mesh(new THREE.SphereGeometry(1.08, 48, 24), cloneMat(materials.hub)), 'hub');
-    hubRearCap.scale.set(.34, 1, 1);
-    hubRearCap.position.set(-8.22, 73, 0);
-    rotorGroup.add(hubRearCap);
-
-    hub.material.transparent = true;
-    hubRearCap.material.transparent = true;
-
-    const spinner = register(new THREE.Mesh(makeSpinnerGeometry(), cloneMat(materials.hub)), 'hub');
-    spinner.material.transparent = true;
-    spinner.material.depthWrite = false;
-    spinner.rotation.z = Math.PI / 2;
-    spinner.position.set(-10.0,73,0);
-    rotorGroup.add(spinner);
+    const spinner = new THREE.Group(); spinner.position.set(-10.05,73,0); rotorGroup.add(spinner);
+    const spinnerShell = register(new THREE.Mesh(makeSpinnerGeometry(), cloneMat(materials.hub)), 'hub'); spinnerShell.material.transparent=true; spinnerShell.material.depthWrite=false; spinnerShell.rotation.z=Math.PI/2; spinner.add(spinnerShell);
+    const frontServicePlate = register(xCylinder(1.06,.18,cloneMat(materials.hub)), 'hub'); frontServicePlate.position.set(-.72,0,0); frontServicePlate.material.transparent=true; addEdges(frontServicePlate,0x334155,.22); spinner.add(frontServicePlate);
+    const frontOuterRing = new THREE.Mesh(new THREE.TorusGeometry(1.05,.045,12,88), cloneMat(materials.steel)); frontOuterRing.rotation.y=Math.PI/2; frontOuterRing.position.set(-.84,0,0); spinner.add(frontOuterRing);
+    const frontInnerRing = new THREE.Mesh(new THREE.TorusGeometry(.54,.035,12,72), cloneMat(materials.towerDark)); frontInnerRing.rotation.y=Math.PI/2; frontInnerRing.position.set(-.86,0,0); spinner.add(frontInnerRing);
+    spinner.add(makeHubBoltFace(.86,24,-.93)); spinner.material = spinnerShell.material;
 
     const hubCollars = [];
-    for(let i=0; i<3; i++){
-      const angle = i * Math.PI * 2 / 3;
-      const collarGroup = new THREE.Group();
-      collarGroup.position.set(-9.0, 73, 0);
-      collarGroup.rotation.x = angle;
-
-      const socket = new THREE.Mesh(new THREE.CylinderGeometry(.56,.64,.34,36), cloneMat(materials.towerDark));
-      socket.position.set(0, 1.15, 0);
-      socket.rotation.x = 0;
-      socket.castShadow = true;
-      collarGroup.add(socket);
-
-      const bearingFace = new THREE.Mesh(new THREE.TorusGeometry(.58,.055,12,44), cloneMat(materials.steel));
-      bearingFace.position.set(0, 1.33, 0);
-      bearingFace.rotation.x = Math.PI / 2;
-      collarGroup.add(bearingFace);
-
-      hubCollars.push(collarGroup);
-      rotorGroup.add(collarGroup);
+    for(let i=0;i<3;i++){
+      const angle=i*Math.PI*2/3; const collarGroup=new THREE.Group(); collarGroup.position.set(-9.18,73,0); collarGroup.rotation.x=angle;
+      const socket=register(new THREE.Mesh(new THREE.CylinderGeometry(.72,.86,.52,48), cloneMat(materials.hub)), 'hub'); socket.position.set(0,1.18,0); socket.material.transparent=true; collarGroup.add(socket);
+      const bearingRing=register(new THREE.Mesh(new THREE.TorusGeometry(.78,.075,16,72), cloneMat(materials.steel)), 'pitchBearing'); bearingRing.position.set(0,1.48,0); bearingRing.rotation.x=Math.PI/2; collarGroup.add(bearingRing);
+      const innerRace=new THREE.Mesh(new THREE.TorusGeometry(.55,.035,12,60), cloneMat(materials.towerDark)); innerRace.position.set(0,1.495,0); innerRace.rotation.x=Math.PI/2; collarGroup.add(innerRace);
+      for(let b=0;b<18;b++){ const a=b/18*Math.PI*2; const bolt=new THREE.Mesh(new THREE.CylinderGeometry(.028,.028,.085,10), cloneMat(materials.steel)); bolt.position.set(Math.cos(a)*.67,1.535,Math.sin(a)*.67); collarGroup.add(bolt); }
+      const bluePitchRing=new THREE.Mesh(new THREE.TorusGeometry(.65,.025,10,64), cloneMat(materials.blue)); bluePitchRing.position.set(0,1.57,0); bluePitchRing.rotation.x=Math.PI/2; bluePitchRing.material.transparent=true; bluePitchRing.material.opacity=.78; collarGroup.add(bluePitchRing);
+      hubCollars.push(collarGroup); rotorGroup.add(collarGroup);
     }
 
-    const hubInside = new THREE.Group();
-    hubInside.visible = false;
-    insideGroups.set('hub', hubInside);
-    scene.add(hubInside);
-
-    const hubCore = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, 1.15, 40), cloneMat(materials.steel));
-    hubCore.rotation.z = Math.PI / 2;
-    hubCore.position.set(-9.0, 73, 0);
-    hubInside.add(hubCore);
-
-    const pitchLabelRing = new THREE.Mesh(new THREE.TorusGeometry(.92,.035,12,72), cloneMat(materials.magenta));
-    pitchLabelRing.position.set(-9.0,73,0);
-    pitchLabelRing.rotation.y = Math.PI / 2;
-    hubInside.add(pitchLabelRing);
-
+    const hubInside = new THREE.Group(); hubInside.visible=false; insideGroups.set('hub',hubInside); scene.add(hubInside);
+    const hubCore = new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,1.22,48), cloneMat(materials.steel)); hubCore.rotation.z=Math.PI/2; hubCore.position.set(-9.12,73,0); hubInside.add(hubCore);
+    const hubCoreRing = new THREE.Mesh(new THREE.TorusGeometry(.56,.045,12,64), cloneMat(materials.towerDark)); hubCoreRing.rotation.y=Math.PI/2; hubCoreRing.position.set(-9.76,73,0); hubInside.add(hubCoreRing);
     for(let i=0;i<3;i++){
-      const angle = i * Math.PI * 2 / 3;
-      const bearingY = 73 + Math.cos(angle)*1.05;
-      const bearingZ = Math.sin(angle)*1.05;
-
-      const pitchBearing = register(new THREE.Mesh(new THREE.TorusGeometry(.40,.065,14,48), cloneMat(materials.yellow)), 'pitchBearing');
-      pitchBearing.position.set(-8.92, bearingY, bearingZ);
-      pitchBearing.rotation.y = Math.PI / 2;
-      hubInside.add(pitchBearing);
-
-      const pitchMotor = register(new THREE.Mesh(new THREE.BoxGeometry(.34,.24,.24), cloneMat(materials.blue)), 'pitchMotor');
-      pitchMotor.position.set(-8.35, bearingY, bearingZ);
-      pitchMotor.rotation.x = angle;
-      hubInside.add(pitchMotor);
-
-      const actuatorRod = new THREE.Mesh(new THREE.CylinderGeometry(.026,.026,.52,12), cloneMat(materials.black));
-      actuatorRod.rotation.z = Math.PI / 2;
-      actuatorRod.position.set(-8.62, bearingY, bearingZ);
-      hubInside.add(actuatorRod);
+      const angle=i*Math.PI*2/3, radialY=Math.cos(angle), radialZ=Math.sin(angle); const bearingY=73+radialY*1.08, bearingZ=radialZ*1.08;
+      const pitchBearing=register(new THREE.Mesh(new THREE.TorusGeometry(.43,.065,14,56), cloneMat(materials.yellow)), 'pitchBearing'); pitchBearing.position.set(-8.9,bearingY,bearingZ); pitchBearing.rotation.y=Math.PI/2; hubInside.add(pitchBearing);
+      const pitchMotor=register(new THREE.Mesh(makeRoundedBoxGeometry(.52,.28,.30,.07), cloneMat(materials.blue)), 'pitchMotor'); pitchMotor.position.set(-8.28,73+radialY*.72,radialZ*.72); pitchMotor.rotation.x=angle; pitchMotor.rotation.y=Math.PI/2; addEdges(pitchMotor,0x075985,.28); hubInside.add(pitchMotor);
+      const actuatorBody=new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,.78,14), cloneMat(materials.blue)); actuatorBody.position.set(-8.58,73+radialY*.86,radialZ*.86); actuatorBody.rotation.z=Math.PI/2; actuatorBody.rotation.x=angle; hubInside.add(actuatorBody);
+      const actuatorRod=new THREE.Mesh(new THREE.CylinderGeometry(.024,.024,.72,12), cloneMat(materials.black)); actuatorRod.position.set(-8.88,73+radialY*.96,radialZ*.96); actuatorRod.rotation.z=Math.PI/2; actuatorRod.rotation.x=angle; hubInside.add(actuatorRod);
+      for(const x of [-8.18,-8.98]){ const pivot=new THREE.Mesh(new THREE.SphereGeometry(.105,18,12), cloneMat(materials.steel)); pivot.position.set(x,73+radialY*.98,radialZ*.98); hubInside.add(pivot); }
+      const pitchArm=new THREE.Mesh(new THREE.BoxGeometry(.16,.68,.10), cloneMat(materials.blue)); pitchArm.position.set(-8.92,bearingY,bearingZ); pitchArm.rotation.x=angle; pitchArm.rotation.z=.38; hubInside.add(pitchArm);
     }
+    for(let i=0;i<3;i++){ const angle=i*Math.PI*2/3+.25; const curve=new THREE.CatmullRomCurve3([new THREE.Vector3(-9.2,73,0),new THREE.Vector3(-8.85,73+Math.cos(angle)*.55,Math.sin(angle)*.55),new THREE.Vector3(-8.42,73+Math.cos(angle)*.92,Math.sin(angle)*.92)]); const hose=new THREE.Mesh(new THREE.TubeGeometry(curve,18,.025,8,false), cloneMat(materials.black)); hubInside.add(hose); }
+    const pitchLabelRing = new THREE.Mesh(new THREE.TorusGeometry(1.22,.026,12,96), cloneMat(materials.magenta)); pitchLabelRing.position.set(-9.02,73,0); pitchLabelRing.rotation.y=Math.PI/2; pitchLabelRing.material.transparent=true; pitchLabelRing.material.opacity=.65; hubInside.add(pitchLabelRing);
 
-    const bladeInside = new THREE.Group();
-    bladeInside.visible = false;
-    insideGroups.set('blade', bladeInside);
-    scene.add(bladeInside);
-
+    const bladeInside = new THREE.Group(); bladeInside.visible=false; insideGroups.set('blade', bladeInside); scene.add(bladeInside);
     for(let i=0;i<3;i++){
-      const angle = i * Math.PI * 2 / 3;
-      const bladeGroup = new THREE.Group();
-      bladeGroup.position.set(-9.2, 73, 0);
-      bladeGroup.rotation.x = angle;
-      rotorGroup.add(bladeGroup);
-
-      const blade = register(new THREE.Mesh(makeBladeGeometry(27.8, 1.24, .15, .38, .05), cloneMat(materials.blade)), 'blade');
-      blade.position.set(0, 17.05, 0);
-      bladeGroup.add(blade);
-
-      const root = register(new THREE.Mesh(new THREE.CylinderGeometry(.38,.56,1.05,36), cloneMat(materials.towerDark)), 'bladeRoot');
-      root.position.set(0, 1.28, 0);
-      bladeGroup.add(root);
-
-      const rootRing = new THREE.Mesh(new THREE.TorusGeometry(.56,.045,10,36), cloneMat(materials.steel));
-      rootRing.position.set(0, 1.68, 0);
-      rootRing.rotation.x = Math.PI / 2;
-      bladeGroup.add(rootRing);
-
-      const tip = register(new THREE.Mesh(new THREE.ConeGeometry(.16, 1.15, 24), cloneMat(materials.blade)), 'blade');
-      tip.position.set(-.18, 31.25, 0);
-      tip.rotation.x = Math.PI;
-      bladeGroup.add(tip);
-
-      const sparGroup = new THREE.Group();
-      sparGroup.position.copy(bladeGroup.position);
-      sparGroup.rotation.copy(bladeGroup.rotation);
-
-      const spar = register(new THREE.Mesh(new THREE.BoxGeometry(.13, 24, .09), cloneMat(materials.yellow)), 'internalSpar');
-      spar.position.set(0, 16.9, .22);
-      sparGroup.add(spar);
-
-      const shearWeb = new THREE.Mesh(new THREE.BoxGeometry(.07, 16, .22), cloneMat(materials.blue));
-      shearWeb.position.set(0, 13.0, 0);
-      sparGroup.add(shearWeb);
-
-      const lightningCable = register(new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,24,12), cloneMat(materials.copper)), 'lightningProtection');
-      lightningCable.position.set(.19,16.9,-.03);
-      sparGroup.add(lightningCable);
-
+      const angle=i*Math.PI*2/3; const bladeGroup=new THREE.Group(); bladeGroup.position.set(-9.2,73,0); bladeGroup.rotation.x=angle; rotorGroup.add(bladeGroup);
+      const root=register(new THREE.Mesh(new THREE.CylinderGeometry(.48,.62,1.18,44), cloneMat(materials.towerDark)), 'bladeRoot'); root.position.set(0,1.28,0); bladeGroup.add(root);
+      const rootRing=new THREE.Mesh(new THREE.TorusGeometry(.62,.055,12,48), cloneMat(materials.steel)); rootRing.position.set(0,1.84,0); rootRing.rotation.x=Math.PI/2; bladeGroup.add(rootRing);
+      for(let b=0;b<16;b++){ const a=b/16*Math.PI*2; const bolt=new THREE.Mesh(new THREE.CylinderGeometry(.024,.024,.065,8), cloneMat(materials.steel)); bolt.position.set(Math.cos(a)*.52,1.9,Math.sin(a)*.52); bladeGroup.add(bolt); }
+      const blade=register(new THREE.Mesh(makeBladeGeometry(28.6,1.18,.13,.34,.045), cloneMat(materials.blade)), 'blade'); blade.position.set(0,17.65,0); bladeGroup.add(blade);
+      const tip=register(new THREE.Mesh(new THREE.ConeGeometry(.15,1.08,24), cloneMat(materials.blade)), 'blade'); tip.position.set(-.16,32.05,0); tip.rotation.x=Math.PI; bladeGroup.add(tip);
+      const sparGroup=new THREE.Group(); sparGroup.position.copy(bladeGroup.position); sparGroup.rotation.copy(bladeGroup.rotation);
+      const spar=register(new THREE.Mesh(new THREE.BoxGeometry(.13,24.6,.09), cloneMat(materials.yellow)), 'internalSpar'); spar.position.set(0,17.3,.22); sparGroup.add(spar);
+      const shearWeb=new THREE.Mesh(new THREE.BoxGeometry(.07,16.4,.22), cloneMat(materials.blue)); shearWeb.position.set(0,13.3,0); sparGroup.add(shearWeb);
+      const lightningCable=register(new THREE.Mesh(new THREE.CylinderGeometry(.065,.065,24.4,12), cloneMat(materials.copper)), 'lightningProtection'); lightningCable.position.set(.19,17.25,-.03); sparGroup.add(lightningCable);
       bladeInside.add(sparGroup);
-
-      bladeAssemblies.push({ group: bladeGroup, bladeMesh: blade, rootMesh: root, index: i });
+      bladeAssemblies.push({group:bladeGroup, bladeMesh:blade, rootMesh:root, index:i});
     }
 
-    // Transformer and cable
-    const transformerPad = new THREE.Mesh(new THREE.BoxGeometry(8, .45, 5), cloneMat(materials.foundation));
-    transformerPad.position.set(22, .25, 14);
-    transformerPad.receiveShadow = true;
-    scene.add(transformerPad);
+    const transformerPad = new THREE.Mesh(new THREE.BoxGeometry(8,.45,5), cloneMat(materials.foundation)); transformerPad.position.set(22,.25,14); transformerPad.receiveShadow=true; scene.add(transformerPad);
+    const transformer = register(new THREE.Mesh(new THREE.BoxGeometry(4.8,4.2,3.4), cloneMat(materials.transformer)), 'transformer'); transformer.position.set(22,2.55,14); addEdges(transformer,0x020617,.55); scene.add(transformer);
+    const transformerTop = register(new THREE.Mesh(new THREE.BoxGeometry(5.25,.45,3.8), cloneMat(materials.towerDark)), 'transformer'); transformerTop.position.set(22,4.88,14); transformerTop.material.transparent=true; scene.add(transformerTop);
+    const transformerInside = new THREE.Group(); transformerInside.visible=false; insideGroups.set('transformer', transformerInside); for(let i=0;i<3;i++){ const coil=new THREE.Mesh(new THREE.TorusGeometry(.5,.09,12,48), cloneMat(materials.copper)); coil.position.set(20.7+i*1.3,2.9,14); coil.rotation.y=Math.PI/2; transformerInside.add(coil); } const bus=new THREE.Mesh(new THREE.BoxGeometry(3.7,.12,.12), cloneMat(materials.yellow)); bus.position.set(22,3.65,14); transformerInside.add(bus); scene.add(transformerInside);
+    const cableCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(2,.25,0),new THREE.Vector3(6,.25,3),new THREE.Vector3(12,.25,8),new THREE.Vector3(18,.25,12),new THREE.Vector3(20,.25,14)]); const cableTube=new THREE.Mesh(new THREE.TubeGeometry(cableCurve,40,.08,8,false), cloneMat(materials.black)); scene.add(cableTube);
 
-    const transformer = register(new THREE.Mesh(new THREE.BoxGeometry(4.8, 4.2, 3.4), cloneMat(materials.transformer)), 'transformer');
-    transformer.position.set(22, 2.55, 14);
-    addEdges(transformer, 0x020617, .55);
-    scene.add(transformer);
+    const arrowGroup = new THREE.Group(); const arrowMat=new THREE.MeshStandardMaterial({color:0x0ea5e9,roughness:.5}); const arrowShaft=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,8,16), arrowMat); arrowShaft.rotation.z=Math.PI/2; arrowShaft.position.set(0,.6,0); const arrowHead=new THREE.Mesh(new THREE.ConeGeometry(.35,.95,24), arrowMat); arrowHead.rotation.z=-Math.PI/2; arrowHead.position.set(-4.5,.6,0); arrowGroup.add(arrowShaft,arrowHead); arrowGroup.position.set(-28,.1,-23); scene.add(arrowGroup);
 
-    const transformerTop = register(new THREE.Mesh(new THREE.BoxGeometry(5.25, .45, 3.8), cloneMat(materials.towerDark)), 'transformer');
-    transformerTop.position.set(22, 4.88, 14);
-    scene.add(transformerTop);
-
-    const transformerInside = new THREE.Group();
-    transformerInside.visible = false;
-    insideGroups.set('transformer', transformerInside);
-    for(let i=0;i<3;i++){
-      const coil = new THREE.Mesh(new THREE.TorusGeometry(.5,.09,12,48), cloneMat(materials.copper));
-      coil.position.set(20.7 + i*1.3, 2.9, 14);
-      coil.rotation.y = Math.PI / 2;
-      transformerInside.add(coil);
-    }
-    const bus = new THREE.Mesh(new THREE.BoxGeometry(3.7,.12,.12), cloneMat(materials.yellow));
-    bus.position.set(22,3.65,14);
-    transformerInside.add(bus);
-    scene.add(transformerInside);
-
-    const cableCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(2, .25, 0),
-      new THREE.Vector3(6, .25, 3),
-      new THREE.Vector3(12, .25, 8),
-      new THREE.Vector3(18, .25, 12),
-      new THREE.Vector3(20, .25, 14)
-    ]);
-    const cableTube = new THREE.Mesh(new THREE.TubeGeometry(cableCurve, 40, .08, 8, false), cloneMat(materials.black));
-    scene.add(cableTube);
-
-    // Wind arrow
-    const arrowGroup = new THREE.Group();
-    const arrowMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness:.5 });
-    const arrowShaft = new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,8,16), arrowMat);
-    arrowShaft.rotation.z = Math.PI / 2;
-    arrowShaft.position.set(0, .6, 0);
-    const arrowHead = new THREE.Mesh(new THREE.ConeGeometry(.35,.95,24), arrowMat);
-    arrowHead.rotation.z = -Math.PI / 2;
-    arrowHead.position.set(-4.5, .6, 0);
-    arrowGroup.add(arrowShaft, arrowHead);
-    arrowGroup.position.set(-28, 0.1, -23);
-    scene.add(arrowGroup);
-
-    // Shortcuts and labels
     const shortcutOrder = ['foundation','tower','door','transformer','yaw','nacelle','hub','blade','gearbox','brake','generator'];
-    const labelOrder = [...shortcutOrder, 'lowSpeedShaft','highSpeedShaft','controllerCabinet','coolingSystem','yawDrive','pitchBearing','pitchMotor','bladeRoot','internalSpar','lightningProtection'];
-    for(const id of shortcutOrder){
-      const b = document.createElement('button');
-      b.textContent = parts[id].name;
-      b.addEventListener('click', () => selectPart(id));
-      ui.partButtons.appendChild(b);
-      partButtonEls.set(id, b);
+    const labelOrder = [...shortcutOrder,'lowSpeedShaft','highSpeedShaft','controllerCabinet','coolingSystem','yawDrive','pitchBearing','pitchMotor','bladeRoot','internalSpar','lightningProtection'];
+    for(const id of shortcutOrder){ const b=document.createElement('button'); b.textContent=parts[id].name; b.addEventListener('click',()=>selectPart(id)); ui.partButtons.appendChild(b); partButtonEls.set(id,b); }
+    for(const id of labelOrder){ if(labelEls.has(id)) continue; const label=document.createElement('div'); label.className='label-pill'; label.textContent=parts[id].name; label.addEventListener('click',e=>{e.stopPropagation();selectPart(id);}); ui.labelsLayer.appendChild(label); labelEls.set(id,label); }
+    for(const [key,config] of Object.entries(systemTours)){ const b=document.createElement('button'); b.textContent=config.name; b.addEventListener('click',()=>startSystemTour(key)); ui.systemButtons.appendChild(b); systemButtonEls.set(key,b); }
 
-    }
-
-    for(const id of labelOrder){
-      if(labelEls.has(id)) continue;
-      const label = document.createElement('div');
-      label.className = 'label-pill';
-      label.textContent = parts[id].name;
-      label.addEventListener('click', (e) => {
-        e.stopPropagation();
-        selectPart(id);
-      });
-      ui.labelsLayer.appendChild(label);
-      labelEls.set(id, label);
-    }
-
-    for(const [key, config] of Object.entries(systemTours)){
-      const b = document.createElement('button');
-      b.textContent = config.name;
-      b.addEventListener('click', () => startSystemTour(key));
-      ui.systemButtons.appendChild(b);
-      systemButtonEls.set(key, b);
-    }
-
-    function updateSystemButtons(){
-      for(const [key, btn] of systemButtonEls){
-        btn.classList.toggle('active-system', key === activeSystemKey);
-      }
-    }
-
-    function setCutawayTargets(activeInside){
-      cutawayTarget.nacelle = activeInside === 'nacelle' ? 1 : 0;
-      cutawayTarget.hub = (activeInside === 'hub' || activeInside === 'blade') ? 1 : 0;
-      cutawayTarget.tower = activeInside === 'tower' ? 1 : 0;
-      cutawayTarget.foundation = activeInside === 'foundation' ? 1 : 0;
-      cutawayTarget.transformer = activeInside === 'transformer' ? 1 : 0;
-    }
-
-    function showOnlyInside(groupName){
-      for(const [name, group] of insideGroups){
-        group.visible = name === groupName;
-      }
-      if(groupName !== 'hub' && groupName !== 'blade'){
-        spinner.visible = true;
-      }
-      setCutawayTargets(groupName);
-    }
-
-    function hideInside(){
-      for(const group of insideGroups.values()) group.visible = false;
-      spinner.visible = true;
-      setCutawayTargets(null);
-    }
-
-    function updateNacelleGuideVisuals(){
-      const nacelleOpen = insideGroups.get('nacelle')?.visible;
-      nacelleMechanicalGuide.visible = nacelleOpen && (!activeSystemKey || activeSystemKey === 'drivetrain');
-      nacelleElectricalGuide.visible = nacelleOpen && (!activeSystemKey || activeSystemKey === 'electrical');
-      nacelleYawGuide.visible = nacelleOpen && (!activeSystemKey || activeSystemKey === 'pitchYaw');
-    }
-
+    function updateSystemButtons(){ for(const [key,btn] of systemButtonEls){ btn.classList.toggle('active-system', key===activeSystemKey); } }
+    function setCutawayTargets(activeInside){ cutawayTarget.nacelle=activeInside==='nacelle'?1:0; cutawayTarget.hub=(activeInside==='hub'||activeInside==='blade')?1:0; cutawayTarget.tower=activeInside==='tower'?1:0; cutawayTarget.foundation=activeInside==='foundation'?1:0; cutawayTarget.transformer=activeInside==='transformer'?1:0; }
+    function showOnlyInside(groupName){ for(const [name,group] of insideGroups){ group.visible = name===groupName || (groupName==='blade' && name==='hub'); } if(groupName!=='hub' && groupName!=='blade') spinner.visible=true; setCutawayTargets(groupName); }
+    function hideInside(){ for(const group of insideGroups.values()) group.visible=false; spinner.visible=true; setCutawayTargets(null); }
+    function updateNacelleGuideVisuals(){ const open=insideGroups.get('nacelle')?.visible; nacelleMechanicalGuide.visible=open && (!activeSystemKey || activeSystemKey==='drivetrain'); nacelleElectricalGuide.visible=open && (!activeSystemKey || activeSystemKey==='electrical'); nacelleYawGuide.visible=open && (!activeSystemKey || activeSystemKey==='pitchYaw'); }
     function updateCutaways(delta){
       updateNacelleGuideVisuals();
-      for(const key of Object.keys(cutawayState)){
-        const diff = cutawayTarget[key] - cutawayState[key];
-        cutawayState[key] += diff * Math.min(1, delta * 5.5);
-      }
-
-      const n = cutawayState.nacelle;
-      nacelle.material.opacity = 1 - 0.62 * n;
-      nacelleNose.material.opacity = 1 - 0.52 * n;
-      nacelleBellyFairing.material.opacity = 1 - 0.48 * n;
-      nacelleNoseFace.material.opacity = .18 * (1 - n);
-
-      // Cutaway panels slide away from the component view instead of hanging in front of it.
-      // The top cover lifts high and drifts behind the nacelle; the side cover drops below
-      // the nacelle and fades so it reads as "removed" instead of blocking the lesson.
-      nacelleCoverTop.position.set(0.1 + n*0.8, 75.38 + n*3.7, -n*5.2);
-      nacelleSideCover.position.set(0.1 + n*0.5, 73 - n*4.8, -2.68 - n*3.2);
-      nacelleSideCover.rotation.x = n * 0.42;
-      nacelleSideCover.rotation.y = -n * 0.12;
-      nacelleCoverTop.material.opacity = 1 - 0.78 * n;
-      nacelleSideCover.material.opacity = 1 - 0.88 * n;
-      nacelleAccessPanel.material.opacity = .24 * (1 - n);
-      nacellePanelSeam.material.opacity = .22 * (1 - n);
-      nacelleRoofLine.material.opacity = .28 * (1 - n);
-
-      const h = cutawayState.hub;
-
-      // Hub cutaway: the spinner acts like a removed cover.
-      // It slides well forward, drops below the hub sightline, fades out, then hides.
-      hub.material.opacity = 1 - 0.42 * h;
-      hubRearCap.material.opacity = 1 - 0.42 * h;
-      spinner.visible = h < .985;
-      spinner.material.opacity = Math.max(0, 1 - 1.15 * h);
-      spinner.position.x = -10.0 - h * 4.25;
-      spinner.position.y = 73 - h * 1.35;
-      spinner.position.z = 0 - h * 1.55;
-      for(const collar of hubCollars){
-        collar.visible = h < .72;
-      }
-
-      const t = cutawayState.tower;
-      tower.material.opacity = 1 - 0.62 * t;
-
-      const f = cutawayState.foundation;
-      foundation.material.opacity = 1 - 0.48 * f;
-
-      const tr = cutawayState.transformer;
-      transformer.material.opacity = 1 - 0.62 * tr;
-      transformerTop.material.opacity = 1 - 0.62 * tr;
-      transformerTop.position.y = 4.88 + tr * 1.5;
-
-      for(const assembly of bladeAssemblies){
-        const pitchAmount = [0.32, 0.0, -0.22][assembly.index] || 0;
-        assembly.bladeMesh.rotation.y += (pitchAmount * h - assembly.bladeMesh.rotation.y) * Math.min(1, delta * 5);
-      }
+      for(const key of Object.keys(cutawayState)){ cutawayState[key] += (cutawayTarget[key]-cutawayState[key]) * Math.min(1,delta*5.5); }
+      const n=cutawayState.nacelle; nacelle.material.opacity=1-.62*n; nacelleNose.material.opacity=1-.52*n; nacelleBellyFairing.material.opacity=1-.48*n; nacelleNoseFace.material.opacity=.18*(1-n);
+      nacelleCoverTop.position.set(.1+n*.8,75.38+n*3.7,-n*5.2); nacelleSideCover.position.set(.1+n*.5,73-n*4.8,-2.68-n*3.2); nacelleSideCover.rotation.x=n*.42; nacelleSideCover.rotation.y=-n*.12; nacelleCoverTop.material.opacity=1-.78*n; nacelleSideCover.material.opacity=1-.88*n; nacelleAccessPanel.material.opacity=.24*(1-n); nacellePanelSeam.material.opacity=.22*(1-n); nacelleRoofLine.material.opacity=.28*(1-n);
+      const h=cutawayState.hub; hub.material.opacity=1-.46*h; hubRearCap.material.opacity=1-.38*h; spinner.visible=h<.985; spinner.material.opacity=Math.max(0,1-1.15*h); spinner.position.x=-10.05-h*4.4; spinner.position.y=73-h*1.2; spinner.position.z=0-h*1.65;
+      for(const collar of hubCollars){ collar.visible=true; collar.traverse(child=>{ if(child.material?.opacity!==undefined){ child.material.transparent=true; child.material.opacity=Math.max(.62,1-.28*h); } }); }
+      tower.material.opacity=1-.62*cutawayState.tower; foundation.material.opacity=1-.48*cutawayState.foundation; transformer.material.opacity=1-.62*cutawayState.transformer; transformerTop.material.opacity=1-.62*cutawayState.transformer; transformerTop.position.y=4.88+cutawayState.transformer*1.5;
+      for(const assembly of bladeAssemblies){ const pitchAmount=[.32,0,-.22][assembly.index]||0; assembly.bladeMesh.rotation.y += (pitchAmount*h - assembly.bladeMesh.rotation.y)*Math.min(1,delta*5); }
     }
-
-    function updateProgress(){
-      const total = shortcutOrder.length * 2;
-      let score = 0;
-      for(const id of shortcutOrder){
-        const stage = visitedStages.get(id) || 0;
-        score += Math.min(stage, 2);
-        const btn = partButtonEls.get(id);
-        const label = labelEls.get(id);
-        if(btn){
-          btn.classList.toggle('done', stage === 1);
-          btn.classList.toggle('deep-done', stage >= 2);
-        }
-        if(label){
-          label.classList.toggle('deep', stage >= 2);
-        }
-      }
-      const pct = Math.round((score / total) * 100);
-      ui.progressFill.style.width = pct + '%';
-      ui.progressText.textContent = `${score}/${total} training checks completed. First click = identify. Second click = deeper detail.`;
-    }
-
-    function revealInsideForPart(partId, stage){
-      const part = parts[partId];
-      if(!part) return;
-      if(stage === 2 || internalPartIds.has(partId)) {
-        showOnlyInside(part.inside);
-        if(part.inside === 'hub' || part.inside === 'blade'){
-          rotorSpin = false;
-          ui.spinBtn.textContent = 'Spin rotor';
-        }
-      } else hideInside();
-    }
-
-    function clearSystemTour(){
-      activeSystemKey = null;
-      activeSystemIndex = -1;
-      systemIntroPending = false;
-      updateSystemButtons();
-      restoreSystemFocusVisuals();
-      updateSystemFlowCard();
-      setTourStatus();
-    }
-
-    function startSystemTour(systemKey){
-      if(!systemTours[systemKey]) return;
-      activeSystemKey = systemKey;
-      activeSystemIndex = 0;
-      systemIntroPending = true;
-      updateSystemButtons();
-      setSystemIntroPanel(systemKey);
-      updateSystemFlowCard();
-      setTourStatus();
-    }
-
-    function setSystemIntroPanel(systemKey){
-      const config = systemTours[systemKey];
-      if(!config) return;
-      const firstPart = parts[config.parts[0]];
-
-      ui.moreDetailCard.style.display = 'block';
-      ui.stageTag.textContent = 'SYSTEM INTRO';
-      ui.stageTag.style.background = 'var(--accent2)';
-      ui.partTitle.textContent = `${config.name} system`;
-      ui.panelLead.textContent = 'Start here before moving part-by-part through the guided system flow.';
-      ui.whatIsText.textContent = config.overview;
-      ui.whatDoesText.textContent = config.introPurpose;
-      ui.whyCareText.textContent = config.introFlow;
-      ui.moreDetailText.textContent = `When ready, start with ${firstPart.name}. Use the large Next button or the faded bottom-center button to begin.`;
-      ui.footerText.innerHTML = `<span class="active-name">${config.name}</span> intro active. Start the flow when students understand the system purpose.`;
-    }
-
-    function nextSystemPart(){
-      if(!activeSystemKey){
-        startSystemTour('structure');
-        return;
-      }
-      const config = systemTours[activeSystemKey];
-
-      if(systemIntroPending){
-        systemIntroPending = false;
-        activeSystemIndex = 0;
-        selectPart(config.parts[0]);
-        updateSystemFlowCard();
-        return;
-      }
-
-      const currentId = config.parts[activeSystemIndex];
-
-      // First action on a part opens the deeper/cutaway view.
-      // Next action advances to the next system part.
-      if(selectedPartId === currentId && selectedStage === 1){
-        selectPart(currentId);
-        updateSystemFlowCard();
-        return;
-      }
-
-      activeSystemIndex = (activeSystemIndex + 1) % config.parts.length;
-      selectPart(config.parts[activeSystemIndex]);
-      updateSystemFlowCard();
-    }
-
-    function updateSystemFlowCard(){
-      if(!activeSystemKey){
-        ui.systemFlowCard.style.display = 'none';
-        ui.systemFlowBtn.textContent = 'Start system flow';
-        ui.floatingNextBtn.textContent = 'Next step';
-        ui.floatingNextBtn.classList.add('hidden');
-        return;
-      }
-
-      const config = systemTours[activeSystemKey];
-
-      if(systemIntroPending){
-        const firstPart = parts[config.parts[0]];
-        ui.systemFlowCard.style.display = 'block';
-        ui.systemFlowTitle.textContent = `${config.name} system intro`;
-        ui.systemFlowCurrent.textContent = `Purpose: ${config.introPurpose}`;
-        ui.systemFlowHint.textContent = config.introFlow;
-
-        const actionText = `Start flow: ${firstPart.name}`;
-        ui.systemFlowBtn.textContent = actionText;
-        ui.floatingNextBtn.textContent = actionText;
-        ui.floatingNextBtn.classList.remove('hidden');
-
-        ui.systemStepPills.innerHTML = '';
-        config.parts.forEach((id) => {
-          const dot = document.createElement('span');
-          dot.className = 'step-pill';
-          dot.title = parts[id].name;
-          ui.systemStepPills.appendChild(dot);
-        });
-        return;
-      }
-
-      const currentId = config.parts[Math.max(0, activeSystemIndex)];
-      const currentPart = parts[currentId];
-      const nextId = config.parts[(activeSystemIndex + 1) % config.parts.length];
-      const nextPart = parts[nextId];
-      const onCurrentPart = selectedPartId === currentId;
-      const inspected = (visitedStages.get(currentId) || 0) >= 2;
-      const needsDeepView = onCurrentPart && selectedStage === 1 && !inspected;
-
-      ui.systemFlowCard.style.display = 'block';
-      ui.systemFlowTitle.textContent = `${config.name} system flow`;
-      ui.systemFlowCurrent.textContent = inspected
-        ? `Step ${activeSystemIndex + 1} of ${config.parts.length}: ${currentPart.name} inspected ✓`
-        : `Step ${activeSystemIndex + 1} of ${config.parts.length}: ${currentPart.name}`;
-
-      ui.systemFlowHint.textContent = needsDeepView
-        ? `Read the panel, then open the deeper view for ${currentPart.name}.`
-        : inspected
-          ? `${currentPart.name} inspected ✓. Continue to ${nextPart.name}.`
-          : `Ready for the next system part: ${nextPart.name}.`;
-
-      const actionText = needsDeepView
-        ? `Open deeper view: ${currentPart.name}`
-        : `Next: ${nextPart.name}`;
-
-      ui.systemFlowBtn.textContent = actionText;
-      ui.floatingNextBtn.textContent = actionText;
-      ui.floatingNextBtn.classList.remove('hidden');
-
-      ui.systemStepPills.innerHTML = '';
-      config.parts.forEach((id, index) => {
-        const dot = document.createElement('span');
-        dot.className = 'step-pill';
-        const stepInspected = (visitedStages.get(id) || 0) >= 2;
-        if(index < activeSystemIndex || stepInspected) dot.classList.add('done');
-        if(index === activeSystemIndex) dot.classList.add('current');
-        dot.title = stepInspected ? `${parts[id].name} inspected` : parts[id].name;
-        ui.systemStepPills.appendChild(dot);
-      });
-    }
-
-    function getActiveSystemPartSet(){
-      if(!activeSystemKey) return null;
-      return new Set(systemTours[activeSystemKey].parts);
-    }
-
-    function getPulseTargetPartId(){
-      if(activeSystemKey){
-        if(systemIntroPending) return null;
-        const config = systemTours[activeSystemKey];
-        return config?.parts?.[Math.max(0, activeSystemIndex)] || null;
-      }
-      return selectedPartId || null;
-    }
-
-    function ensureFocusBaseMaterial(mat){
-      if(!mat || !mat.color) return;
-      if(!mat.userData.focusBaseColor){
-        mat.userData.focusBaseColor = mat.color.clone();
-      }
-    }
-
-    function restoreSystemFocusVisuals(){
-      for(const meshes of partMeshes.values()){
-        for(const mesh of meshes){
-          const mat = mesh.material;
-          if(!mat || !mat.color) continue;
-          ensureFocusBaseMaterial(mat);
-          mat.color.copy(mat.userData.focusBaseColor);
-        }
-      }
-    }
-
-    function applySystemFocusVisuals(){
-      const activeSet = getActiveSystemPartSet();
-      if(!activeSet){
-        restoreSystemFocusVisuals();
-        return;
-      }
-
-      for(const [partId, meshes] of partMeshes){
-        const isActive = activeSet.has(partId);
-        for(const mesh of meshes){
-          const mat = mesh.material;
-          if(!mat || !mat.color) continue;
-          ensureFocusBaseMaterial(mat);
-          if(isActive){
-            mat.color.copy(mat.userData.focusBaseColor);
-          } else {
-            mat.color.copy(mat.userData.focusBaseColor).lerp(focusDimColor, 0.72);
-          }
-        }
-      }
-    }
-
-    function setTourStatus(){
-      if(activeSystemKey){
-        const config = systemTours[activeSystemKey];
-        if(systemIntroPending){
-          ui.tourTitle.textContent = `System intro: ${config.name}`;
-          return;
-        }
-        const currentId = config.parts[Math.max(0, activeSystemIndex)];
-        const currentName = parts[currentId]?.name || config.name;
-        ui.tourTitle.textContent = `System flow: ${config.name} ${Math.max(1, activeSystemIndex + 1)}/${config.parts.length} — ${currentName}`;
-        return;
-      }
-      if(tourIndex < 0){
-        ui.tourTitle.textContent = 'Guided tour: not started';
-        return;
-      }
-      const current = tourOrder[tourIndex];
-      ui.tourTitle.textContent = `Guided tour: ${tourIndex + 1}/${tourOrder.length} — ${parts[current].name}`;
-    }
-
-    function setPanel(partId, stage){
-      const part = parts[partId];
-      ui.moreDetailCard.style.display = 'block';
-      ui.stageTag.textContent = stage === 1 ? 'ZOOM VIEW' : 'DEEPER DETAIL';
-      ui.stageTag.style.background = stage === 1 ? 'var(--accent2)' : 'var(--accent)';
-      ui.partTitle.textContent = part.name;
-      const systemConfig = activeSystemKey ? systemTours[activeSystemKey] : null;
-      ui.panelLead.textContent = systemConfig
-        ? `System tour: ${systemConfig.name}. ${systemConfig.overview}`
-        : (stage === 1
-          ? 'You are in the identify/zoom step. Click the same part again for the deeper training view.'
-          : 'You are in the deeper training view. Use this step to discuss the internal layout and service relevance.');
-      ui.whatIsText.textContent = part.whatIs;
-      ui.whatDoesText.textContent = part.whatDoes;
-      ui.whyCareText.textContent = part.whyCare;
-      ui.moreDetailText.textContent = stage === 1
-        ? 'Click this same part again to see the deeper cutaway view and more detail.'
-        : part.moreDetail;
-      ui.footerText.innerHTML = stage === 1
-        ? `Inspecting <span class="active-name">${part.name}</span>. Click it again for deeper detail.`
-        : `Inside/deeper view: <span class="active-name">${part.name}</span>. Click another part to continue.`;
-    }
-
-    function animateCamera(toPosition, toTarget, duration = 900){
-      cameraTween = {
-        startTime: performance.now(),
-        duration,
-        fromPosition: camera.position.clone(),
-        fromTarget: controls.target.clone(),
-        toPosition: toPosition.clone(),
-        toTarget: toTarget.clone()
-      };
-    }
-
-    function easeInOutCubic(t){
-      return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
-
-    function selectPart(partId){
-      const part = parts[partId];
-      if(!part) return;
-
-      if(selectedPartId === partId && selectedStage === 1) selectedStage = 2;
-      else {
-        selectedPartId = partId;
-        selectedStage = 1;
-      }
-
-      revealInsideForPart(partId, selectedStage);
-      visitedStages.set(partId, Math.max(visitedStages.get(partId) || 0, selectedStage));
-      updateProgress();
-      setPanel(partId, selectedStage);
-      animateCamera(part.camera, part.focus, selectedStage === 1 ? 900 : 650);
-      flashPart(partId);
-
-      const orderIndex = tourOrder.indexOf(partId);
-      if(orderIndex !== -1) tourIndex = orderIndex;
-
-      if(activeSystemKey){
-        const idx = systemTours[activeSystemKey].parts.indexOf(partId);
-        if(idx !== -1){
-          activeSystemIndex = idx;
-          systemIntroPending = false;
-        }
-        updateSystemFlowCard();
-      }
-      setTourStatus();
-    }
-
-    function flashPart(partId){
-      const meshes = partMeshes.get(partId) || [];
-      for(const mesh of meshes){
-        const mat = mesh.material;
-        if(mat && mat.emissive){
-          mat.userData.flashUntil = performance.now() + 450;
-          mat.emissive.set(0x38bdf8);
-          mat.emissiveIntensity = .55;
-        }
-      }
-    }
-
-    function updateHover(partId){
-      if(hoveredPartId === partId) return;
-      hoveredPartId = partId;
-      document.body.style.cursor = partId ? 'pointer' : 'default';
-    }
-
-    function pickPart(event){
-      const rect = renderer.domElement.getBoundingClientRect();
-      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, camera);
-      const intersects = raycaster.intersectObjects(clickable, true);
-      if(intersects.length === 0) return null;
-      let obj = intersects[0].object;
-      while(obj && !obj.userData.partId) obj = obj.parent;
-      return obj?.userData.partId || null;
-    }
-
-    renderer.domElement.addEventListener('pointermove', (event) => updateHover(pickPart(event)));
-    renderer.domElement.addEventListener('pointerdown', (event) => {
-      pointerDown = { x:event.clientX, y:event.clientY };
-    });
-    renderer.domElement.addEventListener('pointerup', (event) => {
-      if(!pointerDown) return;
-      const moved = Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y);
-      pointerDown = null;
-      if(moved > 6) return;
-      const partId = pickPart(event);
-      if(partId) selectPart(partId);
-    });
-
-    function updateLabels(){
-      for(const [id, label] of labelEls){
-        const pos = labelPositions[id];
-        if(!labelsEnabled || !pos){
-          label.classList.add('hidden');
-          continue;
-        }
-
-        if(activeSystemKey && !systemTours[activeSystemKey].parts.includes(id)){
-          label.classList.add('hidden');
-          continue;
-        }
-
-        if(internalPartIds.has(id)){
-          const insideName = parts[id]?.inside;
-          if(!insideGroups.get(insideName)?.visible){
-            label.classList.add('hidden');
-            continue;
-          }
-        }
-
-        const anchor = parts[id]?.focus ? parts[id].focus : pos;
-        const threshold = labelActivationDistance[id] ?? 22;
-        const distance = camera.position.distanceTo(anchor);
-        const alwaysShow = id === selectedPartId;
-        if(!alwaysShow && distance > threshold){
-          label.classList.add('hidden');
-          continue;
-        }
-
-        const projected = pos.clone().project(camera);
-        if(projected.z < -1 || projected.z > 1){
-          label.classList.add('hidden');
-          continue;
-        }
-
-        const fade = alwaysShow ? 1 : Math.max(0.35, 1 - Math.max(0, distance - threshold * 0.45) / (threshold * 0.75));
-        label.style.left = `${(projected.x * .5 + .5) * window.innerWidth}px`;
-        label.style.top = `${(-projected.y * .5 + .5) * window.innerHeight}px`;
-        label.style.opacity = fade.toFixed(2);
-        label.classList.toggle('active', id === selectedPartId);
-        label.classList.remove('hidden');
-      }
-    }
-
-    function resetOverviewText(){
-      ui.stageTag.textContent = 'READY';
-      ui.stageTag.style.background = 'var(--accent2)';
-      ui.partTitle.textContent = 'Wind turbine overview';
-      ui.panelLead.textContent = 'Click a turbine part to zoom in, click it again for deeper detail, or use the new system tour buttons for a guided path.';
-      ui.whatIsText.textContent = 'A commercial wind turbine is a machine that turns wind energy into electrical energy.';
-      ui.whatDoesText.textContent = 'The rotor captures wind energy, the drivetrain transfers it, and the electrical system conditions and sends power away from the turbine.';
-      ui.whyCareText.textContent = 'Students and technicians need to understand where the major systems are, what they do, and why failures in those systems matter. System flows now begin with an intro card that explains the system purpose before students move part-by-part.';
-      ui.moreDetailCard.style.display = 'none';
-      ui.moreDetailText.textContent = '';
-      ui.footerText.innerHTML = 'Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span>';
-    }
-
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      selectedPartId = null;
-      selectedStage = 0;
-      tourIndex = -1;
-      clearSystemTour();
-      hideInside();
-      resetOverviewText();
-      setTourStatus();
-      animateCamera(new THREE.Vector3(48,30,58), new THREE.Vector3(0,38,0), 900);
-    });
-
-    document.getElementById('hideInsideBtn').addEventListener('click', () => {
-      hideInside();
-      if(selectedPartId){
-        selectedStage = 1;
-        setPanel(selectedPartId, 1);
-      }
-    });
-
-    function startTour(){
-      tourIndex = 0;
-      selectPart(tourOrder[tourIndex]);
-      setTourStatus();
-    }
-
-    function nextTourStep(){
-      if(tourIndex < 0){
-        startTour();
-        return;
-      }
-      const current = tourOrder[tourIndex];
-      if(selectedPartId === current && selectedStage === 1){
-        selectPart(current);
-        return;
-      }
-      tourIndex = (tourIndex + 1) % tourOrder.length;
-      selectPart(tourOrder[tourIndex]);
-    }
-
-    document.getElementById('tourBtn').addEventListener('click', startTour);
-    document.getElementById('nextTourBtn').addEventListener('click', nextTourStep);
-    document.getElementById('nextSystemBtn').addEventListener('click', nextSystemPart);
-    ui.systemFlowBtn.addEventListener('click', nextSystemPart);
-    ui.floatingNextBtn.addEventListener('click', nextSystemPart);
-    document.getElementById('clearSystemBtn').addEventListener('click', () => {
-      clearSystemTour();
-      resetOverviewText();
-    });
-    ui.labelsBtn.addEventListener('click', () => {
-      labelsEnabled = !labelsEnabled;
-      ui.labelsBtn.textContent = labelsEnabled ? 'Hide labels' : 'Show labels';
-      updateLabels();
-    });
-    ui.spinBtn.addEventListener('click', () => {
-      rotorSpin = !rotorSpin;
-      ui.spinBtn.textContent = rotorSpin ? 'Pause rotor' : 'Spin rotor';
-    });
-
-    window.addEventListener('keydown', e => {
-      keys.add(e.key.toLowerCase());
-      if(e.key.toLowerCase() === 'n') nextTourStep();
-    });
-    window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
-
-    function updateWalk(delta){
-      const speed = keys.has('shift') ? 28 : 15;
-      const forward = new THREE.Vector3().subVectors(controls.target, camera.position);
-      forward.y = 0;
-      if(forward.lengthSq() < .001) return;
-      forward.normalize();
-      const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0,1,0)).normalize();
-      const move = new THREE.Vector3();
-      if(keys.has('w') || keys.has('arrowup')) move.add(forward);
-      if(keys.has('s') || keys.has('arrowdown')) move.sub(forward);
-      if(keys.has('d') || keys.has('arrowright')) move.add(right);
-      if(keys.has('a') || keys.has('arrowleft')) move.sub(right);
-      if(move.lengthSq() > 0){
-        move.normalize().multiplyScalar(speed * delta);
-        camera.position.add(move);
-        controls.target.add(move);
-      }
-    }
-
-    function updateCameraTween(){
-      if(!cameraTween) return;
-      const raw = Math.min(1, (performance.now() - cameraTween.startTime) / cameraTween.duration);
-      const t = easeInOutCubic(raw);
-      camera.position.lerpVectors(cameraTween.fromPosition, cameraTween.toPosition, t);
-      controls.target.lerpVectors(cameraTween.fromTarget, cameraTween.toTarget, t);
-      if(raw >= 1) cameraTween = null;
-    }
-
-    function updateMaterialFlashes(){
-      const now = performance.now();
-      const pulsePartId = getPulseTargetPartId();
-      const pulseValue = 0.12 + ((Math.sin(now * 0.0065) + 1) * 0.5) * 0.16;
-
-      for(const [partId, meshes] of partMeshes){
-        for(const mesh of meshes){
-          const mat = mesh.material;
-          if(!mat?.emissive) continue;
-
-          let intensity = 0;
-          if(mat.userData.flashUntil){
-            if(now > mat.userData.flashUntil) mat.userData.flashUntil = null;
-            else intensity = Math.max(intensity, 0.55);
-          }
-
-          if(partId === hoveredPartId){
-            intensity = Math.max(intensity, 0.22);
-          }
-
-          if(partId === pulsePartId){
-            intensity = Math.max(intensity, pulseValue);
-          }
-
-          if(intensity > 0){
-            mat.emissive.set(0x38bdf8);
-            mat.emissiveIntensity = intensity;
-          } else {
-            mat.emissive.set(0x000000);
-            mat.emissiveIntensity = 0;
-          }
-        }
-      }
-    }
-
-    function animate(){
-      const delta = clock.getDelta();
-      updateWalk(delta);
-      updateCameraTween();
-      updateMaterialFlashes();
-      updateCutaways(delta);
-      applySystemFocusVisuals();
-      if(rotorSpin){
-        for(const assembly of bladeAssemblies){
-          assembly.group.rotation.x += delta * 0.22;
-        }
-      }
-      controls.update();
-      updateLabels();
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    resetOverviewText();
-    updateProgress();
-    setTourStatus();
-    animate();
+    function updateProgress(){ const total=shortcutOrder.length*2; let score=0; for(const id of shortcutOrder){ const stage=visitedStages.get(id)||0; score+=Math.min(stage,2); const btn=partButtonEls.get(id), label=labelEls.get(id); if(btn){btn.classList.toggle('done',stage===1); btn.classList.toggle('deep-done',stage>=2);} if(label) label.classList.toggle('deep',stage>=2); } const pct=Math.round(score/total*100); ui.progressFill.style.width=pct+'%'; ui.progressText.textContent=`${score}/${total} training checks completed. First click = identify. Second click = deeper detail.`; }
+    function revealInsideForPart(partId,stage){ const part=parts[partId]; if(!part) return; if(stage===2 || internalPartIds.has(partId)){ showOnlyInside(part.inside); if(part.inside==='hub'||part.inside==='blade'){ rotorSpin=false; ui.spinBtn.textContent='Spin rotor'; } } else hideInside(); }
+    function clearSystemTour(){ activeSystemKey=null; activeSystemIndex=-1; systemIntroPending=false; updateSystemButtons(); restoreSystemFocusVisuals(); updateSystemFlowCard(); setTourStatus(); }
+    function startSystemTour(systemKey){ if(!systemTours[systemKey]) return; activeSystemKey=systemKey; activeSystemIndex=0; systemIntroPending=true; updateSystemButtons(); setSystemIntroPanel(systemKey); updateSystemFlowCard(); setTourStatus(); }
+    function setSystemIntroPanel(systemKey){ const config=systemTours[systemKey], firstPart=parts[config.parts[0]]; ui.moreDetailCard.style.display='block'; ui.stageTag.textContent='SYSTEM INTRO'; ui.stageTag.style.background='var(--accent2)'; ui.partTitle.textContent=`${config.name} system`; ui.panelLead.textContent='Start here before moving part-by-part through the guided system flow.'; ui.whatIsText.textContent=config.overview; ui.whatDoesText.textContent=config.introPurpose; ui.whyCareText.textContent=config.introFlow; ui.moreDetailText.textContent=`When ready, start with ${firstPart.name}. Use the large Next button or the faded bottom-center button to begin.`; ui.footerText.innerHTML=`<span class="active-name">${config.name}</span> intro active. Start the flow when students understand the system purpose.`; }
+    function nextSystemPart(){ if(!activeSystemKey){ startSystemTour('structure'); return; } const config=systemTours[activeSystemKey]; if(systemIntroPending){ systemIntroPending=false; activeSystemIndex=0; selectPart(config.parts[0]); updateSystemFlowCard(); return; } const currentId=config.parts[activeSystemIndex]; if(selectedPartId===currentId && selectedStage===1){ selectPart(currentId); updateSystemFlowCard(); return; } activeSystemIndex=(activeSystemIndex+1)%config.parts.length; selectPart(config.parts[activeSystemIndex]); updateSystemFlowCard(); }
+    function updateSystemFlowCard(){ if(!activeSystemKey){ ui.systemFlowCard.style.display='none'; ui.systemFlowBtn.textContent='Start system flow'; ui.floatingNextBtn.textContent='Next step'; ui.floatingNextBtn.classList.add('hidden'); return; } const config=systemTours[activeSystemKey]; if(systemIntroPending){ const firstPart=parts[config.parts[0]]; ui.systemFlowCard.style.display='block'; ui.systemFlowTitle.textContent=`${config.name} system intro`; ui.systemFlowCurrent.textContent=`Purpose: ${config.introPurpose}`; ui.systemFlowHint.textContent=config.introFlow; const action=`Start flow: ${firstPart.name}`; ui.systemFlowBtn.textContent=action; ui.floatingNextBtn.textContent=action; ui.floatingNextBtn.classList.remove('hidden'); ui.systemStepPills.innerHTML=''; config.parts.forEach(id=>{ const dot=document.createElement('span'); dot.className='step-pill'; dot.title=parts[id].name; ui.systemStepPills.appendChild(dot); }); return; } const currentId=config.parts[Math.max(0,activeSystemIndex)], currentPart=parts[currentId], nextId=config.parts[(activeSystemIndex+1)%config.parts.length], nextPart=parts[nextId]; const inspected=(visitedStages.get(currentId)||0)>=2; const needsDeep=selectedPartId===currentId && selectedStage===1 && !inspected; ui.systemFlowCard.style.display='block'; ui.systemFlowTitle.textContent=`${config.name} system flow`; ui.systemFlowCurrent.textContent=inspected?`Step ${activeSystemIndex+1} of ${config.parts.length}: ${currentPart.name} inspected ✓`:`Step ${activeSystemIndex+1} of ${config.parts.length}: ${currentPart.name}`; ui.systemFlowHint.textContent=needsDeep?`Read the panel, then open the deeper view for ${currentPart.name}.`:inspected?`${currentPart.name} inspected ✓. Continue to ${nextPart.name}.`:`Ready for the next system part: ${nextPart.name}.`; const action=needsDeep?`Open deeper view: ${currentPart.name}`:`Next: ${nextPart.name}`; ui.systemFlowBtn.textContent=action; ui.floatingNextBtn.textContent=action; ui.floatingNextBtn.classList.remove('hidden'); ui.systemStepPills.innerHTML=''; config.parts.forEach((id,index)=>{ const dot=document.createElement('span'); dot.className='step-pill'; if(index<activeSystemIndex || (visitedStages.get(id)||0)>=2) dot.classList.add('done'); if(index===activeSystemIndex) dot.classList.add('current'); dot.title=parts[id].name; ui.systemStepPills.appendChild(dot); }); }
+    function getActiveSystemPartSet(){ return activeSystemKey ? new Set(systemTours[activeSystemKey].parts) : null; }
+    function getPulseTargetPartId(){ if(activeSystemKey){ if(systemIntroPending) return null; return systemTours[activeSystemKey]?.parts?.[Math.max(0,activeSystemIndex)] || null; } return selectedPartId || null; }
+    function ensureFocusBaseMaterial(mat){ if(!mat || !mat.color) return; if(!mat.userData.focusBaseColor) mat.userData.focusBaseColor=mat.color.clone(); }
+    function restoreSystemFocusVisuals(){ for(const meshes of partMeshes.values()){ for(const mesh of meshes){ const mat=mesh.material; if(!mat?.color) continue; ensureFocusBaseMaterial(mat); mat.color.copy(mat.userData.focusBaseColor); } } }
+    function applySystemFocusVisuals(){ const activeSet=getActiveSystemPartSet(); if(!activeSet){ restoreSystemFocusVisuals(); return; } for(const [partId,meshes] of partMeshes){ const active=activeSet.has(partId); for(const mesh of meshes){ const mat=mesh.material; if(!mat?.color) continue; ensureFocusBaseMaterial(mat); mat.color.copy(mat.userData.focusBaseColor); if(!active) mat.color.lerp(focusDimColor,.72); } } }
+    function setTourStatus(){ if(activeSystemKey){ const config=systemTours[activeSystemKey]; if(systemIntroPending){ ui.tourTitle.textContent=`System intro: ${config.name}`; return; } const currentId=config.parts[Math.max(0,activeSystemIndex)]; ui.tourTitle.textContent=`System flow: ${config.name} ${Math.max(1,activeSystemIndex+1)}/${config.parts.length} — ${parts[currentId]?.name||config.name}`; return; } if(tourIndex<0) ui.tourTitle.textContent='Guided tour: not started'; else ui.tourTitle.textContent=`Guided tour: ${tourIndex+1}/${tourOrder.length} — ${parts[tourOrder[tourIndex]].name}`; }
+    function setPanel(partId,stage){ const part=parts[partId]; ui.moreDetailCard.style.display='block'; ui.stageTag.textContent=stage===1?'ZOOM VIEW':'DEEPER DETAIL'; ui.stageTag.style.background=stage===1?'var(--accent2)':'var(--accent)'; ui.partTitle.textContent=part.name; const systemConfig=activeSystemKey?systemTours[activeSystemKey]:null; ui.panelLead.textContent=systemConfig?`System tour: ${systemConfig.name}. ${systemConfig.overview}`:(stage===1?'You are in the identify/zoom step. Click the same part again for the deeper training view.':'You are in the deeper training view. Use this step to discuss the internal layout and service relevance.'); ui.whatIsText.textContent=part.whatIs; ui.whatDoesText.textContent=part.whatDoes; ui.whyCareText.textContent=part.whyCare; ui.moreDetailText.textContent=stage===1?'Click this same part again to see the deeper cutaway view and more detail.':part.moreDetail; ui.footerText.innerHTML=stage===1?`Inspecting <span class="active-name">${part.name}</span>. Click it again for deeper detail.`:`Inside/deeper view: <span class="active-name">${part.name}</span>. Click another part to continue.`; }
+    function animateCamera(toPosition,toTarget,duration=900){ cameraTween={startTime:performance.now(),duration,fromPosition:camera.position.clone(),fromTarget:controls.target.clone(),toPosition:toPosition.clone(),toTarget:toTarget.clone()}; }
+    function easeInOutCubic(t){ return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
+    function selectPart(partId){ const part=parts[partId]; if(!part) return; if(selectedPartId===partId && selectedStage===1) selectedStage=2; else { selectedPartId=partId; selectedStage=1; } revealInsideForPart(partId,selectedStage); visitedStages.set(partId,Math.max(visitedStages.get(partId)||0,selectedStage)); updateProgress(); setPanel(partId,selectedStage); animateCamera(part.camera,part.focus,selectedStage===1?900:650); flashPart(partId); const orderIndex=tourOrder.indexOf(partId); if(orderIndex!==-1) tourIndex=orderIndex; if(activeSystemKey){ const idx=systemTours[activeSystemKey].parts.indexOf(partId); if(idx!==-1){ activeSystemIndex=idx; systemIntroPending=false; } updateSystemFlowCard(); } setTourStatus(); }
+    function flashPart(partId){ const meshes=partMeshes.get(partId)||[]; for(const mesh of meshes){ const mat=mesh.material; if(mat?.emissive){ mat.userData.flashUntil=performance.now()+450; mat.emissive.set(0x38bdf8); mat.emissiveIntensity=.55; } } }
+    function updateHover(partId){ if(hoveredPartId===partId) return; hoveredPartId=partId; document.body.style.cursor=partId?'pointer':'default'; }
+    function pickPart(event){ const rect=renderer.domElement.getBoundingClientRect(); pointer.x=((event.clientX-rect.left)/rect.width)*2-1; pointer.y=-((event.clientY-rect.top)/rect.height)*2+1; raycaster.setFromCamera(pointer,camera); const intersects=raycaster.intersectObjects(clickable,true); if(intersects.length===0) return null; let obj=intersects[0].object; while(obj && !obj.userData.partId) obj=obj.parent; return obj?.userData.partId || null; }
+    renderer.domElement.addEventListener('pointermove', event=>updateHover(pickPart(event))); renderer.domElement.addEventListener('pointerdown', event=>{ pointerDown={x:event.clientX,y:event.clientY}; }); renderer.domElement.addEventListener('pointerup', event=>{ if(!pointerDown) return; const moved=Math.hypot(event.clientX-pointerDown.x,event.clientY-pointerDown.y); pointerDown=null; if(moved>6) return; const partId=pickPart(event); if(partId) selectPart(partId); });
+    function updateLabels(){ for(const [id,label] of labelEls){ const pos=labelPositions[id]; if(!labelsEnabled || !pos){ label.classList.add('hidden'); continue; } if(activeSystemKey && !systemTours[activeSystemKey].parts.includes(id)){ label.classList.add('hidden'); continue; } if(internalPartIds.has(id)){ const insideName=parts[id]?.inside; const visible = insideGroups.get(insideName)?.visible || (insideName==='hub' && insideGroups.get('blade')?.visible); if(!visible){ label.classList.add('hidden'); continue; } } const anchor=parts[id]?.focus || pos; const threshold=labelActivationDistance[id]??22; const distance=camera.position.distanceTo(anchor); const alwaysShow=id===selectedPartId; if(!alwaysShow && distance>threshold){ label.classList.add('hidden'); continue; } const projected=pos.clone().project(camera); if(projected.z<-1 || projected.z>1){ label.classList.add('hidden'); continue; } const fade=alwaysShow?1:Math.max(.35,1-Math.max(0,distance-threshold*.45)/(threshold*.75)); label.style.left=`${(projected.x*.5+.5)*window.innerWidth}px`; label.style.top=`${(-projected.y*.5+.5)*window.innerHeight}px`; label.style.opacity=fade.toFixed(2); label.classList.toggle('active',id===selectedPartId); label.classList.remove('hidden'); } }
+    function resetOverviewText(){ ui.stageTag.textContent='READY'; ui.stageTag.style.background='var(--accent2)'; ui.partTitle.textContent='Wind turbine overview'; ui.panelLead.textContent='Click a turbine part to zoom in, click it again for deeper detail, or use the system tour buttons for a guided path.'; ui.whatIsText.textContent='A commercial wind turbine is a machine that turns wind energy into electrical energy.'; ui.whatDoesText.textContent='The rotor captures wind energy, the drivetrain transfers it, and the electrical system conditions and sends power away from the turbine.'; ui.whyCareText.textContent='Students and technicians need to understand where the major systems are, what they do, and why failures in those systems matter.'; ui.moreDetailCard.style.display='none'; ui.moreDetailText.textContent=''; ui.footerText.innerHTML='Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span>'; }
+    document.getElementById('resetBtn').addEventListener('click',()=>{ selectedPartId=null; selectedStage=0; tourIndex=-1; clearSystemTour(); hideInside(); resetOverviewText(); setTourStatus(); animateCamera(new THREE.Vector3(48,30,58), new THREE.Vector3(0,38,0), 900); });
+    document.getElementById('hideInsideBtn').addEventListener('click',()=>{ hideInside(); if(selectedPartId){ selectedStage=1; setPanel(selectedPartId,1); } });
+    function startTour(){ tourIndex=0; selectPart(tourOrder[tourIndex]); setTourStatus(); }
+    function nextTourStep(){ if(tourIndex<0){ startTour(); return; } const current=tourOrder[tourIndex]; if(selectedPartId===current && selectedStage===1){ selectPart(current); return; } tourIndex=(tourIndex+1)%tourOrder.length; selectPart(tourOrder[tourIndex]); }
+    document.getElementById('tourBtn').addEventListener('click',startTour); document.getElementById('nextTourBtn').addEventListener('click',nextTourStep); document.getElementById('nextSystemBtn').addEventListener('click',nextSystemPart); ui.systemFlowBtn.addEventListener('click',nextSystemPart); ui.floatingNextBtn.addEventListener('click',nextSystemPart); document.getElementById('clearSystemBtn').addEventListener('click',()=>{ clearSystemTour(); resetOverviewText(); }); ui.labelsBtn.addEventListener('click',()=>{ labelsEnabled=!labelsEnabled; ui.labelsBtn.textContent=labelsEnabled?'Hide labels':'Show labels'; updateLabels(); }); ui.spinBtn.addEventListener('click',()=>{ rotorSpin=!rotorSpin; ui.spinBtn.textContent=rotorSpin?'Pause rotor':'Spin rotor'; });
+    window.addEventListener('keydown',e=>{ keys.add(e.key.toLowerCase()); if(e.key.toLowerCase()==='n') nextTourStep(); }); window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
+    function updateWalk(delta){ const speed=keys.has('shift')?28:15; const forward=new THREE.Vector3().subVectors(controls.target,camera.position); forward.y=0; if(forward.lengthSq()<.001) return; forward.normalize(); const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize(); const move=new THREE.Vector3(); if(keys.has('w')||keys.has('arrowup')) move.add(forward); if(keys.has('s')||keys.has('arrowdown')) move.sub(forward); if(keys.has('d')||keys.has('arrowright')) move.add(right); if(keys.has('a')||keys.has('arrowleft')) move.sub(right); if(move.lengthSq()>0){ move.normalize().multiplyScalar(speed*delta); camera.position.add(move); controls.target.add(move); } }
+    function updateCameraTween(){ if(!cameraTween) return; const raw=Math.min(1,(performance.now()-cameraTween.startTime)/cameraTween.duration); const t=easeInOutCubic(raw); camera.position.lerpVectors(cameraTween.fromPosition,cameraTween.toPosition,t); controls.target.lerpVectors(cameraTween.fromTarget,cameraTween.toTarget,t); if(raw>=1) cameraTween=null; }
+    function updateMaterialFlashes(){ const now=performance.now(); const pulsePartId=getPulseTargetPartId(); const pulseValue=.12+((Math.sin(now*.0065)+1)*.5)*.16; for(const [partId,meshes] of partMeshes){ for(const mesh of meshes){ const mat=mesh.material; if(!mat?.emissive) continue; let intensity=0; if(mat.userData.flashUntil){ if(now>mat.userData.flashUntil) mat.userData.flashUntil=null; else intensity=Math.max(intensity,.55); } if(partId===hoveredPartId) intensity=Math.max(intensity,.22); if(partId===pulsePartId) intensity=Math.max(intensity,pulseValue); if(intensity>0){ mat.emissive.set(0x38bdf8); mat.emissiveIntensity=intensity; } else { mat.emissive.set(0x000000); mat.emissiveIntensity=0; } } } }
+    function animate(){ const delta=clock.getDelta(); updateWalk(delta); updateCameraTween(); updateMaterialFlashes(); updateCutaways(delta); applySystemFocusVisuals(); if(rotorSpin){ for(const assembly of bladeAssemblies){ assembly.group.rotation.x += delta*.22; } } controls.update(); updateLabels(); renderer.render(scene,camera); requestAnimationFrame(animate); }
+    window.addEventListener('resize',()=>{ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight); });
+
+    resetOverviewText(); updateProgress(); setTourStatus(); animate();
   </script>
 </body>
 </html>
