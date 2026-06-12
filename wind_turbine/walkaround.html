@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commercial Wind Turbine Trainer - MVP v5</title>
+  <title>Commercial Wind Turbine Trainer - MVP v7</title>
   <style>
     :root{
       --panel:#0f172a;
@@ -183,7 +183,7 @@
 
   <section class="hud">
     <h1>Commercial Wind Turbine Trainer</h1>
-    <div class="sub">MVP v5: fixed rotor spin axis and moved cutaway panels out of the inspection view.</div>
+    <div class="sub">MVP v7: clickable internal nacelle and blade-pitch components added for deeper inspection.</div>
     <div class="chips">
       <span class="chip"><strong>Drag</strong> orbit</span>
       <span class="chip"><strong>Wheel</strong> zoom</span>
@@ -213,9 +213,9 @@
       <div class="section-body" id="whyCareText">Technicians inspect, maintain, and troubleshoot each of these systems to keep the turbine safe and producing power.</div>
     </div>
 
-    <div class="section-card">
+    <div class="section-card" id="moreDetailCard">
       <div class="section-title">More detail</div>
-      <div class="section-body muted" id="moreDetailText">This version adds a nacelle cutaway, stronger internal layout, and blade pitch detail. Click a part, then click it again to go deeper.</div>
+      <div class="section-body muted" id="moreDetailText">Click this same part again to see the deeper cutaway view and more detail.</div>
     </div>
 
     <div class="buttons">
@@ -305,6 +305,7 @@
       whatIsText: document.getElementById('whatIsText'),
       whatDoesText: document.getElementById('whatDoesText'),
       whyCareText: document.getElementById('whyCareText'),
+      moreDetailCard: document.getElementById('moreDetailCard'),
       moreDetailText: document.getElementById('moreDetailText'),
       partButtons: document.getElementById('partButtons'),
       labelsLayer: document.getElementById('labelsLayer'),
@@ -447,6 +448,116 @@
         camera: new THREE.Vector3(-13, 76, 11),
         inside: 'nacelle'
       },
+      lowSpeedShaft: {
+        name: 'Low-speed shaft',
+        tag: 'INSIDE NACELLE',
+        whatIs: 'The low-speed shaft connects the rotor hub to the gearbox.',
+        whatDoes: 'It carries high-torque, low-speed rotation from the rotor into the drivetrain.',
+        whyCare: 'Shaft alignment, bearings, and vibration issues can damage downstream drivetrain components.',
+        moreDetail: 'This shaft turns relatively slowly compared with the generator side, but it carries very high torque. It is one of the first major drivetrain parts after the rotor hub.',
+        focus: new THREE.Vector3(-5.25, 72.95, 0),
+        camera: new THREE.Vector3(-18, 76.2, 8.5),
+        inside: 'nacelle'
+      },
+      highSpeedShaft: {
+        name: 'High-speed shaft',
+        tag: 'INSIDE NACELLE',
+        whatIs: 'The high-speed shaft is the faster rotating shaft between the gearbox and generator.',
+        whatDoes: 'It transfers increased rotational speed from the gearbox output to the generator.',
+        whyCare: 'High-speed shaft issues can show up as vibration, misalignment, overheating, or brake-related wear.',
+        moreDetail: 'After the gearbox increases speed, the high-speed shaft drives the brake and generator. This part spins faster than the low-speed side and is closely tied to generator performance.',
+        focus: new THREE.Vector3(2.25, 72.95, 0),
+        camera: new THREE.Vector3(-9.8, 76.0, 8.8),
+        inside: 'nacelle'
+      },
+      controllerCabinet: {
+        name: 'Controller cabinet',
+        tag: 'INSIDE NACELLE',
+        whatIs: 'The controller cabinet houses control hardware and system electronics.',
+        whatDoes: 'It monitors turbine conditions and helps manage operating logic, protection, and system responses.',
+        whyCare: 'Faults in control hardware can cause nuisance shutdowns, lost communication, or improper turbine behavior.',
+        moreDetail: 'The controller receives information from sensors and coordinates functions such as startup, shutdown, yaw behavior, and protective actions. Clean wiring and reliable electronics are critical here.',
+        focus: new THREE.Vector3(2.9, 74.95, -1.55),
+        camera: new THREE.Vector3(-7.8, 78.3, 10.2),
+        inside: 'nacelle'
+      },
+      coolingSystem: {
+        name: 'Cooling fan / radiator',
+        tag: 'INSIDE NACELLE',
+        whatIs: 'The cooling system is the fan-and-radiator section that helps remove heat from turbine equipment.',
+        whatDoes: 'It helps control operating temperatures for components such as the generator, power electronics, or lubricating systems.',
+        whyCare: 'Poor cooling can lead to overheating, reduced efficiency, alarms, or automatic shutdowns.',
+        moreDetail: 'Commercial turbines often use fans, heat exchangers, or radiators to control temperature inside the nacelle. Airflow and heat transfer matter a lot for reliable operation.',
+        focus: new THREE.Vector3(6.4, 74.2, -1.55),
+        camera: new THREE.Vector3(-2.5, 78.0, 11.2),
+        inside: 'nacelle'
+      },
+      yawDrive: {
+        name: 'Yaw drive machinery',
+        tag: 'INSIDE NACELLE',
+        whatIs: 'Yaw drive machinery is the internal hardware that helps rotate the nacelle on the yaw bearing.',
+        whatDoes: 'It applies controlled turning force so the nacelle can align the rotor with changing wind direction.',
+        whyCare: 'Wear, lubrication issues, and drive faults can cause poor wind tracking or excessive loading.',
+        moreDetail: 'The yaw system includes the yaw bearing and drive components that move the nacelle a little at a time. Proper operation helps maintain good energy capture and reduces uneven stress.',
+        focus: new THREE.Vector3(0, 69.95, 0),
+        camera: new THREE.Vector3(12.5, 74.0, 10.5),
+        inside: 'nacelle'
+      },
+      pitchBearing: {
+        name: 'Pitch bearing',
+        tag: 'HUB INTERIOR',
+        whatIs: 'The pitch bearing is the large bearing at the blade root that allows the blade to rotate.',
+        whatDoes: 'It lets the turbine change blade angle for power control, startup, shutdown, and overspeed protection.',
+        whyCare: 'Pitch bearing wear or lubrication problems can affect blade control and create serious reliability issues.',
+        moreDetail: 'Each blade root uses a pitch bearing so the blade can rotate around its long axis. This is a core part of blade pitch control.',
+        focus: new THREE.Vector3(-8.95, 74.32, 0),
+        camera: new THREE.Vector3(-20.5, 78.0, 10.5),
+        inside: 'hub'
+      },
+      pitchMotor: {
+        name: 'Pitch motor / actuator',
+        tag: 'HUB INTERIOR',
+        whatIs: 'The pitch motor or actuator is the device that drives blade pitch movement.',
+        whatDoes: 'It turns the blade through the pitch bearing to change aerodynamic angle.',
+        whyCare: 'Pitch actuator faults can reduce power control, affect shutdown performance, or cause blade-position alarms.',
+        moreDetail: 'The actuator works with pitch control hardware to move the blade toward a productive angle or toward a feathered, low-lift position when needed.',
+        focus: new THREE.Vector3(-7.85, 74.32, 0),
+        camera: new THREE.Vector3(-18.5, 77.8, 10.2),
+        inside: 'hub'
+      },
+      bladeRoot: {
+        name: 'Blade root',
+        tag: 'BLADE INTERIOR',
+        whatIs: 'The blade root is the inboard end of the blade where it attaches to the hub.',
+        whatDoes: 'It transfers aerodynamic loads from the blade into the hub and pitch system.',
+        whyCare: 'Blade root hardware is critical because it carries heavy loads and interfaces directly with pitch components.',
+        moreDetail: 'The blade root contains the structural connection between the blade and the hub. This area is heavily loaded and central to blade installation and inspection.',
+        focus: new THREE.Vector3(-9.2, 75.2, 0),
+        camera: new THREE.Vector3(-21.0, 80.0, 13.0),
+        inside: 'blade'
+      },
+      internalSpar: {
+        name: 'Internal spar',
+        tag: 'BLADE INTERIOR',
+        whatIs: 'The internal spar is a major structural member inside the blade.',
+        whatDoes: 'It helps carry bending loads and gives the blade much of its internal strength.',
+        whyCare: 'Damage to the main structural members of a blade can affect stiffness, strength, and serviceability.',
+        moreDetail: 'Large blades use internal structural elements such as spars and shear webs to resist aerodynamic and gravitational loads while keeping weight manageable.',
+        focus: new THREE.Vector3(-9.0, 88.5, 0.22),
+        camera: new THREE.Vector3(-23.0, 91.0, 16.5),
+        inside: 'blade'
+      },
+      lightningProtection: {
+        name: 'Lightning protection path',
+        tag: 'BLADE INTERIOR',
+        whatIs: 'The lightning protection path is the conductive route that helps carry lightning current safely through the blade system.',
+        whatDoes: 'It provides a controlled electrical path so lightning energy is less likely to damage blade structure and internal components.',
+        whyCare: 'Poor lightning protection can lead to blade damage, electrical faults, and expensive repairs.',
+        moreDetail: 'Wind turbine blades are exposed to weather and may experience lightning strikes. Internal conductors help route that energy safely toward the rest of the protection system.',
+        focus: new THREE.Vector3(-8.8, 86.8, -0.03),
+        camera: new THREE.Vector3(-22.0, 90.0, 16.0),
+        inside: 'blade'
+      },
       transformer: {
         name: 'Pad-mounted transformer',
         tag: 'ELECTRICAL SYSTEM',
@@ -461,7 +572,7 @@
     };
 
     const tourOrder = ['foundation','tower','door','transformer','yaw','nacelle','hub','blade','gearbox','brake','generator'];
-    const internalPartIds = new Set(['gearbox','brake','generator']);
+    const internalPartIds = new Set(['gearbox','brake','generator','lowSpeedShaft','highSpeedShaft','controllerCabinet','coolingSystem','yawDrive','pitchBearing','pitchMotor','bladeRoot','internalSpar','lightningProtection']);
     const labelPositions = {
       foundation: new THREE.Vector3(0, 3.5, 0),
       tower: new THREE.Vector3(0, 39, 2.8),
@@ -471,8 +582,18 @@
       hub: new THREE.Vector3(-11.8, 76.1, 0),
       blade: new THREE.Vector3(-9.2, 95.2, 0),
       gearbox: new THREE.Vector3(-2.5, 75.5, 0),
+      lowSpeedShaft: new THREE.Vector3(-5.25, 75.0, 0),
       brake: new THREE.Vector3(.65, 75.2, 0),
+      highSpeedShaft: new THREE.Vector3(2.2, 75.15, 0),
       generator: new THREE.Vector3(4.7, 75.3, 0),
+      controllerCabinet: new THREE.Vector3(2.8, 77.1, -1.55),
+      coolingSystem: new THREE.Vector3(6.3, 76.8, -1.55),
+      yawDrive: new THREE.Vector3(0, 71.25, 0),
+      pitchBearing: new THREE.Vector3(-8.95, 75.9, 0),
+      pitchMotor: new THREE.Vector3(-7.85, 75.4, 0),
+      bladeRoot: new THREE.Vector3(-9.2, 76.1, 0),
+      internalSpar: new THREE.Vector3(-9.0, 88.4, 0.22),
+      lightningProtection: new THREE.Vector3(-8.8, 86.6, -0.03),
       transformer: new THREE.Vector3(22, 6.3, 14)
     };
 
@@ -630,7 +751,7 @@
     nacelleInside.visible = false;
     insideGroups.set('nacelle', nacelleInside);
 
-    const lowSpeedShaft = xCylinder(.28, 5.2, cloneMat(materials.black));
+    const lowSpeedShaft = register(xCylinder(.28, 5.2, cloneMat(materials.black)), 'lowSpeedShaft');
     lowSpeedShaft.position.set(-5.25, 72.95, 0);
     nacelleInside.add(lowSpeedShaft);
 
@@ -653,7 +774,7 @@
     brakeCaliper.position.set(.85,73.95,.8);
     nacelleInside.add(brakeCaliper);
 
-    const highSpeedShaft = xCylinder(.17, 3.0, cloneMat(materials.black));
+    const highSpeedShaft = register(xCylinder(.17, 3.0, cloneMat(materials.black)), 'highSpeedShaft');
     highSpeedShaft.position.set(2.25,72.95,0);
     nacelleInside.add(highSpeedShaft);
 
@@ -661,12 +782,12 @@
     generator.position.set(5.0,72.95,0);
     nacelleInside.add(generator);
 
-    const controller = new THREE.Mesh(new THREE.BoxGeometry(1.8,1.9,1.35), cloneMat(materials.blue));
+    const controller = register(new THREE.Mesh(new THREE.BoxGeometry(1.8,1.9,1.35), cloneMat(materials.blue)), 'controllerCabinet');
     controller.position.set(2.9,74.95,-1.55);
     addEdges(controller, 0x0c4a6e, .5);
     nacelleInside.add(controller);
 
-    const radiator = new THREE.Mesh(new THREE.BoxGeometry(1.4,2.1,.42), cloneMat(materials.towerDark));
+    const radiator = register(new THREE.Mesh(new THREE.BoxGeometry(1.4,2.1,.42), cloneMat(materials.towerDark)), 'coolingSystem');
     radiator.position.set(6.2,74.3,-1.55);
     nacelleInside.add(radiator);
     for(let i=0;i<4;i++){
@@ -674,7 +795,7 @@
       fin.position.set(6.2,73.55 + i*.35,-1.28);
       nacelleInside.add(fin);
     }
-    const fan = new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,.28,32), cloneMat(materials.steel));
+    const fan = register(new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,.28,32), cloneMat(materials.steel)), 'coolingSystem');
     fan.rotation.x = Math.PI/2;
     fan.position.set(6.75,74.1,-1.55);
     nacelleInside.add(fan);
@@ -683,7 +804,7 @@
     serviceDeck.position.set(.8,70.72,0);
     nacelleInside.add(serviceDeck);
 
-    const yawDriveRack = new THREE.Mesh(new THREE.BoxGeometry(2.9,.55,2.5), cloneMat(materials.towerDark));
+    const yawDriveRack = register(new THREE.Mesh(new THREE.BoxGeometry(2.9,.55,2.5), cloneMat(materials.towerDark)), 'yawDrive');
     yawDriveRack.position.set(0,69.95,0);
     nacelleInside.add(yawDriveRack);
 
@@ -709,12 +830,12 @@
 
     for(let i=0;i<3;i++){
       const angle = i * Math.PI * 2 / 3;
-      const pitchBearing = new THREE.Mesh(new THREE.TorusGeometry(.72,.12,14,48), cloneMat(materials.yellow));
+      const pitchBearing = register(new THREE.Mesh(new THREE.TorusGeometry(.72,.12,14,48), cloneMat(materials.yellow)), 'pitchBearing');
       pitchBearing.position.set(-8.95, 73 + Math.cos(angle)*1.32, Math.sin(angle)*1.32);
       pitchBearing.rotation.y = Math.PI / 2;
       hubInside.add(pitchBearing);
 
-      const pitchMotor = new THREE.Mesh(new THREE.BoxGeometry(.68,.55,.48), cloneMat(materials.blue));
+      const pitchMotor = register(new THREE.Mesh(new THREE.BoxGeometry(.68,.55,.48), cloneMat(materials.blue)), 'pitchMotor');
       pitchMotor.position.set(-7.85, 73 + Math.cos(angle)*1.32, Math.sin(angle)*1.32);
       hubInside.add(pitchMotor);
     }
@@ -735,7 +856,7 @@
       blade.position.set(0, 15.8, 0);
       bladeGroup.add(blade);
 
-      const root = register(new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,2.2,32), cloneMat(materials.towerDark)), 'blade');
+      const root = register(new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,2.2,32), cloneMat(materials.towerDark)), 'bladeRoot');
       root.rotation.z = Math.PI / 2;
       root.position.set(0, 2.2, 0);
       bladeGroup.add(root);
@@ -749,7 +870,7 @@
       sparGroup.position.copy(bladeGroup.position);
       sparGroup.rotation.copy(bladeGroup.rotation);
 
-      const spar = new THREE.Mesh(new THREE.BoxGeometry(.13, 24, .09), cloneMat(materials.yellow));
+      const spar = register(new THREE.Mesh(new THREE.BoxGeometry(.13, 24, .09), cloneMat(materials.yellow)), 'internalSpar');
       spar.position.set(0, 16.4, .22);
       sparGroup.add(spar);
 
@@ -757,7 +878,7 @@
       shearWeb.position.set(0, 12.5, 0);
       sparGroup.add(shearWeb);
 
-      const lightningCable = new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,24,12), cloneMat(materials.copper));
+      const lightningCable = register(new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,24,12), cloneMat(materials.copper)), 'lightningProtection');
       lightningCable.position.set(.19,16.4,-.03);
       sparGroup.add(lightningCable);
 
@@ -820,6 +941,7 @@
 
     // Shortcuts and labels
     const shortcutOrder = ['foundation','tower','door','transformer','yaw','nacelle','hub','blade','gearbox','brake','generator'];
+    const labelOrder = [...shortcutOrder, 'lowSpeedShaft','highSpeedShaft','controllerCabinet','coolingSystem','yawDrive','pitchBearing','pitchMotor','bladeRoot','internalSpar','lightningProtection'];
     for(const id of shortcutOrder){
       const b = document.createElement('button');
       b.textContent = parts[id].name;
@@ -827,6 +949,10 @@
       ui.partButtons.appendChild(b);
       partButtonEls.set(id, b);
 
+    }
+
+    for(const id of labelOrder){
+      if(labelEls.has(id)) continue;
       const label = document.createElement('div');
       label.className = 'label-pill';
       label.textContent = parts[id].name;
@@ -929,8 +1055,13 @@
     function revealInsideForPart(partId, stage){
       const part = parts[partId];
       if(!part) return;
-      if(stage === 2 || internalPartIds.has(partId)) showOnlyInside(part.inside);
-      else hideInside();
+      if(stage === 2 || internalPartIds.has(partId)) {
+        showOnlyInside(part.inside);
+        if(part.inside === 'hub' || part.inside === 'blade'){
+          rotorSpin = false;
+          ui.spinBtn.textContent = 'Spin rotor';
+        }
+      } else hideInside();
     }
 
     function setTourStatus(){
@@ -944,6 +1075,7 @@
 
     function setPanel(partId, stage){
       const part = parts[partId];
+      ui.moreDetailCard.style.display = 'block';
       ui.stageTag.textContent = stage === 1 ? 'ZOOM VIEW' : 'DEEPER DETAIL';
       ui.stageTag.style.background = stage === 1 ? 'var(--accent2)' : 'var(--accent)';
       ui.partTitle.textContent = part.name;
@@ -1064,9 +1196,12 @@
           label.classList.add('hidden');
           continue;
         }
-        if(internalPartIds.has(id) && !insideGroups.get('nacelle')?.visible){
-          label.classList.add('hidden');
-          continue;
+        if(internalPartIds.has(id)){
+          const insideName = parts[id]?.inside;
+          if(!insideGroups.get(insideName)?.visible){
+            label.classList.add('hidden');
+            continue;
+          }
         }
         const projected = pos.clone().project(camera);
         if(projected.z < -1 || projected.z > 1){
@@ -1088,7 +1223,8 @@
       ui.whatIsText.textContent = 'A commercial wind turbine is a machine that turns wind energy into electrical energy.';
       ui.whatDoesText.textContent = 'The rotor captures wind energy, the drivetrain transfers it, and the electrical system conditions and sends power away from the turbine.';
       ui.whyCareText.textContent = 'Students and technicians need to understand where the major systems are, what they do, and why failures in those systems matter.';
-      ui.moreDetailText.textContent = 'This version fixes the rotor spin axis, moves cutaway panels out of the inspection view, and keeps the student-friendly information panel.';
+      ui.moreDetailCard.style.display = 'none';
+      ui.moreDetailText.textContent = '';
       ui.footerText.innerHTML = 'Click a part: <span class="active-name">tower, nacelle, hub, blade, foundation, transformer</span>';
     }
 
