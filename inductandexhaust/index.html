@@ -1,1 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aircraft Engine Induction & Exhaust Trainer</title>
+  <style>
+    :root{
+      --bg:#eef4fb;
+      --panel:#ffffff;
+      --ink:#122033;
+      --muted:#5d6b80;
+      --border:#c7d4e6;
+      --blue:#1677ff;
+      --green:#16a34a;
+      --yellow:#f2b705;
+      --orange:#f97316;
+      --purple:#7c3aed;
+      --red:#ef4444;
+      --cyan:#06b6d4;
+      --shadow:0 18px 45px rgba(18,32,51,.16);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(22,119,255,.15), transparent 34rem),
+        radial-gradient(circle at bottom right, rgba(124,58,237,.12), transparent 34rem),
+        linear-gradient(135deg,#f7fbff,var(--bg));
+    }
+    .wrap{max-width:1480px;margin:0 auto;padding:20px}
+    header{
+      display:flex;gap:16px;align-items:flex-start;justify-content:space-between;
+      margin-bottom:14px;
+    }
+    h1{font-size:clamp(1.55rem,3vw,2.65rem);line-height:1.05;margin:0;color:#07111f;letter-spacing:-.04em}
+    .subtitle{color:var(--muted);margin:7px 0 0;font-size:1rem;max-width:840px}
+    .pillbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+    button{
+      border:0;border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer;
+      background:#dbeafe;color:#0f3d75;box-shadow:inset 0 0 0 1px rgba(15,61,117,.09);
+      transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    button.active{background:var(--ink);color:white;box-shadow:0 10px 26px rgba(18,32,51,.22)}
+    .modebtn[data-mode="natural"].active{background:#105aa6}
+    .modebtn[data-mode="super"].active{background:#15703a}
+    .modebtn[data-mode="turbo"].active{background:#5b32a8}
+    .main{
+      display:grid;
+      grid-template-columns:minmax(680px,1fr) 410px;
+      gap:16px;
+      align-items:stretch;
+    }
+    .card{
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(199,212,230,.9);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .visual-card{position:relative;padding:12px}
+    .mode-ribbon{
+      position:absolute;left:24px;top:24px;z-index:5;
+      display:flex;gap:8px;align-items:center;
+      background:rgba(255,255,255,.88);border:1px solid var(--border);
+      border-radius:999px;padding:8px 12px;font-weight:900;backdrop-filter:blur(6px)
+    }
+    .mode-dot{width:14px;height:14px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgba(22,119,255,.12)}
+    body.mode-super .mode-dot{background:var(--green);box-shadow:0 0 0 4px rgba(22,163,74,.14)}
+    body.mode-turbo .mode-dot{background:var(--purple);box-shadow:0 0 0 4px rgba(124,58,237,.14)}
+    .legend{
+      position:absolute;right:24px;top:22px;z-index:5;background:rgba(255,255,255,.88);border:1px solid var(--border);
+      border-radius:16px;padding:10px 12px;font-size:.8rem;color:#24344d;backdrop-filter:blur(6px)
+    }
+    .legend-row{display:flex;align-items:center;gap:8px;margin:4px 0;font-weight:700}.swatch{width:30px;height:5px;border-radius:4px}.s-air{background:var(--blue)}.s-mixture{background:var(--green)}.s-boost{background:var(--yellow)}.s-exhaust{background:var(--orange)}.s-oil{background:var(--cyan)}.s-drive{background:var(--purple)}
+    svg{width:100%;height:auto;display:block;border-radius:18px;background:linear-gradient(#fdfefe,#f3f7fc)}
+    .side{display:flex;flex-direction:column;gap:12px}
+    .info-card{padding:18px}
+    .eyebrow{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:6px}
+    h2{font-size:1.35rem;margin:0 0 8px;letter-spacing:-.02em}
+    .readout{font-size:1rem;line-height:1.45;color:#263650;margin:0}
+    .step-list{display:grid;gap:8px;margin-top:12px}
+    .step{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:14px;background:#f5f8fc;border:1px solid #d9e3f1}.num{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;background:#e7eef8;color:#1c3357;font-weight:900;flex:0 0 auto}.step strong{display:block}.step span{color:#526077;font-size:.9rem}
+    .gauges{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.gauge{background:#f7f9fd;border:1px solid #dce6f2;border-radius:16px;padding:12px}.gauge-title{font-size:.75rem;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.07em}.gauge-value{font-size:1.45rem;font-weight:900;margin-top:3px}.bar{height:9px;background:#e5edf7;border-radius:99px;overflow:hidden;margin-top:8px}.bar>i{display:block;height:100%;width:50%;border-radius:99px;background:linear-gradient(90deg,#93c5fd,var(--blue))}.bar.map>i{background:linear-gradient(90deg,#fde68a,var(--yellow))}.bar.wg>i{background:linear-gradient(90deg,#fdba74,var(--orange))}.bar.udp>i{background:linear-gradient(90deg,#a7f3d0,var(--green))}
+    .controls{padding:16px;display:grid;gap:12px}.slider-row label{display:flex;justify-content:space-between;font-weight:900;font-size:.9rem;margin-bottom:4px}.slider-row input{width:100%;accent-color:#5b32a8}.controller-panel{padding:16px}.controller-buttons{display:flex;gap:8px;flex-wrap:wrap}.smallbtn{font-size:.78rem;padding:8px 10px;background:#eef2ff;color:#3c277d}.smallbtn.active{background:#5b32a8;color:white}.scenario-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.scenario-buttons button{border-radius:14px;text-align:left;background:#f6f7fb;color:#25324b;border:1px solid #dce4f1;font-size:.82rem}.scenario-buttons button.active{background:#111827;color:white}
+    .hint{margin-top:10px;padding:12px;border-radius:14px;background:#fff8e1;border:1px solid #f5d36e;color:#5b4611;font-size:.92rem;line-height:1.35}.quiz{padding:16px}.quiz-options{display:grid;gap:8px;margin-top:10px}.quiz-options button{border-radius:14px;text-align:left;background:white;color:#25324b;border:1px solid #d8e1ef}.quiz-options button.correct{background:#dcfce7;border-color:#86efac;color:#14532d}.quiz-options button.wrong{background:#fee2e2;border-color:#fecaca;color:#7f1d1d}.feedback{min-height:24px;margin-top:10px;font-weight:800}.footer-note{font-size:.78rem;color:var(--muted);padding:0 18px 16px;line-height:1.35}
 
+    /* SVG styles */
+    .label{font-size:20px;font-weight:900;fill:#102036}.small-label{font-size:16px;font-weight:800;fill:#2d3d56}.tiny-label{font-size:13px;font-weight:800;fill:#46576f}.callout{fill:#fff;stroke:#c9d6e8;stroke-width:2}.component{fill:#f8fafc;stroke:#2f415d;stroke-width:3}.metal{fill:url(#metal);stroke:#31445f;stroke-width:3}.dark{fill:#243142}.engine{fill:url(#engineGrad);stroke:#29384f;stroke-width:3}.fin{stroke:#52627a;stroke-width:2}.air{stroke:var(--blue)}.mix{stroke:var(--green)}.boost{stroke:var(--yellow)}.exhaust{stroke:var(--orange)}.drive{stroke:var(--purple)}.oil{stroke:var(--cyan)}.flow{fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow);stroke-dasharray:22 20;animation:dash 1.1s linear infinite;filter:url(#softGlow)}.flow.thin{stroke-width:6}.flow.heavy{stroke-width:14}.static-line{fill:none;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow)}.hidden{display:none}.ghost{opacity:.16}.active-thing{filter:url(#pulseGlow);animation:pulse 1.35s ease-in-out infinite}.controllerBox{fill:#ffffff;stroke:#ccd8ea;stroke-width:2}.controllerBox.active{stroke:#5b32a8;stroke-width:4;filter:url(#purpleGlow)}.controllerText{font-size:14px;font-weight:900;fill:#263650}#wasteGate.highlight{filter:url(#purpleGlow)}.pressure-tap{fill:#fff;stroke:#1f2937;stroke-width:2}.wg-disc{fill:#fff7ed;stroke:#9a3412;stroke-width:3}.wg-disc.closed{transform:rotate(72deg);transform-box:fill-box;transform-origin:center}.wg-disc.open{transform:rotate(0deg);transform-box:fill-box;transform-origin:center}
+    @keyframes dash{to{stroke-dashoffset:-42}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.72}}
+    .mode-layer{display:none}body.mode-natural .natural-layer,body.mode-super .super-layer,body.mode-turbo .turbo-layer{display:inline}body.mode-turbo .turbo-only{display:block}.turbo-only{display:none}body.mode-natural .natural-only{display:block}.natural-only{display:none}body.mode-super .super-only{display:block}.super-only{display:none}
+    @media(max-width:1080px){.main{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.controller-panel,.quiz{grid-column:auto}.legend{position:static;margin:8px 6px 0}.mode-ribbon{position:static;margin:0 6px 8px;width:max-content}.visual-card{padding-top:12px}}
+    @media(max-width:760px){.wrap{padding:12px}.side{display:flex}.pillbar{justify-content:flex-start}header{display:block}.main{gap:12px}.scenario-buttons,.gauges{grid-template-columns:1fr}svg{min-width:760px}.visual-scroll{overflow-x:auto;border-radius:18px}}
+  </style>
+</head>
+<body class="mode-natural">
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Aircraft Engine Induction & Exhaust Trainer</h1>
+        <p class="subtitle">Click the system type, trace the air/exhaust path, then use the turbo controller lab to see why wastegate control matters.</p>
+      </div>
+      <div class="pillbar" role="tablist" aria-label="Engine type">
+        <button class="modebtn active" data-mode="natural">Naturally Aspirated</button>
+        <button class="modebtn" data-mode="super">Supercharged</button>
+        <button class="modebtn" data-mode="turbo">Turbocharged</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="card visual-card">
+        <div class="mode-ribbon"><span class="mode-dot"></span><span id="modeTitle">Naturally Aspirated</span></div>
+        <div class="legend">
+          <div class="legend-row"><span class="swatch s-air"></span>Outside air</div>
+          <div class="legend-row"><span class="swatch s-mixture"></span>Mixture / induction air</div>
+          <div class="legend-row"><span class="swatch s-boost"></span>Boosted air</div>
+          <div class="legend-row"><span class="swatch s-exhaust"></span>Exhaust gas</div>
+          <div class="legend-row turbo-only"><span class="swatch s-oil"></span>Control oil</div>
+          <div class="legend-row"><span class="swatch s-drive"></span>Shaft / gear drive</div>
+        </div>
+        <div class="visual-scroll">
+        <svg viewBox="0 0 1100 650" aria-label="Induction and exhaust system diagram">
+          <defs>
+            <linearGradient id="metal" x1="0" x2="1">
+              <stop offset="0" stop-color="#dbe1e8"/>
+              <stop offset=".35" stop-color="#ffffff"/>
+              <stop offset=".7" stop-color="#aab5c4"/>
+              <stop offset="1" stop-color="#eef2f6"/>
+            </linearGradient>
+            <linearGradient id="engineGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#f4f7fb"/>
+              <stop offset=".55" stop-color="#bcc7d6"/>
+              <stop offset="1" stop-color="#8794a8"/>
+            </linearGradient>
+            <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="purpleGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#7c3aed" flood-opacity=".38"/>
+            </filter>
+            <filter id="pulseGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#f97316" flood-opacity=".42"/>
+            </filter>
+            <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+              <path d="M2,2 L10,6 L2,10 Z" fill="context-stroke"/>
+            </marker>
+          </defs>
+
+          <!-- background altitude / pressure strip -->
+          <rect x="22" y="540" width="1056" height="80" rx="22" fill="#f8fbff" stroke="#c9d8ea" stroke-width="2"/>
+          <text x="45" y="570" class="tiny-label">Teaching approximation</text>
+          <text x="45" y="596" class="small-label" id="bottomMessage">No compressor: manifold pressure depends on atmospheric pressure and throttle opening.</text>
+
+          <!-- Common air scoop and filter -->
+          <text x="80" y="92" class="label">Outside Air</text>
+          <path class="flow air" d="M72 122 H205"/>
+          <g id="scoop">
+            <path class="metal" d="M218 94 h102 q26 0 38 25 q-12 25-38 25 H218 q-18 0-18-25 q0-25 18-25z"/>
+            <path d="M306 94 q34 25 0 50" fill="#2a3443" opacity=".85"/>
+            <path d="M330 104 q18 14 0 30" fill="#f8fbff" opacity=".65"/>
+          </g>
+          <path class="flow air" d="M260 150 V210"/>
+          <text x="96" y="218" class="small-label">Air Filter</text>
+          <g id="filter">
+            <ellipse cx="260" cy="225" rx="76" ry="18" class="metal"/>
+            <rect x="184" y="225" width="152" height="50" class="metal"/>
+            <ellipse cx="260" cy="275" rx="76" ry="18" class="metal"/>
+            <g opacity=".6">
+              <path class="fin" d="M198 226v48M214 226v50M230 226v50M246 226v51M262 226v51M278 226v51M294 226v50M310 226v50M326 226v49"/>
+            </g>
+          </g>
+
+          <!-- Fuel metering / throttle -->
+          <g id="fuelMeter">
+            <text x="70" y="360" class="small-label">Fuel Metering</text>
+            <rect x="185" y="330" width="150" height="85" rx="16" class="component"/>
+            <circle cx="216" cy="374" r="24" fill="#e9eef5" stroke="#2f415d" stroke-width="3"/>
+            <circle cx="302" cy="374" r="24" fill="#e9eef5" stroke="#2f415d" stroke-width="3"/>
+            <path d="M205 374 h108" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
+            <path id="throttlePlate" d="M250 352 L272 396" stroke="#111827" stroke-width="7" stroke-linecap="round"/>
+            <circle cx="335" cy="356" r="11" fill="#eab308" stroke="#8a5b00" stroke-width="3"/>
+            <path d="M335 356 h42" stroke="#8a5b00" stroke-width="4" stroke-linecap="round"/>
+          </g>
+
+          <!-- Natural path around fuel metering -->
+          <g class="mode-layer natural-layer">
+            <path class="flow air" d="M260 294 V326"/>
+            <path class="flow mix" d="M260 415 V455"/>
+          </g>
+
+          <!-- Supercharger layer: after fuel metering, before manifold -->
+          <g class="mode-layer super-layer">
+            <path class="flow air" d="M260 294 V326"/>
+            <path class="flow mix" d="M260 415 V438"/>
+            <g transform="translate(170 430)">
+              <text x="-106" y="54" class="small-label">Internal</text>
+              <text x="-130" y="75" class="small-label">Supercharger</text>
+              <rect x="0" y="18" width="178" height="88" rx="24" class="metal"/>
+              <circle cx="78" cy="62" r="40" fill="#eef2f7" stroke="#2f415d" stroke-width="3"/>
+              <g class="active-thing">
+                <path d="M78 62 m0-30 q26 12 12 30 q-12 26-30 12 q-26-12-12-30 q12-26 30-12z" fill="#cbd5e1" stroke="#64748b" stroke-width="2"/>
+                <circle cx="78" cy="62" r="10" fill="#475569"/>
+              </g>
+              <path class="static-line drive" d="M178 62 H255 V185 H330"/>
+              <circle cx="255" cy="62" r="20" fill="#ddd6fe" stroke="#5b21b6" stroke-width="4"/>
+              <circle cx="255" cy="185" r="20" fill="#ddd6fe" stroke="#5b21b6" stroke-width="4"/>
+              <text x="275" y="90" class="tiny-label" fill="#5b21b6">gear driven</text>
+            </g>
+            <path class="flow boost" d="M260 538 V456"/>
+          </g>
+
+          <!-- Turbocharger layer -->
+          <g class="mode-layer turbo-layer">
+            <!-- intake to compressor -->
+            <path class="flow air" d="M260 294 V315 C260 330 286 330 308 330 H480"/>
+            <text x="440" y="292" class="small-label">Turbo compressor</text>
+            <g id="turboCompressor" transform="translate(500 282)">
+              <path class="metal" d="M80 20 C140 20 160 75 132 118 C105 158 35 150 18 100 C0 45 32 20 80 20z"/>
+              <circle cx="78" cy="86" r="48" fill="#f8fafc" stroke="#2f415d" stroke-width="3"/>
+              <circle cx="78" cy="86" r="28" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>
+              <g id="compressorWheel" class="active-thing">
+                <path d="M78 86 L78 58 M78 86 L103 73 M78 86 L103 101 M78 86 L78 114 M78 86 L54 101 M78 86 L54 73" stroke="#334155" stroke-width="5" stroke-linecap="round"/>
+              </g>
+            </g>
+            <!-- compressor out to intercooler and throttle -->
+            <path class="flow boost" d="M655 368 H716 V445 H585"/>
+            <text x="690" y="426" class="small-label">Intercooler</text>
+            <g transform="translate(720 390)">
+              <rect x="0" y="34" width="155" height="76" rx="14" class="metal"/>
+              <path d="M16 48h123M16 65h123M16 82h123M16 99h123" stroke="#506174" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+              <circle cx="0" cy="72" r="11" fill="#cbd5e1" stroke="#41516a" stroke-width="3"/>
+              <circle cx="155" cy="72" r="11" fill="#cbd5e1" stroke="#41516a" stroke-width="3"/>
+            </g>
+            <path class="flow boost" d="M720 462 H350 V374"/>
+            <path class="flow mix" d="M260 415 V455"/>
+
+            <!-- shaft to turbine -->
+            <path class="static-line drive" d="M635 368 H830"/>
+            <text x="690" y="348" class="tiny-label">shared shaft</text>
+            <g id="turboTurbine" transform="translate(820 260)">
+              <text x="-16" y="-18" class="small-label">Turbine</text>
+              <path class="metal" d="M82 15 C145 20 162 87 130 130 C96 174 24 145 14 95 C4 42 35 12 82 15z"/>
+              <circle cx="76" cy="88" r="47" fill="#f8fafc" stroke="#2f415d" stroke-width="3"/>
+              <circle cx="76" cy="88" r="26" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>
+              <g id="turbineWheel" class="active-thing">
+                <path d="M76 88 L76 58 M76 88 L101 73 M76 88 L101 103 M76 88 L76 118 M76 88 L52 103 M76 88 L52 73" stroke="#8a3412" stroke-width="5" stroke-linecap="round"/>
+              </g>
+            </g>
+
+            <!-- exhaust to turbine and bypass -->
+            <path id="toTurbinePath" class="flow exhaust heavy" d="M690 565 C850 560 860 470 874 404"/>
+            <path id="bypassPath" class="flow exhaust thin" d="M675 565 C980 560 1010 452 1008 352" opacity=".5"/>
+            <path class="flow exhaust" d="M965 350 C1012 314 1008 250 966 220"/>
+            <text x="962" y="205" class="small-label">Overboard</text>
+            <g id="wasteGate" transform="translate(960 443)">
+              <text x="-62" y="-42" class="small-label">Wastegate</text>
+              <circle cx="0" cy="0" r="35" fill="#fff7ed" stroke="#9a3412" stroke-width="3"/>
+              <path id="wgPlate" class="wg-disc open" d="M-25 0 H25" stroke="#9a3412" stroke-width="8" stroke-linecap="round"/>
+              <path d="M33 -16 L85 -60" stroke="#475569" stroke-width="4" fill="none"/>
+              <circle cx="98" cy="-70" r="26" fill="#e2e8f0" stroke="#475569" stroke-width="3"/>
+            </g>
+            <!-- control oil circuit -->
+            <path id="oilLine" class="flow oil thin" d="M944 373 C930 315 760 225 730 170" opacity=".95"/>
+            <text x="818" y="225" class="tiny-label">engine oil closes wastegate</text>
+
+            <!-- UDP / MAP taps -->
+            <circle cx="690" cy="390" r="11" class="pressure-tap"/>
+            <text x="704" y="384" class="tiny-label">UDP</text>
+            <circle cx="352" cy="430" r="11" class="pressure-tap"/>
+            <text x="365" y="438" class="tiny-label">MAP</text>
+
+            <!-- controllers -->
+            <g id="controllerCluster" transform="translate(550 80)">
+              <text x="0" y="-16" class="label">Automatic controller logic</text>
+              <g id="box-apc" class="ctrlBox" transform="translate(0 0)">
+                <rect class="controllerBox" width="175" height="62" rx="14"/>
+                <text x="15" y="25" class="controllerText">APC</text>
+                <text x="15" y="45" class="tiny-label">senses UDP</text>
+              </g>
+              <g id="box-prc" class="ctrlBox" transform="translate(190 0)">
+                <rect class="controllerBox" width="195" height="62" rx="14"/>
+                <text x="15" y="25" class="controllerText">Pressure-ratio</text>
+                <text x="15" y="45" class="tiny-label">UDP vs ambient</text>
+              </g>
+              <g id="box-roc" class="ctrlBox" transform="translate(0 76)">
+                <rect class="controllerBox" width="175" height="62" rx="14"/>
+                <text x="15" y="25" class="controllerText">Rate-of-change</text>
+                <text x="15" y="45" class="tiny-label">rapid UDP rise</text>
+              </g>
+              <g id="box-relief" class="ctrlBox" transform="translate(190 76)">
+                <rect class="controllerBox" width="195" height="62" rx="14"/>
+                <text x="15" y="25" class="controllerText">Pressure relief</text>
+                <text x="15" y="45" class="tiny-label">backup overboost</text>
+              </g>
+              <g id="box-density" class="ctrlBox" transform="translate(0 152)">
+                <rect class="controllerBox" width="175" height="62" rx="14"/>
+                <text x="15" y="25" class="controllerText">Density ctrl</text>
+                <text x="15" y="45" class="tiny-label">full throttle</text>
+              </g>
+              <g id="box-differential" class="ctrlBox" transform="translate(190 152)">
+                <rect class="controllerBox" width="195" height="62" rx="14"/>
+                <text x="15" y="25" class="controllerText">Differential ctrl</text>
+                <text x="15" y="45" class="tiny-label">part throttle</text>
+              </g>
+            </g>
+          </g>
+
+          <!-- Common manifold and engine -->
+          <g id="manifold">
+            <text x="394" y="454" class="small-label">Intake Manifold</text>
+            <path class="metal" d="M370 462 C450 430 565 430 645 462 C630 485 606 492 575 492 H440 C410 492 385 485 370 462z"/>
+            <path d="M435 492 C410 520 384 533 346 540" stroke="#a7b1c0" stroke-width="19" stroke-linecap="round" fill="none"/>
+            <path d="M477 492 C455 520 452 535 432 555" stroke="#a7b1c0" stroke-width="18" stroke-linecap="round" fill="none"/>
+            <path d="M538 492 C562 520 558 535 578 555" stroke="#a7b1c0" stroke-width="18" stroke-linecap="round" fill="none"/>
+            <path d="M580 492 C608 520 632 533 670 540" stroke="#a7b1c0" stroke-width="19" stroke-linecap="round" fill="none"/>
+          </g>
+          <path class="flow mix" d="M430 498 C405 520 378 533 348 542"/>
+          <path class="flow mix" d="M480 498 C462 522 455 537 435 555"/>
+          <path class="flow mix" d="M535 498 C555 522 558 537 580 555"/>
+          <path class="flow mix" d="M580 498 C610 520 638 533 668 542"/>
+
+          <!-- engine body -->
+          <g id="engine" transform="translate(0 0)">
+            <text x="110" y="510" class="small-label">Cylinders</text>
+            <g transform="translate(330 530)">
+              <rect x="-168" y="18" width="150" height="78" rx="18" class="engine"/>
+              <rect x="-190" y="30" width="34" height="52" rx="8" class="engine"/>
+              <g opacity=".7">
+                <path class="fin" d="M-150 20v74M-135 20v74M-120 20v74M-105 20v74M-90 20v74M-75 20v74M-60 20v74M-45 20v74"/>
+              </g>
+              <rect x="258" y="18" width="150" height="78" rx="18" class="engine"/>
+              <rect x="414" y="30" width="34" height="52" rx="8" class="engine"/>
+              <g opacity=".7">
+                <path class="fin" d="M275 20v74M290 20v74M305 20v74M320 20v74M335 20v74M350 20v74M365 20v74M380 20v74"/>
+              </g>
+              <path class="engine" d="M-30 0 H270 C300 0 322 30 315 64 C309 100 280 120 246 120 H-6 C-38 120 -67 100 -75 64 C-84 30 -61 0 -30 0z"/>
+              <circle cx="120" cy="62" r="58" fill="#d7dee8" stroke="#29384f" stroke-width="4"/>
+              <circle cx="120" cy="62" r="34" fill="#8997aa" stroke="#29384f" stroke-width="4"/>
+              <circle cx="120" cy="62" r="12" fill="#29384f"/>
+              <g fill="#29384f">
+                <circle cx="120" cy="16" r="5"/><circle cx="120" cy="108" r="5"/><circle cx="74" cy="62" r="5"/><circle cx="166" cy="62" r="5"/><circle cx="88" cy="30" r="5"/><circle cx="152" cy="30" r="5"/><circle cx="88" cy="94" r="5"/><circle cx="152" cy="94" r="5"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- common exhaust collectors -->
+          <g id="exhaustSystem">
+            <text x="760" y="592" class="small-label">Exhaust Manifold</text>
+            <path class="static-line exhaust" d="M340 590 C388 633 455 635 505 598"/>
+            <path class="static-line exhaust" d="M673 590 C620 633 555 635 505 598"/>
+            <path class="static-line exhaust" d="M505 598 V623"/>
+            <path class="flow exhaust" d="M340 590 C388 633 455 635 505 598 V623"/>
+            <path class="flow exhaust" d="M673 590 C620 633 555 635 505 598 V623"/>
+            <rect x="482" y="616" width="46" height="26" rx="8" fill="#2d3748" stroke="#111827" stroke-width="3"/>
+          </g>
+        </svg>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="card info-card">
+          <div class="eyebrow" id="modeEyebrow">Selected system</div>
+          <h2 id="infoTitle">Naturally aspirated</h2>
+          <p class="readout" id="infoText">Uses atmospheric air only. No compressor boosts manifold pressure, so available power drops as altitude increases.</p>
+          <div class="step-list" id="steps"></div>
+          <div class="gauges">
+            <div class="gauge"><div class="gauge-title">Ambient</div><div class="gauge-value" id="ambientVal">29.9” Hg</div><div class="bar"><i id="ambientBar"></i></div></div>
+            <div class="gauge"><div class="gauge-title">MAP</div><div class="gauge-value" id="mapVal">26.9” Hg</div><div class="bar map"><i id="mapBar"></i></div></div>
+            <div class="gauge turbo-only"><div class="gauge-title">UDP</div><div class="gauge-value" id="udpVal">—</div><div class="bar udp"><i id="udpBar"></i></div></div>
+            <div class="gauge turbo-only"><div class="gauge-title">Wastegate</div><div class="gauge-value" id="wgVal">—</div><div class="bar wg"><i id="wgBar"></i></div></div>
+          </div>
+        </section>
+
+        <section class="card controls">
+          <div class="eyebrow">Engine controls</div>
+          <div class="slider-row">
+            <label for="throttle"><span>Throttle</span><span id="throttleLabel">85%</span></label>
+            <input id="throttle" type="range" min="15" max="100" value="85" />
+          </div>
+          <div class="slider-row">
+            <label for="altitude"><span>Altitude</span><span id="altLabel">5,000 ft</span></label>
+            <input id="altitude" type="range" min="0" max="25000" step="500" value="5000" />
+          </div>
+          <div class="hint" id="controlHint">Move altitude up and watch how a non-boosted system loses available manifold pressure.</div>
+        </section>
+
+        <section class="card controller-panel turbo-only">
+          <div class="eyebrow">Turbo controller lab</div>
+          <h2 id="ctrlTitle">Wastegate basics</h2>
+          <p class="readout" id="ctrlText">The wastegate controls how much exhaust gas passes through the turbine. More turbine flow = faster compressor = more upper deck pressure.</p>
+          <div class="controller-buttons" id="controllerButtons"></div>
+          <div class="scenario-buttons" id="scenarioButtons"></div>
+        </section>
+
+        <section class="card quiz">
+          <div class="eyebrow">Quick check</div>
+          <h2 id="quizQuestion">Which system has no compressor?</h2>
+          <div class="quiz-options" id="quizOptions"></div>
+          <div class="feedback" id="feedback"></div>
+        </section>
+        <div class="footer-note">Note: gauge values are simplified classroom approximations for visualization, not aircraft performance data.</div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const body = document.body;
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    const modeData = {
+      natural: {
+        title: 'Naturally Aspirated',
+        infoTitle: 'Naturally aspirated',
+        text: 'Uses atmospheric air only. No compressor boosts manifold pressure, so available power drops as altitude increases.',
+        bottom: 'No compressor: manifold pressure depends on atmospheric pressure and throttle opening.',
+        hint: 'Move altitude up and watch how a non-boosted system loses available manifold pressure.',
+        steps: [
+          ['Outside air', 'Air enters through the scoop and air filter.'],
+          ['Fuel metering', 'Carburetor or fuel injection meters fuel into the induction airflow.'],
+          ['Manifold to cylinders', 'The intake manifold divides the air/fuel charge to the cylinders.'],
+          ['Exhaust overboard', 'Spent gases exit through the exhaust manifold.']
+        ],
+        quiz: {
+          q:'Which system has no compressor?',
+          options:['Naturally aspirated','Supercharged','Turbocharged'],
+          answer:0,
+          why:'Correct. Naturally aspirated systems use atmospheric air and do not boost manifold pressure.'
+        }
+      },
+      super: {
+        title: 'Supercharged',
+        infoTitle: 'Supercharged induction',
+        text: 'An engine-driven internal compressor boosts manifold pressure. In this trainer it is placed after fuel metering and before the manifold.',
+        bottom: 'Engine-driven compressor boosts the charge before it enters the intake manifold.',
+        hint: 'The supercharger raises MAP, but the gear-driven compressor uses some engine power and temperature can rise.',
+        steps: [
+          ['Outside air', 'Air enters through the scoop and filter.'],
+          ['Fuel metering', 'Fuel is metered before the internal supercharger in this layout.'],
+          ['Internal supercharger', 'Gear drive from the engine spins the compressor.'],
+          ['Boosted charge', 'The boosted charge goes through the manifold to the cylinders.']
+        ],
+        quiz: {
+          q:'What drives the compressor in a supercharged induction system?',
+          options:['Exhaust gas','Engine gear drive','Cabin heat muffler'],
+          answer:1,
+          why:'Correct. A supercharger is mechanically driven by the engine, usually by the crankshaft or accessory gearbox.'
+        }
+      },
+      turbo: {
+        title: 'Turbocharged',
+        infoTitle: 'Turbocharged induction',
+        text: 'Exhaust pressure spins the turbine. The turbine drives the compressor on the same shaft, increasing upper deck pressure before the throttle.',
+        bottom: 'Exhaust energy drives the turbine; the turbine shaft drives the compressor; controllers manage the wastegate.',
+        hint: 'Use the controller lab below. Most confusion comes from remembering that oil pressure closes the wastegate and spring pressure opens it.',
+        steps: [
+          ['Exhaust drives turbine', 'More exhaust through the turbine increases turbo speed.'],
+          ['Shaft drives compressor', 'The compressor raises upper deck pressure before the throttle.'],
+          ['Throttle separates UDP/MAP', 'UDP is before the throttle; MAP is after the throttle and before the cylinders.'],
+          ['Wastegate controls boost', 'Open bypasses turbine. Closed sends more exhaust through turbine.']
+        ],
+        quiz: {
+          q:'In an automatic turbo system, what does engine oil pressure do to the wastegate actuator?',
+          options:['Closes the wastegate','Opens the wastegate','Disconnects the turbo shaft'],
+          answer:0,
+          why:'Correct. Spring pressure holds the wastegate open; engine oil pressure acting on the actuator closes it.'
+        }
+      }
+    };
+
+    const controllerData = {
+      basics: {
+        label:'Wastegate basics', title:'Wastegate basics', active:['wg'],
+        text:'The wastegate controls how much exhaust gas passes over the turbine. Fully open means exhaust bypasses the turbine. Fully closed means exhaust is routed through the turbine.',
+        wg:45, boost:58, turbine:65
+      },
+      manual: {
+        label:'Manual', title:'Manual wastegate control', active:['wg'],
+        text:'Manual systems may use throttle linkage, a separate cockpit control, or a ground-adjustable restrictor. The pilot or adjustment controls how much the wastegate closes as altitude and power demand change.',
+        wg:55, boost:60, turbine:62
+      },
+      actuator: {
+        label:'Actuator', title:'Wastegate actuator', active:['wg'],
+        text:'The actuator positions the wastegate. Spring pressure holds the wastegate open. Engine oil pressure acts on a piston to close the wastegate and increase turbocharger speed.',
+        wg:72, boost:72, turbine:78
+      },
+      apc: {
+        label:'APC', title:'Absolute pressure controller', active:['apc'],
+        text:'The APC senses upper deck pressure and controls maximum boost by regulating how much oil returns from the wastegate actuator to the engine sump.',
+        wg:68, boost:74, turbine:76
+      },
+      prc: {
+        label:'Pressure-ratio', title:'Pressure-ratio controller', active:['prc'],
+        text:'The pressure-ratio controller compares upper deck pressure to ambient pressure. If the ratio gets too high, it bleeds actuator oil so the wastegate opens and boost decreases.',
+        wg:38, boost:50, turbine:45
+      },
+      roc: {
+        label:'Rate-of-change', title:'Rate-of-change controller', active:['roc'],
+        text:'The rate-of-change controller reacts only when upper deck pressure rises too fast. It bleeds actuator oil to slow the pressure rise and reduce overshoot.',
+        wg:30, boost:45, turbine:42
+      },
+      relief: {
+        label:'Relief valve', title:'Pressure relief valve', active:['relief'],
+        text:'The pressure relief valve is backup overboost protection. It opens near maximum boost to prevent severe overboost or overshoot of upper deck pressure.',
+        wg:25, boost:42, turbine:38
+      },
+      sealevel: {
+        label:'Sea-level boosted', title:'Sea-level boosted Lycoming-style control', active:['density','differential'],
+        text:'Sea-level boosted systems maintain about sea-level manifold pressure and do not boost above that level. The density controller limits full-throttle pressure; the differential pressure controller manages part-throttle operation and reduces bootstrapping.',
+        wg:55, boost:60, turbine:58
+      }
+    };
+
+    const scenarios = {
+      climb: {
+        label:'Climb: altitude increasing', key:'apc', throttle:85, altitude:14000,
+        text:'As altitude increases, upper deck pressure tends to fall. The APC reduces oil bleed, actuator oil pressure rises, the wastegate closes more, and more exhaust goes through the turbine.'
+      },
+      overboost: {
+        label:'High UDP / overboost', key:'prc', throttle:100, altitude:2000,
+        text:'If upper deck pressure gets too high, controllers bleed oil from the actuator. The spring opens the wastegate, turbine flow drops, and boost decreases.'
+      },
+      rapid: {
+        label:'Rapid throttle advance', key:'roc', throttle:100, altitude:8000,
+        text:'A rapid throttle movement can make UDP rise too quickly. The rate-of-change controller bleeds actuator oil to reduce overshoot.'
+      },
+      part: {
+        label:'Part-throttle bootstrapping', key:'sealevel', throttle:48, altitude:7000,
+        text:'At part throttle, the differential pressure controller compares UDP and MAP to maintain a small pressure drop across the throttle and reduce bootstrapping.'
+      }
+    };
+
+    let mode = 'natural';
+    let controller = 'basics';
+
+    function fmtHg(v){ return `${v.toFixed(1)}” Hg`; }
+    function fmtFt(v){ return Number(v).toLocaleString() + ' ft'; }
+    function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+
+    function densityAt(alt){
+      return clamp(1 - (alt/30000)*0.56, .38, 1);
+    }
+
+    function calcPressures(){
+      const throttle = +$('#throttle').value / 100;
+      const alt = +$('#altitude').value;
+      const ambient = 29.92 * densityAt(alt);
+      let map = ambient * (.16 + .84 * throttle);
+      let udp = null;
+      let wg = null;
+
+      if(mode === 'super'){
+        map = clamp(ambient * (1.18 + .34 * throttle), 8, 38);
+      }
+      if(mode === 'turbo'){
+        const critical = 18000;
+        const target = 29.92 * (.18 + .82 * throttle);
+        const ability = alt <= critical ? 1 : clamp(1 - (alt-critical)/16000*.45, .55, 1);
+        udp = clamp(target / Math.max(throttle,.25) * ability, ambient, 43);
+        map = clamp(Math.min(target, udp - (throttle < .82 ? 3 : 1.5)), 5, 36);
+        wg = clamp(20 + (alt/critical)*65 + throttle*18, 12, 100);
+        const c = controllerData[controller];
+        if(c){ wg = c.wg; udp = clamp(ambient + c.boost/100*(39-ambient), ambient, 43); map = clamp(Math.min(udp - (throttle < .82 ? 3 : 1.5), 35), 5, 36); }
+      }
+      return {ambient,map,udp,wg,throttle,alt};
+    }
+
+    function updateMode(newMode){
+      mode = newMode;
+      body.classList.remove('mode-natural','mode-super','mode-turbo');
+      body.classList.add(`mode-${mode}`);
+      $$('.modebtn').forEach(b=>b.classList.toggle('active', b.dataset.mode===mode));
+      const d = modeData[mode];
+      $('#modeTitle').textContent = d.title;
+      $('#infoTitle').textContent = d.infoTitle;
+      $('#infoText').textContent = d.text;
+      $('#bottomMessage').textContent = d.bottom;
+      $('#controlHint').textContent = d.hint;
+      $('#modeEyebrow').textContent = mode === 'turbo' ? 'Selected system + controls' : 'Selected system';
+      $('#steps').innerHTML = d.steps.map((s,i)=>`<div class="step"><span class="num">${i+1}</span><div><strong>${s[0]}</strong><span>${s[1]}</span></div></div>`).join('');
+      buildQuiz(d.quiz);
+      updateGauges();
+      if(mode === 'turbo') updateController(controller);
+    }
+
+    function buildQuiz(q){
+      $('#quizQuestion').textContent = q.q;
+      $('#feedback').textContent = '';
+      $('#quizOptions').innerHTML = q.options.map((o,i)=>`<button data-answer="${i}">${o}</button>`).join('');
+      $$('#quizOptions button').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          const good = +btn.dataset.answer === q.answer;
+          $$('#quizOptions button').forEach(b=>b.classList.remove('correct','wrong'));
+          btn.classList.add(good?'correct':'wrong');
+          if(!good) $$('#quizOptions button')[q.answer].classList.add('correct');
+          $('#feedback').textContent = good ? q.why : 'Not that one. Look at what drives or boosts the intake air.';
+        });
+      });
+    }
+
+    function updateGauges(){
+      const p = calcPressures();
+      $('#throttleLabel').textContent = Math.round(p.throttle*100) + '%';
+      $('#altLabel').textContent = fmtFt(p.alt);
+      $('#ambientVal').textContent = fmtHg(p.ambient);
+      $('#mapVal').textContent = fmtHg(p.map);
+      $('#ambientBar').style.width = clamp(p.ambient/29.92*100,0,100)+'%';
+      $('#mapBar').style.width = clamp(p.map/36*100,0,100)+'%';
+      if(mode === 'turbo'){
+        $('#udpVal').textContent = fmtHg(p.udp);
+        $('#wgVal').textContent = Math.round(p.wg) + '% closed';
+        $('#udpBar').style.width = clamp(p.udp/43*100,0,100)+'%';
+        $('#wgBar').style.width = clamp(p.wg,0,100)+'%';
+        updateWastegateVisual(p.wg);
+      }
+    }
+
+    function updateWastegateVisual(wgClosed){
+      const plate = $('#wgPlate');
+      const toT = $('#toTurbinePath');
+      const bypass = $('#bypassPath');
+      const closed = clamp(wgClosed,0,100);
+      const rot = closed * .78;
+      plate.style.transform = `rotate(${rot}deg)`;
+      plate.style.transformBox = 'fill-box';
+      plate.style.transformOrigin = 'center';
+      toT.style.strokeWidth = 7 + closed/100*10;
+      bypass.style.strokeWidth = 14 - closed/100*8;
+      bypass.style.opacity = .85 - closed/100*.62;
+      $('#compressorWheel').style.animationDuration = (1.5 - closed/100*.8).toFixed(2)+'s';
+      $('#turbineWheel').style.animationDuration = (1.5 - closed/100*.8).toFixed(2)+'s';
+      $('#oilLine').style.opacity = .4 + closed/100*.6;
+    }
+
+    function buildControllers(){
+      $('#controllerButtons').innerHTML = Object.keys(controllerData).map(k=>`<button class="smallbtn" data-controller="${k}">${controllerData[k].label}</button>`).join('');
+      $$('#controllerButtons button').forEach(b=>b.addEventListener('click',()=> updateController(b.dataset.controller)));
+      $('#scenarioButtons').innerHTML = Object.keys(scenarios).map(k=>`<button data-scenario="${k}">${scenarios[k].label}</button>`).join('');
+      $$('#scenarioButtons button').forEach(b=>b.addEventListener('click',()=> runScenario(b.dataset.scenario)));
+    }
+
+    function updateController(key){
+      controller = key;
+      const c = controllerData[key];
+      $('#ctrlTitle').textContent = c.title;
+      $('#ctrlText').textContent = c.text;
+      $$('#controllerButtons button').forEach(b=>b.classList.toggle('active', b.dataset.controller===key));
+      $$('#scenarioButtons button').forEach(b=>b.classList.remove('active'));
+      // visual controller highlights
+      ['apc','prc','roc','relief','density','differential'].forEach(id=>{
+        const r = $(`#box-${id} rect`);
+        if(r) r.classList.toggle('active', c.active.includes(id));
+      });
+      $('#wasteGate').classList.toggle('highlight', c.active.includes('wg'));
+      updateGauges();
+      $('#controlHint').textContent = c.text;
+    }
+
+    function runScenario(key){
+      const s = scenarios[key];
+      $('#throttle').value = s.throttle;
+      $('#altitude').value = s.altitude;
+      updateController(s.key);
+      $('#ctrlText').textContent = s.text;
+      $$('#scenarioButtons button').forEach(b=>b.classList.toggle('active', b.dataset.scenario===key));
+      $('#controlHint').textContent = s.text;
+      updateGauges();
+    }
+
+    $$('.modebtn').forEach(btn => btn.addEventListener('click',()=>updateMode(btn.dataset.mode)));
+    $('#throttle').addEventListener('input',()=>{ if(mode==='turbo') controller='basics'; updateGauges(); });
+    $('#altitude').addEventListener('input',()=>{ if(mode==='turbo') controller='basics'; updateGauges(); });
+    buildControllers();
+    updateMode('natural');
+  </script>
+</body>
+</html>
