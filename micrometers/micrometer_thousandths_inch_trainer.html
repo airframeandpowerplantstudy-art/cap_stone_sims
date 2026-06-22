@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Micrometer Trainer</title>
+<style>
+  body { margin:0; background:#eef2f6; font-family:Arial,sans-serif; }
+  .wrap { max-width:1600px; margin:18px auto; padding:14px; }
+  .trainer { background:#f8fafc; border-radius:18px; padding:18px; box-shadow:0 8px 24px rgba(0,0,0,.18); }
+  svg { width:100%; height:auto; display:block; }
+  .controls { margin-top:16px; background:white; border-radius:14px; padding:18px; display:flex; align-items:center; gap:20px; }
+  input[type="range"] { flex:1; }
+  .readout { min-width:190px; padding:10px 18px; border:2px solid #cbd5e1; border-radius:10px; text-align:center; font-size:30px; font-weight:800; color:#2563eb; }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+<div class="trainer">
+
+<svg viewBox="0 0 1600 720">
+<defs>
+  <linearGradient id="frameGrad" x1="0" x2="0" y1="0" y2="1">
+    <stop offset="0%" stop-color="#1e293b"/>
+    <stop offset="45%" stop-color="#475569"/>
+    <stop offset="100%" stop-color="#263445"/>
+  </linearGradient>
+
+  <linearGradient id="metalGrad" x1="0" x2="1">
+    <stop offset="0%" stop-color="#7c8794"/>
+    <stop offset="22%" stop-color="#ffffff"/>
+    <stop offset="50%" stop-color="#cbd5e1"/>
+    <stop offset="75%" stop-color="#f8fafc"/>
+    <stop offset="100%" stop-color="#6b7280"/>
+  </linearGradient>
+
+  <linearGradient id="barrelGrad" x1="0" x2="1">
+    <stop offset="0%" stop-color="#4b5563"/>
+    <stop offset="15%" stop-color="#dbe3ed"/>
+    <stop offset="45%" stop-color="#ffffff"/>
+    <stop offset="75%" stop-color="#cbd5e1"/>
+    <stop offset="100%" stop-color="#4b5563"/>
+  </linearGradient>
+
+  <filter id="softShadow">
+    <feDropShadow dx="4" dy="8" stdDeviation="6" flood-opacity=".28"/>
+  </filter>
+</defs>
+
+<!-- C BODY -->
+<path d="
+  M 230 105 L 365 105 L 365 255
+  C 365 420, 465 490, 600 490
+  C 735 490, 835 420, 835 255
+  L 835 105 L 970 105 L 970 270
+  C 970 545, 790 650, 600 650
+  C 410 650, 230 545, 230 270 Z"
+  fill="url(#frameGrad)" stroke="#0f172a" stroke-width="8" filter="url(#softShadow)"/>
+
+<path d="M 335 310 C 355 505, 480 590, 600 590 C 720 590, 845 505, 865 310"
+  fill="none" stroke="rgba(255,255,255,.20)" stroke-width="28" stroke-linecap="round"/>
+
+<!-- ANVIL -->
+<rect x="365" y="150" width="78" height="78" rx="10"
+      fill="url(#metalGrad)" stroke="#111827" stroke-width="4"/>
+<rect x="430" y="162" width="25" height="54" rx="5"
+      fill="#f8fafc" stroke="#334155" stroke-width="3"/>
+
+<!-- SPINDLE -->
+<g id="spindleGroup">
+  <rect id="spindleBody" x="690" y="160" width="120" height="58" rx="10"
+        fill="url(#metalGrad)" stroke="#111827" stroke-width="4"/>
+  <rect id="spindleFace" x="665" y="167" width="26" height="44" rx="6"
+        fill="#f8fafc" stroke="#334155" stroke-width="3"/>
+</g>
+
+<!-- SLEEVE BODY -->
+<rect x="805" y="72" width="520" height="270" rx="28"
+      fill="url(#metalGrad)" stroke="#111827" stroke-width="4"/>
+
+<!-- VERNIER SCALE -->
+<g id="vernierMarks"></g>
+
+<!-- SLEEVE REFERENCE LINE -->
+<line x1="835" y1="260" x2="1310" y2="260" stroke="#111827" stroke-width="4"/>
+<g id="sleeveMarks"></g>
+
+<g id="barrelGroup">
+  <path id="barrelBody" d="
+  M 0 72
+  C 45 52, 395 52, 440 72
+  L 440 342
+  C 395 362, 45 362, 0 342
+  Z"
+    fill="url(#barrelGrad)" stroke="#111827" stroke-width="4"/>
+
+  <g id="barrelMarks"></g>
+
+  <rect x="440" y="150" width="75" height="105" rx="18"
+        fill="url(#metalGrad)" stroke="#111827" stroke-width="4"/>
+</g>
+
+<!-- BLUE THIMBLE REFERENCE EDGE -->
+<line id="readLine" x1="0" y1="260" x2="0" y2="260"
+      stroke="#2563eb" stroke-width="5" stroke-linecap="round"/>
+
+<!-- GAP -->
+<line id="gapLine" x1="455" y1="189" x2="665" y2="189"
+      stroke="#2563eb" stroke-width="5" stroke-linecap="round"/>
+<line x1="455" y1="169" x2="455" y2="209" stroke="#2563eb" stroke-width="5"/>
+<line id="gapTickRight" x1="665" y1="169" x2="665" y2="209" stroke="#2563eb" stroke-width="5"/>
+
+<text id="gapText" x="535" y="145" font-size="36" font-weight="800" fill="#2563eb">0.2610 in</text>
+</svg>
+
+<div class="controls">
+  <strong>Measurement:</strong>
+  <input id="measurement" type="range" min="0" max="1" step="0.0001" value="0.2610">
+  <div id="readout" class="readout">0.2610 in</div>
+</div>
+
+</div>
+</div>
+
+<script>
+const slider = document.getElementById("measurement");
+const readout = document.getElementById("readout");
+
+const spindleBody = document.getElementById("spindleBody");
+const spindleFace = document.getElementById("spindleFace");
+const gapLine = document.getElementById("gapLine");
+const gapTickRight = document.getElementById("gapTickRight");
+const gapText = document.getElementById("gapText");
+
+const sleeveMarks = document.getElementById("sleeveMarks");
+const barrelMarks = document.getElementById("barrelMarks");
+const vernierMarks = document.getElementById("vernierMarks");
+const barrelGroup = document.getElementById("barrelGroup");
+const readLine = document.getElementById("readLine");
+
+const anvilFaceX = 455;
+const closedFaceX = 455;
+const spindleBackX = 810;
+const maxGapPx = 210;
+
+// Physical centerline for spindle/gap mechanics.
+const axisY = 189;
+
+// Visual reading line for sleeve, thimble, and blue reference line.
+const sleeveLineY = 260;
+
+const sleeveStartX = 835;
+const sleeveTickSpacing = 11.5;
+const barrelClosedX = 836.5;
+const barrelTravelPx = 460;
+
+const barrelSpacing = 15;
+const vernierSpacing = barrelSpacing *.9;
+
+function svgEl(type) {
+  return document.createElementNS("http://www.w3.org/2000/svg", type);
+}
+
+function line(x1,y1,x2,y2,w=2,c="#111827") {
+  const l = svgEl("line");
+  l.setAttribute("x1",x1); l.setAttribute("y1",y1);
+  l.setAttribute("x2",x2); l.setAttribute("y2",y2);
+  l.setAttribute("stroke",c); l.setAttribute("stroke-width",w);
+  l.setAttribute("stroke-linecap","round");
+  return l;
+}
+
+function text(x,y,val,size=22,anchor="middle") {
+  const t = svgEl("text");
+  t.setAttribute("x",x);
+  t.setAttribute("y",y);
+  t.setAttribute("font-size",size);
+  t.setAttribute("font-weight","800");
+  t.setAttribute("text-anchor",anchor);
+  t.setAttribute("fill","#111827");
+  t.textContent = val;
+  return t;
+}
+
+function drawSleeve() {
+  sleeveMarks.innerHTML = "";
+
+  for (let i = 0; i <= 40; i++) {
+    const x = sleeveStartX + i * sleeveTickSpacing;
+    const major = i % 4 === 0;
+    const medium = i % 2 === 0 && !major;
+    const len = major ? 46 : medium ? 34 : 24;
+
+    sleeveMarks.appendChild(line(x, sleeveLineY, x, sleeveLineY + len, major ? 3 : 2));
+
+    if (major) {
+      sleeveMarks.appendChild(text(x, sleeveLineY - 14, String(i / 4), 24));
+    }
+  }
+}
+
+function drawVernier(value) {
+  vernierMarks.innerHTML = "";
+
+  const x1 = 875;
+  const x2 = 1290;
+  const labelX = 855;
+
+  const yBottom = sleeveLineY-45;
+  const spacing = vernierSpacing;
+
+  const vernierDigit = Math.round((value * 10000) % 10);
+
+  for (let n = 0; n <= 10; n++) {
+    const y = yBottom - n * spacing;
+    const aligned = n === vernierDigit;
+
+    const mark = line(
+      x1,
+      y,
+      x2,
+      y,
+      aligned ? 4 : 2,
+      aligned ? "#2563eb" : "#111827"
+    );
+
+    mark.setAttribute("opacity", aligned ? "1" : ".75");
+    vernierMarks.appendChild(mark);
+
+    const label = text(labelX, y + 5, String(n), 16, "middle");
+
+    if (aligned) {
+      label.setAttribute("fill", "#2563eb");
+    }
+
+    vernierMarks.appendChild(label);
+  }
+}
+
+
+function drawBarrel(value) {
+  barrelMarks.innerHTML = "";
+
+  const refY = sleeveLineY;
+  const xStart = 0;
+  const labelX = 315;
+
+  const thimbleReading = (value % 0.025) / 0.001;
+
+  for (let wrap = -4; wrap <= 4; wrap++) {
+    for (let n = 0; n < 25; n++) {
+      const graduationNumber = n + wrap * 25;
+      const offset = thimbleReading - graduationNumber;
+      const y = refY + offset * barrelSpacing;
+
+      if (y < 70 || y > 345) continue;
+
+      const major = n % 5 === 0;
+      const len = major ? 275 : 220;
+
+      barrelMarks.appendChild(
+        line(xStart, y, xStart + len, y, major ? 3 : 1.8)
+      );
+
+      if (major) {
+        barrelMarks.appendChild(
+          text(labelX, y + 9, String(n), 28)
+        );
+      }
+    }
+  }
+}
+
+
+function updateMicrometer() {
+  const value = Number(slider.value);
+  const gapPx = value * maxGapPx;
+
+  const faceX = closedFaceX + gapPx;
+  const bodyX = faceX + 26;
+  const bodyWidth = Math.max(40, spindleBackX - bodyX);
+
+  spindleFace.setAttribute("x", faceX);
+  spindleBody.setAttribute("x", bodyX);
+  spindleBody.setAttribute("width", bodyWidth);
+
+  gapLine.setAttribute("x2", faceX);
+  gapTickRight.setAttribute("x1", faceX);
+  gapTickRight.setAttribute("x2", faceX);
+  gapText.setAttribute("x", anvilFaceX + gapPx / 2 - 70);
+
+  const barrelX = barrelClosedX + value * barrelTravelPx;
+  barrelGroup.setAttribute("transform", `translate(${barrelX}, 0)`);
+
+  readLine.setAttribute("x1", barrelX);
+  readLine.setAttribute("x2", barrelX + 42);
+  readLine.setAttribute("y1", sleeveLineY);
+  readLine.setAttribute("y2", sleeveLineY);
+
+  const display = value.toFixed(4) + " in";
+  gapText.textContent = display;
+  readout.textContent = display;
+
+  drawBarrel(value);
+  drawVernier(value);
+}
+
+slider.addEventListener("input", updateMicrometer);
+drawSleeve();
+updateMicrometer();
+</script>
+
+</body>
+</html>
