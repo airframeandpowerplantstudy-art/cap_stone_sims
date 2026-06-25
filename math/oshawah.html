@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RT102 Working at Heights Interactive</title>
+<title>Working at Heights</title>
 <style>
 :root{
   --navy:#102a7a; --blue:#1f66d1; --sky:#eaf4ff; --ink:#172033; --muted:#607086; --bg:#f4f7fb;
@@ -45,13 +45,13 @@ main{max-width:1240px; margin:auto; padding:26px clamp(12px,3vw,32px) 60px}
 .hazard .icon{font-size:2rem}
 .reveal{margin-top:14px; padding:16px; border-radius:16px; background:#f5f8ff; border:1px dashed #9eb7e6}
 .levels{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; align-items:stretch}
-.level{position:relative; padding:18px 14px; min-height:230px; border-radius:18px; color:white; cursor:pointer; background:linear-gradient(180deg,#1545bd,#0d2d86); overflow:hidden; transition:.15s}
+.level{position:relative; padding:12px 10px; min-height:150px; border-radius:18px; color:white; cursor:pointer; background:linear-gradient(180deg,#1545bd,#0d2d86); overflow:hidden; transition:.15s}
 .level:nth-child(2){background:linear-gradient(180deg,#216bd8,#1749a2)}
 .level:nth-child(3){background:linear-gradient(180deg,#4f83d8,#2c5fb8)}
 .level:nth-child(4){background:linear-gradient(180deg,#7187a3,#4d6077)}
 .level:nth-child(5){background:linear-gradient(180deg,#a16207,#7c2d12)}
 .level:hover,.level.active{transform:translateY(-4px); outline:4px solid rgba(37,99,235,.22)}
-.level .num{position:absolute; right:14px; bottom:6px; font-size:5rem; font-weight:1000; opacity:.32}
+.level .num{position:absolute; right:10px; bottom:2px; font-size:5rem; font-weight:1000; opacity:.32}
 .level h3{margin:0 0 8px; font-size:1.05rem}
 .level p{font-size:.88rem; line-height:1.35; margin:0}
 .systemCards{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
@@ -97,12 +97,12 @@ footer{padding:26px; text-align:center; color:#64748b}
 </head>
 <body>
 <header>
-<div class="kicker">RT102 Safety Module</div>
-<h1>Working at Heights</h1>
-<p>An interactive student page for recognizing fall hazards, choosing controls, understanding fall protection systems, and practicing a harness inspection.</p>
+<div class="kicker">Safety Module</div>
+<h1>Working @ Heights</h1>
+<p>For recognizing fall hazards, choosing controls, understanding fall protection systems, and practicing a harness inspection.</p>
 <div class="topStats">
-<div class="stat"><b>4 ft</b><span>General industry trigger point used in this lesson</span></div>
-<div class="stat"><b>6 ft</b><span>Construction trigger point used in this lesson</span></div>
+<div class="stat"><b>4 ft</b><span>General industry trigger point</span></div>
+<div class="stat"><b>6 ft</b><span>Construction trigger point</span></div>
 <div class="stat"><b>389</b><span>Fatal falls, slips, and trips in construction, 2024</span></div>
 <div class="stat"><b>3</b><span>Major hazards: falls, suspension trauma, dropped objects</span></div>
 </div>
@@ -114,15 +114,15 @@ footer{padding:26px; text-align:center; color:#64748b}
 <div class="card">
 <span class="pill">Start here</span>
 <h2>What counts as Working at Heights?</h2>
-<p class="note">For this RT102 lesson, treat work at height as any task where a person could fall to a lower level or where a falling object could strike someone below.</p>
+<p class="note">Treat work at height as any task where a person could fall to a lower level or where a falling object could strike someone below.</p>
 <div class="grid two">
-<div class="card good"><h3>General Industry</h3><p><b>≥ 4 ft</b> is the lesson threshold.</p></div>
-<div class="card warn"><h3>Construction</h3><p><b>≥ 6 ft</b> is the lesson threshold.</p></div>
+<div class="card good"><h3>General Industry</h3><p><b>≥ 4 ft</b> is the threshold.</p></div>
+<div class="card warn"><h3>Construction</h3><p><b>≥ 6 ft</b> is the threshold.</p></div>
 </div>
 <p class="note"><b>Instructor note:</b> site safety can treat any distance as Working at Heights when the risk is significant or obvious.</p>
 </div>
 <div class="card">
-<h2>Where could RT102 students see W@H?</h2>
+<h2>Where could YOU see W@H?</h2>
 <div class="systemCards">
 <div class="system"><b>Ladders</b>Three points of contact, setup angle, footing, and overreach.</div>
 <div class="system"><b>Scaffolds</b>Platforms, guardrails, access, inspection, and falling objects.</div>
@@ -134,7 +134,7 @@ footer{padding:26px; text-align:center; color:#64748b}
 <div class="card" style="margin-top:18px">
 <h2>What are the hazards?</h2>
 <div class="hazardRow" id="hazards"></div>
-<div class="reveal" id="hazardReveal">Click a hazard card to show what students should be looking for.</div>
+<div class="reveal" id="hazardReveal">Click a hazard card to show what you should be looking for.</div>
 </div>
 </section>
 <section class="section" data-title="Rules &amp; Sources" id="rules">
@@ -146,7 +146,7 @@ footer{padding:26px; text-align:center; color:#64748b}
 <div class="card warn"><b>Teaching point:</b> Always follow the most protective applicable rule: law, employer policy, site plan, manufacturer manual, or task-specific procedure.</div>
 </div>
 <div class="card sourceList">
-<h2>OSHA links for student reference</h2>
+<h2>OSHA links for reference</h2>
 <p><a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910SubpartD" target="_blank">General Industry: 1910 Subpart D Walking-Working Surfaces</a></p>
 <p><a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.21" target="_blank">General Industry: 1910.21 Scope and definitions</a></p>
 <p><a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926SubpartM" target="_blank">Construction: 1926 Subpart M Fall Protection</a></p>
