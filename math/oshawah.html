@@ -45,15 +45,57 @@ main{max-width:1240px; margin:auto; padding:26px clamp(12px,3vw,32px) 60px}
 .hazard .icon{font-size:2rem}
 .reveal{margin-top:14px; padding:16px; border-radius:16px; background:#f5f8ff; border:1px dashed #9eb7e6}
 .levels{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; align-items:stretch}
-.level{position:relative; padding:12px 10px; min-height:100px; border-radius:18px; color:white; cursor:pointer; background:linear-gradient(180deg,#1545bd,#0d2d86); overflow:hidden; transition:.15s}
-.level:nth-child(2){background:linear-gradient(180deg,#216bd8,#1749a2)}
-.level:nth-child(3){background:linear-gradient(180deg,#4f83d8,#2c5fb8)}
-.level:nth-child(4){background:linear-gradient(180deg,#7187a3,#4d6077)}
-.level:nth-child(5){background:linear-gradient(180deg,#a16207,#7c2d12)}
-.level:hover,.level.active{transform:translateY(-4px); outline:4px solid rgba(37,99,235,.22)}
-.level .num{position:absolute; right:10px; bottom:2px; font-size:5rem; font-weight:1000; opacity:.32}
-.level h3{margin:0 0 8px; font-size:1.05rem}
-.level p{font-size:.88rem; line-height:1.35; margin:0}
+.level{
+  position:relative;
+  padding:12px 10px;
+  min-height:120px;
+  border-radius:18px;
+  color:white;
+  cursor:pointer;
+  background:linear-gradient(180deg,#1545bd,#0d2d86);
+  overflow:hidden;
+  transition:.2s ease;
+}
+  .level:hover,
+.level.active{
+  transform:translateY(-4px);
+  outline:4px solid rgba(37,99,235,.22);
+}
+  .level .num{
+  position:absolute;
+  right:10px;
+  bottom:2px;
+  font-size:5rem;
+  font-weight:1000;
+  opacity:.22;
+  pointer-events:none;
+}
+.level h3{
+  margin:0 0 8px;
+  font-size:1.05rem;
+}
+
+.level p{
+  font-size:.88rem;
+  line-height:1.35;
+  margin:0;
+}
+
+.level .answer{
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  margin-top:0;
+  padding-top:0;
+  border-top:1px solid rgba(255,255,255,.28);
+  transition:max-height .35s ease, opacity .25s ease, margin-top .25s ease, padding-top .25s ease;
+}
+  .level.active .answer{
+  max-height:160px;
+  opacity:1;
+  margin-top:10px;
+  padding-top:10px;
+}
 .systemCards{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
 .system{border:2px solid #d7e2f1; border-radius:16px; padding:14px; cursor:pointer; background:#fff}
 .system.active{border-color:var(--blue); background:#eef6ff}
@@ -161,7 +203,7 @@ footer{padding:26px; text-align:center; color:#64748b}
 <h2>Hierarchy of Controls Applied to Working at Heights</h2>
 <p class="note">Click a control level. The goal is to move as high on the hierarchy as practical before relying on PPE.</p>
 <div class="levels" id="levels"></div>
-<div class="reveal" id="levelReveal">Select a level to see examples.</div>
+<div class="reveal" id="levelReveal">Click the Card for an Example.</div>
 </div>
 <div class="grid two" style="margin-top:18px">
 <div class="imgBox"><div class="placeholder" style="min-height:320px"><div class="placeholderIcon">🖼️</div><h3>Hierarchy of Controls Image Placeholder</h3><p>Insert your hierarchy of fall protection graphic here.</p><p class="note">You can swap this placeholder with a screenshot, photo, or diagram later.</p></div></div>
@@ -253,9 +295,24 @@ const levels=[
 {t:'Administrative Controls',d:'Change how people work.',e:'Training, signage, supervision, permits, restricted areas, rescue plans, and job briefings.'},
 {t:'PPE',d:'Protect the worker with equipment.',e:'Harnesses, lanyards, SRLs, helmets, and other gear. PPE is important but is the last line of defense.'}
 ];
-document.getElementById('levels').innerHTML=levels.map((l,i)=>`<div class="level" onclick="pickLevel(${i},this)"><h3>${l.t}</h3><p>${l.d}</p><div class="num">${i+1}</div></div>`).join('');
-function pickLevel(i,el){document.querySelectorAll('.level').forEach(x=>x.classList.remove('active')); el.classList.add('active'); document.getElementById('levelReveal').innerHTML='<b>'+levels[i].t+':</b> '+levels[i].e;}
-const systems=[
+document.getElementById('levels').innerHTML=levels.map((l,i)=>`
+  <div class="level" onclick="pickLevel(${i},this)">
+    <h3>${l.t}</h3>
+    <p>${l.d}</p>
+    <div class="answer"><b>Example:</b> ${l.e}</div>
+    <div class="num">${i+1}</div>
+  </div>
+`).join('');
+function pickLevel(i,el){
+  const wasActive = el.classList.contains('active');
+
+  document.querySelectorAll('.level').forEach(x=>x.classList.remove('active'));
+
+  if(!wasActive){
+    el.classList.add('active');
+  }
+}
+  const systems=[
 {t:'Fall Protection',d:'A system, device, or method used to prevent a fall or reduce the effect of a fall. This is the broad umbrella term.'},
 {t:'Fall Prevention',d:'Measures intended to stop the person from falling in the first place. Example: guardrails, covers, barriers, planning.'},
 {t:'Fall Arrest',d:'A system designed to catch a person after a fall begins. It does not prevent the fall; it limits impact and requires rescue planning.'},
