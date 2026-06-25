@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RT102 Working at Heights Interactive</title>
+<style>
+:root{
+  --navy:#102a7a; --blue:#1f66d1; --sky:#eaf4ff; --ink:#172033; --muted:#607086; --bg:#f4f7fb;
+  --card:#ffffff; --green:#16a34a; --red:#dc2626; --amber:#f59e0b; --purple:#5b21b6;
+  --shadow:0 14px 40px rgba(19,37,83,.14); --radius:18px;
+}
+*{box-sizing:border-box}
+body{margin:0; font-family:Inter, Segoe UI, Arial, sans-serif; color:var(--ink); background:linear-gradient(180deg,#edf5ff,#f8fafc 30%,#eef2f7);}
+header{background:linear-gradient(135deg,#091c58,#1644b3 62%,#1d78e5); color:white; padding:28px clamp(16px,4vw,52px); position:relative; overflow:hidden;}
+header:after{content:""; position:absolute; inset:auto -80px -180px auto; width:420px; height:420px; border-radius:50%; background:rgba(255,255,255,.12)}
+.kicker{font-weight:800; letter-spacing:.16em; text-transform:uppercase; opacity:.85; font-size:.78rem}
+h1{margin:.25rem 0 .5rem; font-size:clamp(2rem,5vw,4.4rem); line-height:.95; max-width:980px}
+header p{max-width:880px; font-size:clamp(1rem,2.2vw,1.25rem); opacity:.94}
+.topStats{display:grid; grid-template-columns:repeat(4,minmax(150px,1fr)); gap:12px; margin-top:18px; max-width:1050px}
+.stat{background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25); border-radius:16px; padding:14px; backdrop-filter:blur(8px)}
+.stat b{display:block; font-size:1.75rem; line-height:1}
+.stat span{font-size:.9rem; opacity:.88}
+nav{position:sticky; top:0; z-index:10; display:flex; gap:8px; overflow:auto; padding:10px clamp(12px,3vw,48px); background:rgba(255,255,255,.88); backdrop-filter:blur(10px); border-bottom:1px solid #dbe5f3}
+nav button{border:0; background:#e7eefb; color:#12306f; padding:10px 14px; border-radius:999px; font-weight:800; cursor:pointer; white-space:nowrap}
+nav button.active{background:var(--navy); color:white}
+main{max-width:1240px; margin:auto; padding:26px clamp(12px,3vw,32px) 60px}
+.section{display:none; animation:fade .18s ease}
+.section.active{display:block}
+@keyframes fade{from{opacity:.35; transform:translateY(4px)}to{opacity:1; transform:translateY(0)}}
+.grid{display:grid; gap:18px}
+.two{grid-template-columns:1.05fr .95fr}
+.three{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--card); border:1px solid #dbe5f0; border-radius:var(--radius); box-shadow:var(--shadow); padding:20px}
+.card h2,.card h3{margin-top:0}
+.pill{display:inline-flex; align-items:center; gap:7px; padding:7px 10px; border-radius:999px; background:#eaf2ff; color:#12306f; font-weight:800; font-size:.86rem}
+.warn{background:#fff7ed; border-color:#fed7aa}
+.good{background:#f0fdf4; border-color:#bbf7d0}
+.danger{background:#fef2f2; border-color:#fecaca}
+.note{color:var(--muted); line-height:1.55}
+.hazardRow{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+.hazard{padding:18px; border-radius:18px; border:2px solid transparent; cursor:pointer; background:#f8fbff; min-height:150px; transition:.15s}
+.hazard:hover,.hazard.selected{transform:translateY(-2px); border-color:var(--blue); box-shadow:0 10px 26px rgba(31,102,209,.14)}
+.hazard .icon{font-size:2rem}
+.reveal{margin-top:14px; padding:16px; border-radius:16px; background:#f5f8ff; border:1px dashed #9eb7e6}
+.levels{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; align-items:stretch}
+.level{position:relative; padding:18px 14px; min-height:230px; border-radius:18px; color:white; cursor:pointer; background:linear-gradient(180deg,#1545bd,#0d2d86); overflow:hidden; transition:.15s}
+.level:nth-child(2){background:linear-gradient(180deg,#216bd8,#1749a2)}
+.level:nth-child(3){background:linear-gradient(180deg,#4f83d8,#2c5fb8)}
+.level:nth-child(4){background:linear-gradient(180deg,#7187a3,#4d6077)}
+.level:nth-child(5){background:linear-gradient(180deg,#a16207,#7c2d12)}
+.level:hover,.level.active{transform:translateY(-4px); outline:4px solid rgba(37,99,235,.22)}
+.level .num{position:absolute; right:14px; bottom:6px; font-size:5rem; font-weight:1000; opacity:.32}
+.level h3{margin:0 0 8px; font-size:1.05rem}
+.level p{font-size:.88rem; line-height:1.35; margin:0}
+.systemCards{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+.system{border:2px solid #d7e2f1; border-radius:16px; padding:14px; cursor:pointer; background:#fff}
+.system.active{border-color:var(--blue); background:#eef6ff}
+.system b{display:block; color:#0e2f7c; margin-bottom:6px}
+.definitionTools{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px}
+input[type="search"],input[type="text"],textarea,select{border:1px solid #cbd5e1; border-radius:12px; padding:11px 12px; font:inherit; background:white; min-width:220px}
+.defGrid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+.def{border:1px solid #dbe5f0; border-radius:14px; padding:14px; background:#fbfdff}
+.def b{color:#0e2f7c}
+.smallBtn,.primaryBtn{border:0; border-radius:12px; padding:10px 13px; font-weight:900; cursor:pointer}
+.smallBtn{background:#e7eefb; color:#12306f}
+.primaryBtn{background:var(--navy); color:white}
+.chartWrap{display:grid; gap:10px}
+.bar{display:grid; grid-template-columns:230px 1fr 58px; align-items:center; gap:10px; font-weight:750}
+.track{height:24px; border-radius:999px; background:#e5eaf3; overflow:hidden}
+.fill{height:100%; border-radius:999px; background:linear-gradient(90deg,#1f66d1,#0ea5e9); width:0; transition:width .8s ease}
+.inspection{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.checklist{border-collapse:collapse; width:100%; font-size:.93rem}
+.checklist th{background:var(--navy); color:white; text-align:left; padding:8px}
+.checklist th.pass{background:var(--green)} .checklist th.fail{background:var(--red)}
+.checklist td{border:1px solid #cfd8e6; padding:8px}
+.checklist td:nth-child(2),.checklist td:nth-child(3){text-align:center; width:56px}
+.checklist input{width:20px; height:20px}
+.imgBox{background:white; border:1px solid #dbe5f0; border-radius:16px; overflow:hidden; box-shadow:var(--shadow)}
+.imgBox img{width:100%; display:block}
+.placeholder{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:28px; min-height:260px; background:repeating-linear-gradient(135deg,#f8fbff,#f8fbff 18px,#eef4ff 18px,#eef4ff 36px); border:2px dashed #9eb7e6; color:#12306f}
+.placeholderIcon{font-size:2.8rem; line-height:1; margin-bottom:10px}
+.placeholder h3{margin:0 0 8px}
+.placeholder p{margin:4px 0}
+
+.accordion details{border:1px solid #dbe5f0; background:white; border-radius:14px; margin-bottom:10px; padding:12px}
+.accordion summary{cursor:pointer; font-weight:900; color:#0e2f7c}
+.sourceList a{color:#1644b3; font-weight:800}
+footer{padding:26px; text-align:center; color:#64748b}
+.flash{min-height:190px; display:grid; place-items:center; text-align:center; cursor:pointer; user-select:none; background:linear-gradient(135deg,#ffffff,#eef6ff)}
+.flash b{font-size:1.7rem; color:#0e2f7c}
+@media(max-width:900px){.two,.three,.inspection,.defGrid{grid-template-columns:1fr} .topStats,.hazardRow,.systemCards{grid-template-columns:1fr 1fr} .levels{grid-template-columns:1fr} .bar{grid-template-columns:1fr}}
+@media(max-width:560px){.topStats,.hazardRow,.systemCards{grid-template-columns:1fr} header{padding:22px 14px}}
+@media print{nav,.primaryBtn,.smallBtn{display:none!important} body{background:white} .section{display:block!important; page-break-after:always} .card{box-shadow:none}}
+</style>
+</head>
+<body>
+<header>
+<div class="kicker">RT102 Safety Module</div>
+<h1>Working at Heights</h1>
+<p>An interactive student page for recognizing fall hazards, choosing controls, understanding fall protection systems, and practicing a harness inspection.</p>
+<div class="topStats">
+<div class="stat"><b>4 ft</b><span>General industry trigger point used in this lesson</span></div>
+<div class="stat"><b>6 ft</b><span>Construction trigger point used in this lesson</span></div>
+<div class="stat"><b>389</b><span>Fatal falls, slips, and trips in construction, 2024</span></div>
+<div class="stat"><b>3</b><span>Major hazards: falls, suspension trauma, dropped objects</span></div>
+</div>
+</header>
+<nav id="nav"></nav>
+<main>
+<section class="section active" data-title="Overview" id="overview">
+<div class="grid two">
+<div class="card">
+<span class="pill">Start here</span>
+<h2>What counts as Working at Heights?</h2>
+<p class="note">For this RT102 lesson, treat work at height as any task where a person could fall to a lower level or where a falling object could strike someone below.</p>
+<div class="grid two">
+<div class="card good"><h3>General Industry</h3><p><b>≥ 4 ft</b> is the lesson threshold.</p></div>
+<div class="card warn"><h3>Construction</h3><p><b>≥ 6 ft</b> is the lesson threshold.</p></div>
+</div>
+<p class="note"><b>Instructor note:</b> site safety can treat any distance as Working at Heights when the risk is significant or obvious.</p>
+</div>
+<div class="card">
+<h2>Where could RT102 students see W@H?</h2>
+<div class="systemCards">
+<div class="system"><b>Ladders</b>Three points of contact, setup angle, footing, and overreach.</div>
+<div class="system"><b>Scaffolds</b>Platforms, guardrails, access, inspection, and falling objects.</div>
+<div class="system"><b>Boom lifts</b>Anchorage, tie-off, motion hazards, and rescue planning.</div>
+<div class="system"><b>Scissor lifts</b>Guardrails, gates/chains, pothole protection, and level surfaces.</div>
+</div>
+</div>
+</div>
+<div class="card" style="margin-top:18px">
+<h2>What are the hazards?</h2>
+<div class="hazardRow" id="hazards"></div>
+<div class="reveal" id="hazardReveal">Click a hazard card to show what students should be looking for.</div>
+</div>
+</section>
+<section class="section" data-title="Rules &amp; Sources" id="rules">
+<div class="grid two">
+<div class="card">
+<h2>Who makes the rules?</h2>
+<p><b>OSHA</b> sets the legal requirements for work conducted at heights.</p>
+<p><b>ANSI, ASSE/ASSP, manufacturers, and employers</b> may publish standards or procedures that are more specific or more restrictive than OSHA minimum requirements.</p>
+<div class="card warn"><b>Teaching point:</b> Always follow the most protective applicable rule: law, employer policy, site plan, manufacturer manual, or task-specific procedure.</div>
+</div>
+<div class="card sourceList">
+<h2>OSHA links for student reference</h2>
+<p><a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910SubpartD" target="_blank">General Industry: 1910 Subpart D Walking-Working Surfaces</a></p>
+<p><a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.21" target="_blank">General Industry: 1910.21 Scope and definitions</a></p>
+<p><a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926SubpartM" target="_blank">Construction: 1926 Subpart M Fall Protection</a></p>
+<p><a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.501" target="_blank">Construction: 1926.501 Duty to have fall protection</a></p>
+<p><a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.502" target="_blank">Construction: 1926.502 Criteria and practices</a></p>
+<p><a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.503" target="_blank">Construction: 1926.503 Training requirements</a></p>
+</div>
+</div>
+</section>
+<section class="section" data-title="Hierarchy" id="hierarchy">
+<div class="card">
+<h2>Hierarchy of Controls Applied to Working at Heights</h2>
+<p class="note">Click a control level. The goal is to move as high on the hierarchy as practical before relying on PPE.</p>
+<div class="levels" id="levels"></div>
+<div class="reveal" id="levelReveal">Select a level to see examples.</div>
+</div>
+<div class="grid two" style="margin-top:18px">
+<div class="imgBox"><div class="placeholder" style="min-height:320px"><div class="placeholderIcon">🖼️</div><h3>Hierarchy of Controls Image Placeholder</h3><p>Insert your hierarchy of fall protection graphic here.</p><p class="note">You can swap this placeholder with a screenshot, photo, or diagram later.</p></div></div>
+<div class="card">
+<h2>Quick check</h2>
+<p><b>Which is better?</b> Installing guardrails before work starts or telling students to “be careful” near an open edge?</p>
+<button class="primaryBtn" onclick="document.getElementById('quickAnswer').textContent='Guardrails. That is an engineering/passive control that isolates people from the hazard. “Be careful” is administrative and weaker.'">Show answer</button>
+<p class="reveal" id="quickAnswer"></p>
+</div>
+</div>
+</section>
+<section class="section" data-title="Systems" id="systems">
+<div class="card">
+<h2>Fall Protection Systems: prevention, restraint, arrest, positioning</h2>
+<div class="systemCards" id="systemCards"></div>
+<div class="reveal" id="systemReveal">Click a system to compare what it does and what it does not do.</div>
+</div>
+</section>
+<section class="section" data-title="Definitions" id="definitions">
+<div class="card">
+<h2>OSHA Vocabulary Practice</h2>
+<div class="definitionTools">
+<input id="defSearch" oninput="renderDefs()" placeholder="Search terms..." type="search"/>
+<button class="smallBtn" onclick="shuffleFlash()">New flashcard</button>
+<button class="smallBtn" onclick="toggleAllDefs()">Show / hide all</button>
+</div>
+<div class="card flash" id="flash" onclick="flipFlash()"><b>Click “New flashcard”</b></div>
+<div class="defGrid" id="defGrid" style="margin-top:16px"></div>
+</div>
+</section>
+<section class="section" data-title="Harness Inspection" id="inspection">
+<div class="inspection">
+<div class="card">
+<h2>Interactive Harness Inspection Checklist</h2>
+<p class="note">Use this as a practice activity. Students can check pass/fail, add notes, and print the page.</p>
+<div class="grid two">
+<input placeholder="Manufacturer of equipment" type="text"/>
+<input placeholder="Inspector name" type="text"/>
+<input placeholder="Industry / site" type="text"/>
+<input placeholder="Date of inspection" type="text"/>
+</div>
+<div id="checkTables" style="margin-top:14px"></div>
+<textarea placeholder="Inspection notes / defects found / action taken" style="width:100%; min-height:90px; margin-top:14px"></textarea>
+<p><button class="primaryBtn" onclick="window.print()">Print checklist</button> <button class="smallBtn" onclick="resetChecks()">Reset checks</button></p>
+</div>
+<div class="card">
+<h2>Harness reference image</h2>
+<div class="imgBox"><div class="placeholder" style="min-height:470px"><div class="placeholderIcon">🖼️</div><h3>Harness Inspection Image Placeholder</h3><p>Insert the harness inspection checklist or harness reference diagram here.</p><p class="note">You can swap this placeholder with a screenshot, photo, or diagram later.</p></div></div>
+</div>
+</div>
+</section>
+<section class="section" data-title="Incident Data" id="incident">
+<div class="grid two">
+<div class="card">
+<h2>Fatal falls, slips, and trips in selected private industries, 2024</h2>
+<p class="note">Use the bar chart to compare where fall-related fatalities are concentrated.</p>
+<div class="chartWrap" id="bars"></div>
+<p class="note">Source: Bureau of Labor Statistics, The Economics Daily, 2026.</p>
+</div>
+<div class="imgBox"><div class="placeholder" style="min-height:250px"><div class="placeholderIcon">🖼️</div><h3>Incident Data Chart Placeholder</h3><p>Insert the BLS chart or another incident-data image here.</p><p class="note">You can swap this placeholder with a screenshot, photo, or diagram later.</p></div></div>
+</div>
+</section>
+<section class="section" data-title="Knowledge Check" id="quiz">
+<div class="card">
+<h2>Knowledge Check</h2>
+<div id="quizBox"></div>
+<p><button class="primaryBtn" onclick="gradeQuiz()">Check answers</button> <button class="smallBtn" onclick="resetQuiz()">Reset</button></p>
+<div class="reveal" id="quizResult"></div>
+</div>
+</section>
+</main>
+<footer>RT102 Working at Heights interactive page • Built for Canvas/GitHub Pages use</footer>
+<script>
+const sections=[...document.querySelectorAll('.section')];
+const nav=document.getElementById('nav');
+sections.forEach((s,i)=>{let b=document.createElement('button'); b.textContent=s.dataset.title; b.className=i===0?'active':''; b.onclick=()=>showSection(s.id,b); nav.appendChild(b);});
+function showSection(id,btn){sections.forEach(s=>s.classList.toggle('active',s.id===id)); [...nav.children].forEach(b=>b.classList.remove('active')); btn.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'})}
+const hazards=[
+{title:'Falls',icon:'⬇️',text:'A person falls to a lower level from a ladder, scaffold, lift, roof, platform, or open edge. Look for unprotected edges, holes, poor access, slippery surfaces, and overreach.'},
+{title:'Suspension Trauma',icon:'🪢',text:'After a fall arrest, a worker hanging motionless in a harness can develop serious circulation problems. Fall arrest requires a rescue plan, not just a harness.'},
+{title:'Dropped Objects',icon:'🔧',text:'Tools, materials, or parts can fall and injure people below. Use toe boards, tool lanyards, controlled access zones, exclusion zones, and housekeeping.'}
+];
+document.getElementById('hazards').innerHTML=hazards.map((h,i)=>`<div class="hazard" onclick="pickHazard(${i},this)"><div class="icon">${h.icon}</div><h3>${h.title}</h3><p class="note">Click to reveal</p></div>`).join('');
+function pickHazard(i,el){document.querySelectorAll('.hazard').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); document.getElementById('hazardReveal').innerHTML='<b>'+hazards[i].title+':</b> '+hazards[i].text;}
+const levels=[
+{t:'Elimination',d:'Remove the need to work at height.',e:'Use extendable tools; relocate the task to ground level; preassemble on the ground.'},
+{t:'Substitution',d:'Replace the hazard with a safer alternative.',e:'Use drones or remote inspection tools instead of sending a worker to a high location.'},
+{t:'Engineering Controls',d:'Isolate people from the hazard.',e:'Install guardrails, covers, scaffolding, fixed platforms, or aerial lifts when appropriate.'},
+{t:'Administrative Controls',d:'Change how people work.',e:'Training, signage, supervision, permits, restricted areas, rescue plans, and job briefings.'},
+{t:'PPE',d:'Protect the worker with equipment.',e:'Harnesses, lanyards, SRLs, helmets, and other gear. PPE is important but is the last line of defense.'}
+];
+document.getElementById('levels').innerHTML=levels.map((l,i)=>`<div class="level" onclick="pickLevel(${i},this)"><h3>${l.t}</h3><p>${l.d}</p><div class="num">${i+1}</div></div>`).join('');
+function pickLevel(i,el){document.querySelectorAll('.level').forEach(x=>x.classList.remove('active')); el.classList.add('active'); document.getElementById('levelReveal').innerHTML='<b>'+levels[i].t+':</b> '+levels[i].e;}
+const systems=[
+{t:'Fall Protection',d:'A system, device, or method used to prevent a fall or reduce the effect of a fall. This is the broad umbrella term.'},
+{t:'Fall Prevention',d:'Measures intended to stop the person from falling in the first place. Example: guardrails, covers, barriers, planning.'},
+{t:'Fall Arrest',d:'A system designed to catch a person after a fall begins. It does not prevent the fall; it limits impact and requires rescue planning.'},
+{t:'Fall / Work Restraint',d:'A system that limits movement so the person cannot reach the fall hazard.'},
+{t:'Fall Mitigation',d:'Strategies that reduce the severity or consequences of fall risks.'},
+{t:'Work Positioning',d:'A system that supports a person in a tensioned or suspended position so both hands can be used for the task.'}
+];
+document.getElementById('systemCards').innerHTML=systems.map((s,i)=>`<div class="system" onclick="pickSystem(${i},this)"><b>${s.t}</b><span class="note">Click to compare</span></div>`).join('');
+function pickSystem(i,el){document.querySelectorAll('.system').forEach(x=>x.classList.remove('active')); el.classList.add('active'); document.getElementById('systemReveal').innerHTML='<b>'+systems[i].t+':</b> '+systems[i].d;}
+const defs=[
+['Anchorage','A secure point of attachment for lifelines, lanyards, or deceleration devices.'],
+['Body Harness','Straps secured about the employee to distribute fall arrest forces over the thighs, pelvis, waist, chest, and shoulders, with means for attaching to other PFAS components.'],
+['Buckle','A device for holding the body belt or body harness closed around the employee’s body.'],
+['Deceleration Distance','The additional vertical distance a falling employee travels, excluding lifeline elongation and free fall distance, before stopping after the deceleration device begins to operate.'],
+['Failure','Load refusal, breakage, or separation of component parts.'],
+['Free Fall','The act of falling before a personal fall arrest system begins to apply force to arrest the fall.'],
+['Guardrail System','A barrier erected to prevent employees from falling to lower levels.'],
+['Hole','A gap or void 2 feet or more in its least dimension in a floor, roof, or other walking-working surface.'],
+['Lanyard','A flexible line of rope, wire rope, or strap, generally with a connector at each end, used to connect a body harness to other fall protection components.'],
+['Leading Edge','The edge of a floor, roof, formwork, or other walking-working surface that changes location as additional sections are placed, formed, or constructed.'],
+['Lifeline','A flexible line connected to an anchorage vertically or to anchorages horizontally, serving as a means for connecting other PFAS components.'],
+['Opening','A gap or void 30 inches or more high and 18 inches or more wide in a wall or partition through which employees can fall to a lower level.'],
+['Personal Fall Arrest System (PFAS)','A system used to arrest an employee in a fall from a working level. It includes anchorage, connectors, and a body harness, and may include a lanyard, deceleration device, lifeline, or combinations.'],
+['Positioning Device','A body harness system rigged to allow an employee to be supported on an elevated vertical surface and work with both hands free while leaning.'],
+['Safety-Monitoring System','A safety system in which a competent person is responsible for recognizing and warning employees of fall hazards.'],
+['Self-Retracting Lifeline / Lanyard','A deceleration device with a drum-wound line that extends and retracts during normal movement and locks to arrest a fall.'],
+['Snaphook','A connector with a hook-shaped member and normally closed keeper that opens to receive an object and closes to retain it.'],
+['Walking-Working Surface','Any horizontal or vertical surface on which an employee walks or works, including floors, roofs, ramps, bridges, runways, formwork, and reinforcing steel.'],
+['Work Area','The portion of a walking-working surface where job duties are being performed.']
+];
+let allShown=true, flashIndex=0, flashFront=true;
+function renderDefs(){const q=document.getElementById('defSearch').value.toLowerCase(); const rows=defs.filter(d=>(d[0]+' '+d[1]).toLowerCase().includes(q)); document.getElementById('defGrid').innerHTML=rows.map(d=>`<div class="def"><b>${d[0]}</b><p class="note" style="display:${allShown?'block':'none'}">${d[1]}</p></div>`).join('');}
+function toggleAllDefs(){allShown=!allShown; renderDefs();}
+function shuffleFlash(){flashIndex=Math.floor(Math.random()*defs.length); flashFront=true; updateFlash();}
+function flipFlash(){flashFront=!flashFront; updateFlash();}
+function updateFlash(){document.getElementById('flash').innerHTML=flashFront?`<div><span class="pill">Term</span><br><br><b>${defs[flashIndex][0]}</b><p class="note">Click card for definition</p></div>`:`<div><span class="pill">Definition</span><p style="font-size:1.15rem">${defs[flashIndex][1]}</p><p class="note">Click card for term</p></div>`;}
+renderDefs(); shuffleFlash();
+const categories={
+'Labels/Tags':['Missing','Dates','Illegible'],
+'Webbing':['Excessive Wear','Cuts, Burns, Holes','Chemical residue','Excessive UV Damage','Other'],
+'Stitching':['Loose','Missing','Broken','Other'],
+'Hardware':['Cracks, Burrs','Rust, Corrosion','Functionality','Missing Fasteners','Deformed','Slag, burns','Springs']
+};
+function renderChecks(){let out=''; Object.entries(categories).forEach(([cat,items],ci)=>{out+=`<table class="checklist"><thead><tr><th>${ci+1}. ${cat}</th><th class="pass">Pass</th><th class="fail">Fail</th></tr></thead><tbody>`; items.forEach((it,ii)=>out+=`<tr><td><b>${it}</b></td><td><input type="checkbox" name="${cat}-${ii}" onclick="onlyOne(this)"></td><td><input type="checkbox" name="${cat}-${ii}" onclick="onlyOne(this)"></td></tr>`); out+='</tbody></table><br>';}); document.getElementById('checkTables').innerHTML=out;}
+function onlyOne(cb){document.getElementsByName(cb.name).forEach(x=>{if(x!==cb)x.checked=false;})}
+function resetChecks(){document.querySelectorAll('#inspection input[type=checkbox]').forEach(x=>x.checked=false); document.querySelectorAll('#inspection input[type=text],#inspection textarea').forEach(x=>x.value='');}
+renderChecks();
+const data=[['Construction',389],['Trade, transportation, and utilities',104],['Manufacturing',52],['Leisure and hospitality',38],['Natural resources and mining',32],['Other services',30],['Financial activities',18],['Education and health services',17]];
+function renderBars(){const max=Math.max(...data.map(d=>d[1])); document.getElementById('bars').innerHTML=data.map(d=>`<div class="bar"><span>${d[0]}</span><div class="track"><div class="fill" style="width:${(d[1]/max*100).toFixed(1)}%"></div></div><span>${d[1]}</span></div>`).join('');}
+renderBars();
+const qs=[
+{q:'The most preferred way to control a W@H hazard is:',a:['PPE','Elimination','Administrative controls','Warning signs'],c:1},
+{q:'Fall arrest equipment:',a:['Prevents all falls from starting','Catches a worker after a fall begins','Eliminates the hazard','Replaces rescue planning'],c:1},
+{q:'A restraint system is intended to:',a:['Keep the worker from reaching the fall hazard','Let the worker fall farther','Replace inspections','Support dropped tools'],c:0},
+{q:'Which hazard is created after a worker is hanging in a harness after a fall?',a:['Suspension trauma','UV damage','Leading edge','Guardrail failure'],c:0},
+{q:'For this lesson, construction work at height is treated as:',a:['2 ft or more','4 ft or more','6 ft or more','Only above 20 ft'],c:2}
+];
+function renderQuiz(){document.getElementById('quizBox').innerHTML=qs.map((q,i)=>`<div class="card" style="box-shadow:none;margin-bottom:12px"><h3>${i+1}. ${q.q}</h3>${q.a.map((a,j)=>`<label style="display:block;margin:8px 0"><input type="radio" name="q${i}" value="${j}"> ${a}</label>`).join('')}</div>`).join(''); document.getElementById('quizResult').textContent='';}
+function gradeQuiz(){let score=0; qs.forEach((q,i)=>{const picked=document.querySelector(`input[name=q${i}]:checked`); if(picked && Number(picked.value)===q.c) score++;}); document.getElementById('quizResult').innerHTML=`<b>Score: ${score} / ${qs.length}</b><br>${score===qs.length?'Nice. Students are ready for inspection practice.':'Review the missed items, then try again.'}`;}
+function resetQuiz(){renderQuiz();}
+renderQuiz();
+</script>
+</body>
+</html>
