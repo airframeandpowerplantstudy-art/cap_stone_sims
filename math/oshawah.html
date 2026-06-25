@@ -196,7 +196,7 @@ footer{padding:26px; text-align:center; color:#64748b}
 <div class="inspection">
 <div class="card">
 <h2>Interactive Harness Inspection Checklist</h2>
-<p class="note">Use this as a practice activity. Students can check pass/fail, add notes, and print the page.</p>
+<p class="note">Use this as a practice activity. You can check pass/fail, add notes, and print the page.</p>
 <div class="grid two">
 <input placeholder="Manufacturer of equipment" type="text"/>
 <input placeholder="Inspector name" type="text"/>
@@ -233,7 +233,7 @@ footer{padding:26px; text-align:center; color:#64748b}
 </div>
 </section>
 </main>
-<footer>RT102 Working at Heights interactive page • Built for Canvas/GitHub Pages use</footer>
+<footer>Working at Heights Interactive</footer>
 <script>
 const sections=[...document.querySelectorAll('.section')];
 const nav=document.getElementById('nav');
@@ -286,12 +286,12 @@ const defs=[
 ['Walking-Working Surface','Any horizontal or vertical surface on which an employee walks or works, including floors, roofs, ramps, bridges, runways, formwork, and reinforcing steel.'],
 ['Work Area','The portion of a walking-working surface where job duties are being performed.']
 ];
-let allShown=true, flashIndex=0, flashFront=true;
+let allShown=false, flashIndex=0, flashFront=true;
 function renderDefs(){const q=document.getElementById('defSearch').value.toLowerCase(); const rows=defs.filter(d=>(d[0]+' '+d[1]).toLowerCase().includes(q)); document.getElementById('defGrid').innerHTML=rows.map(d=>`<div class="def"><b>${d[0]}</b><p class="note" style="display:${allShown?'block':'none'}">${d[1]}</p></div>`).join('');}
 function toggleAllDefs(){allShown=!allShown; renderDefs();}
 function shuffleFlash(){flashIndex=Math.floor(Math.random()*defs.length); flashFront=true; updateFlash();}
 function flipFlash(){flashFront=!flashFront; updateFlash();}
-function updateFlash(){document.getElementById('flash').innerHTML=flashFront?`<div><span class="pill">Term</span><br><br><b>${defs[flashIndex][0]}</b><p class="note">Click card for definition</p></div>`:`<div><span class="pill">Definition</span><p style="font-size:1.15rem">${defs[flashIndex][1]}</p><p class="note">Click card for term</p></div>`;}
+function updateFlash(){document.getElementById('flash').innerHTML=flashFront?`<div><span class="pill">Term</span><br><br><b>${defs[flashIndex][0]}</b><p class="note">Click Card</p></div>`:`<div><span class="pill">Definition</span><p style="font-size:1.15rem">${defs[flashIndex][1]}</p><p class="note">Click Card</p></div>`;}
 renderDefs(); shuffleFlash();
 const categories={
 'Labels/Tags':['Missing','Dates','Illegible'],
@@ -314,7 +314,7 @@ const qs=[
 {q:'For this lesson, construction work at height is treated as:',a:['2 ft or more','4 ft or more','6 ft or more','Only above 20 ft'],c:2}
 ];
 function renderQuiz(){document.getElementById('quizBox').innerHTML=qs.map((q,i)=>`<div class="card" style="box-shadow:none;margin-bottom:12px"><h3>${i+1}. ${q.q}</h3>${q.a.map((a,j)=>`<label style="display:block;margin:8px 0"><input type="radio" name="q${i}" value="${j}"> ${a}</label>`).join('')}</div>`).join(''); document.getElementById('quizResult').textContent='';}
-function gradeQuiz(){let score=0; qs.forEach((q,i)=>{const picked=document.querySelector(`input[name=q${i}]:checked`); if(picked && Number(picked.value)===q.c) score++;}); document.getElementById('quizResult').innerHTML=`<b>Score: ${score} / ${qs.length}</b><br>${score===qs.length?'Nice. Students are ready for inspection practice.':'Review the missed items, then try again.'}`;}
+function gradeQuiz(){let score=0; qs.forEach((q,i)=>{const picked=document.querySelector(`input[name=q${i}]:checked`); if(picked && Number(picked.value)===q.c) score++;}); document.getElementById('quizResult').innerHTML=`<b>Score: ${score} / ${qs.length}</b><br>${score===qs.length?'Nice. You are ready for inspection practice.':'Review the missed items, then try again.'}`;}
 function resetQuiz(){renderQuiz();}
 renderQuiz();
 </script>
