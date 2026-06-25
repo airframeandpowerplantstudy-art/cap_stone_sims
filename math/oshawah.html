@@ -164,8 +164,47 @@ footer{padding:26px; text-align:center; color:#64748b}
 .flash b{font-size:1.7rem; color:#0e2f7c}
 @media(max-width:900px){.two,.three,.inspection,.defGrid{grid-template-columns:1fr} .topStats,.hazardRow,.systemCards{grid-template-columns:1fr 1fr} .levels{grid-template-columns:1fr} .bar{grid-template-columns:1fr}}
 @media(max-width:560px){.topStats,.hazardRow,.systemCards{grid-template-columns:1fr} header{padding:22px 14px}}
-@media print{nav,.primaryBtn,.smallBtn{display:none!important} body{background:white} .section{display:block!important; page-break-after:always} .card{box-shadow:none}}
-</style>
+@media print{
+  header,
+  nav,
+  footer,
+  .section{
+    display:none !important;
+  }
+
+  #inspection{
+    display:block !important;
+  }
+
+  #inspection .primaryBtn,
+  #inspection .smallBtn{
+    display:none !important;
+  }
+
+  body{
+    background:white;
+  }
+
+  main{
+    max-width:none;
+    margin:0;
+    padding:0;
+  }
+
+  #inspection .card{
+    box-shadow:none;
+    border:1px solid #999;
+  }
+
+  #inspection .inspection{
+    display:block;
+  }
+
+  #inspection .imgBox{
+    display:none;
+  }
+}
+  </style>
 </head>
 <body>
 <header>
