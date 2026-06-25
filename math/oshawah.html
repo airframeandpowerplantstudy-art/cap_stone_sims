@@ -96,10 +96,40 @@ main{max-width:1240px; margin:auto; padding:26px clamp(12px,3vw,32px) 60px}
   margin-top:10px;
   padding-top:10px;
 }
-.systemCards{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
-.system{border:2px solid #d7e2f1; border-radius:16px; padding:14px; cursor:pointer; background:#fff}
-.system.active{border-color:var(--blue); background:#eef6ff}
-.system b{display:block; color:#0e2f7c; margin-bottom:6px}
+.systemCards{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; align-items:stretch}
+.system{
+  border:2px solid #d7e2f1;
+  border-radius:16px;
+  padding:18px;
+  cursor:pointer;
+  background:#fff;
+  min-height:145px;
+  transition:.2s ease;
+  overflow:hidden;
+}
+.system:hover,
+.system.active{
+  border-color:var(--blue);
+  background:#eef6ff;
+  transform:translateY(-3px);
+  box-shadow:0 10px 26px rgba(31,102,209,.12);
+}
+.system b{display:block; color:#0e2f7c; margin-bottom:8px}
+.system .systemAnswer{
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  margin-top:0;
+  padding-top:0;
+  border-top:1px solid #bfd1ee;
+  transition:max-height .35s ease, opacity .25s ease, margin-top .25s ease, padding-top .25s ease;
+}
+.system.active .systemAnswer{
+  max-height:220px;
+  opacity:1;
+  margin-top:12px;
+  padding-top:12px;
+}
 .definitionTools{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px}
 input[type="search"],input[type="text"],textarea,select{border:1px solid #cbd5e1; border-radius:12px; padding:11px 12px; font:inherit; background:white; min-width:220px}
 .defGrid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
@@ -219,7 +249,7 @@ footer{padding:26px; text-align:center; color:#64748b}
 <div class="card">
 <h2>Fall Protection Systems: prevention, restraint, arrest, positioning</h2>
 <div class="systemCards" id="systemCards"></div>
-<div class="reveal" id="systemReveal">Click a system to compare what it does and what it does not do.</div>
+<div class="reveal">Click a card to slide open the explanation. Click it again to close.</div>
 </div>
 </section>
 <section class="section" data-title="Definitions" id="definitions">
@@ -320,8 +350,20 @@ function pickLevel(i,el){
 {t:'Fall Mitigation',d:'Strategies that reduce the severity or consequences of fall risks.'},
 {t:'Work Positioning',d:'A system that supports a person in a tensioned or suspended position so both hands can be used for the task.'}
 ];
-document.getElementById('systemCards').innerHTML=systems.map((s,i)=>`<div class="system" onclick="pickSystem(${i},this)"><b>${s.t}</b><span class="note">Click to compare</span></div>`).join('');
-function pickSystem(i,el){document.querySelectorAll('.system').forEach(x=>x.classList.remove('active')); el.classList.add('active'); document.getElementById('systemReveal').innerHTML='<b>'+systems[i].t+':</b> '+systems[i].d;}
+document.getElementById('systemCards').innerHTML=systems.map((s,i)=>`
+  <div class="system" onclick="pickSystem(${i},this)">
+    <b>${s.t}</b>
+    <span class="note">Click to reveal</span>
+    <div class="systemAnswer">${s.d}</div>
+  </div>
+`).join('');
+function pickSystem(i,el){
+  const wasActive = el.classList.contains('active');
+  document.querySelectorAll('#systemCards .system').forEach(x=>x.classList.remove('active'));
+  if(!wasActive){
+    el.classList.add('active');
+  }
+}
 const defs=[
 ['Anchorage','A secure point of attachment for lifelines, lanyards, or deceleration devices.'],
 ['Body Harness','Straps secured about the employee to distribute fall arrest forces over the thighs, pelvis, waist, chest, and shoulders, with means for attaching to other PFAS components.'],
