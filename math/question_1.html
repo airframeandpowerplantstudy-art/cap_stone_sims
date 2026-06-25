@@ -11,16 +11,19 @@
     --ink:#243025;
   }
   *{ box-sizing:border-box; }
-  body{
+  html, body{
     margin:0;
+    padding:0;
     font-family:Arial, Helvetica, sans-serif;
     background:#eef2f6;
     color:#12263a;
+    overflow-x:hidden;
   }
   .lab-wrap{
-    max-width:1200px;
+    width:100%;
+    max-width:1000px;
     margin:0 auto;
-    padding:14px;
+    padding:8px;
   }
   .lab-card{
     background:#fff;
@@ -32,14 +35,14 @@
   .controls{
     display:flex;
     flex-wrap:wrap;
-    gap:10px;
+    gap:8px;
     align-items:center;
-    padding:12px 14px;
+    padding:10px;
     background:#f8fafc;
     border-bottom:1px solid #d0d7de;
   }
   .title{
-    font-size:20px;
+    font-size:18px;
     font-weight:700;
     margin-right:auto;
   }
@@ -47,7 +50,7 @@
     border:1px solid #aeb9c5;
     background:#fff;
     border-radius:10px;
-    padding:8px 12px;
+    padding:8px 10px;
     font-weight:700;
     cursor:pointer;
     color:#17324d;
@@ -58,15 +61,16 @@
     border-color:#1f4e79;
   }
   .directions{
-    padding:10px 14px;
+    padding:8px 10px;
     background:#fff8e1;
     border-bottom:1px solid #e8dca5;
-    font-size:14px;
-    line-height:1.4;
+    font-size:13px;
+    line-height:1.35;
   }
+
   #stage{
     position:relative;
-    height:650px;
+    width:100%;
     overflow:hidden;
     touch-action:none;
     user-select:none;
@@ -75,10 +79,20 @@
       linear-gradient(90deg, #e8edf3 1px, transparent 1px);
     background-size:24px 24px;
   }
+
+  #scene{
+    position:absolute;
+    left:0;
+    top:0;
+    width:1100px;
+    height:650px;
+    transform-origin:top left;
+  }
+
   .bill{
     position:absolute;
     left:50%;
-    top:150px;
+    top:105px;
     transform:translateX(-50%);
     width:737px;
     height:313px;
@@ -144,7 +158,7 @@
   .lab-note{
     position:absolute;
     left:50%;
-    top:480px;
+    top:438px;
     transform:translateX(-50%);
     background:rgba(255,255,255,.92);
     border:1px solid #ccd5df;
@@ -155,8 +169,8 @@
   }
   .ruler{
     position:absolute;
-    left:105px;
-    top:520px;
+    left:85px;
+    top:505px;
     width:930px;
     height:94px;
     transform-origin:30px 47px;
@@ -212,22 +226,24 @@
     </div>
 
     <div id="stage">
-      <div class="bill" aria-label="Simplified dollar bill drawn to scale">
-        <div class="billText">UTI RESERVE NOTE</div>
-        <div class="portrait"></div>
-        <div class="one left">1</div>
-        <div class="one right">1</div>
-      </div>
+      <div id="scene">
+        <div class="bill" aria-label="Simplified dollar bill drawn to scale">
+          <div class="billText">UTI RESERVE NOTE</div>
+          <div class="portrait"></div>
+          <div class="one left">1</div>
+          <div class="one right">1</div>
+        </div>
 
-      <div class="lab-note">Measure Carefully!</div>
+        <div class="lab-note">Measure Carefully!</div>
 
-      <div id="ruler" class="ruler" aria-label="Draggable ruler">
-        <svg id="rulerSvg" width="930" height="94" viewBox="0 0 930 94" xmlns="http://www.w3.org/2000/svg"></svg>
-        <div id="rotHandle" class="rotate-handle" title="Drag to rotate">↻</div>
-      </div>
+        <div id="ruler" class="ruler" aria-label="Draggable ruler">
+          <svg id="rulerSvg" width="930" height="94" viewBox="0 0 930 94" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div id="rotHandle" class="rotate-handle" title="Drag to rotate">↻</div>
+        </div>
 
-      <div class="mode-label" id="modeLabel">
-        Current ruler: <strong>1/32 inch</strong>
+        <div class="mode-label" id="modeLabel">
+          Current ruler: <strong>1/32 inch</strong>
+        </div>
       </div>
     </div>
   </div>
@@ -235,7 +251,11 @@
 
 <script>
 (function(){
+  const DESIGN_W = 1100;
+  const DESIGN_H = 650;
+
   const stage = document.getElementById('stage');
+  const scene = document.getElementById('scene');
   const ruler = document.getElementById('ruler');
   const svg = document.getElementById('rulerSvg');
   const inchBtn = document.getElementById('inchBtn');
@@ -244,11 +264,21 @@
 
   const pxPerMm = 4.72;
   const pxPerIn = pxPerMm * 25.4;
+  let scale = 1;
 
-  let x = 105;
-  let y = 520;
+  let x = 85;
+  let y = 505;
   let angle = 0;
   let drag = null;
+
+  function fitStage(){
+    const available = stage.clientWidth || DESIGN_W;
+    scale = Math.min(1, available / DESIGN_W);
+    scene.style.transform = 'scale(' + scale + ')';
+    stage.style.height = (DESIGN_H * scale) + 'px';
+  }
+
+  window.addEventListener('resize', fitStage);
 
   function make(tag){
     return document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -289,7 +319,6 @@
     const endMargin = 34;
     const bodyWidth = (zeroX - rulerLeft) + measuringWidth + endMargin;
 
-    // Ruler body starts before the zero mark, like a real ruler.
     svg.appendChild(rect(rulerLeft, top, bodyWidth, h, '#fff', '#111', 2));
 
     for(let i=0; i<=inches*32; i++){
@@ -298,7 +327,6 @@
       let tick = 9;
       let sw = 1;
 
-      // Keep tick marks in the upper reading band so they do not intersect the numbers.
       if(rem === 0){ tick = 36; sw = 2; }
       else if(rem === 16){ tick = 30; sw = 1.7; }
       else if(rem === 8 || rem === 24){ tick = 24; sw = 1.45; }
@@ -313,10 +341,6 @@
       svg.appendChild(text(xx, top + 59, String(n), 22, 'middle'));
     }
 
-    // Small start line before zero so students can see that zero is not the ruler edge.
-    svg.appendChild(line(rulerLeft + 8, top + h - 7, zeroX - 7, top + h - 7, '#777', 1));
-   //
-    //svg.appendChild(text(rulerLeft + 6, 90, 'inches — zero mark is inset; each small mark = 1/32 in', 14));
     modeLabel.innerHTML = 'Current ruler: <strong>1/32 inch</strong>';
     inchBtn.classList.add('active');
     metricBtn.classList.remove('active');
@@ -330,7 +354,6 @@
     const endMargin = 34;
     const bodyWidth = (zeroX - rulerLeft) + measuringWidth + endMargin;
 
-    // Ruler body starts before the zero mark, like a real ruler.
     svg.appendChild(rect(rulerLeft, top, bodyWidth, h, '#fff', '#111', 2));
 
     for(let i=0; i<=mm; i++){
@@ -338,7 +361,6 @@
       let tick = 12;
       let sw = 1.05;
 
-      // Keep tick marks in the upper reading band so they do not intersect the numbers.
       if(i % 10 === 0){ tick = 36; sw = 2; }
       else if(i % 5 === 0){ tick = 26; sw = 1.6; }
 
@@ -350,9 +372,6 @@
       svg.appendChild(text(xx, top + 59, String(cm), 21, 'middle'));
     }
 
-    // Small start line before zero so students can see that zero is not the ruler edge.
-    svg.appendChild(line(rulerLeft + 8, top + h - 7, zeroX - 7, top + h - 7, '#777', 1));
-    //svg.appendChild(text(rulerLeft + 6, 90, 'centimeters — zero mark is inset; each small mark = 1 mm', 14));
     modeLabel.innerHTML = 'Current ruler: <strong>millimeter</strong>';
     metricBtn.classList.add('active');
     inchBtn.classList.remove('active');
@@ -364,15 +383,18 @@
     ruler.style.transform = 'rotate(' + angle + 'deg)';
   }
 
-  function getStagePoint(e){
+  function getScenePoint(e){
     const r = stage.getBoundingClientRect();
-    return { x:e.clientX - r.left, y:e.clientY - r.top };
+    return {
+      x:(e.clientX - r.left) / scale,
+      y:(e.clientY - r.top) / scale
+    };
   }
 
   ruler.addEventListener('pointerdown', (e) => {
     if(e.target.id === 'rotHandle') return;
     ruler.setPointerCapture(e.pointerId);
-    const p = getStagePoint(e);
+    const p = getScenePoint(e);
     drag = { type:'move', dx:p.x - x, dy:p.y - y };
   });
 
@@ -384,7 +406,7 @@
 
   ruler.addEventListener('pointermove', (e) => {
     if(!drag) return;
-    const p = getStagePoint(e);
+    const p = getScenePoint(e);
 
     if(drag.type === 'move'){
       x = p.x - drag.dx;
@@ -405,12 +427,13 @@
     applyTransform();
   });
   document.getElementById('resetBtn').addEventListener('click', () => {
-    x = 105; y = 520; angle = 0;
+    x = 85; y = 505; angle = 0;
     applyTransform();
   });
 
   drawInch();
   applyTransform();
+  fitStage();
 })();
 </script>
 </body>
