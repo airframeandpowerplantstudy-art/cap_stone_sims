@@ -157,7 +157,7 @@
     position:absolute;
     left:105px;
     top:520px;
-    width:860px;
+    width:930px;
     height:94px;
     transform-origin:30px 47px;
     cursor:grab;
@@ -222,7 +222,7 @@
       <div class="lab-note">Measure Carefully!</div>
 
       <div id="ruler" class="ruler" aria-label="Draggable ruler">
-        <svg id="rulerSvg" width="860" height="94" viewBox="0 0 860 94" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="rulerSvg" width="930" height="94" viewBox="0 0 930 94" xmlns="http://www.w3.org/2000/svg"></svg>
         <div id="rotHandle" class="rotate-handle" title="Drag to rotate">↻</div>
       </div>
 
@@ -283,32 +283,39 @@
 
   function drawInch(){
     svg.innerHTML = '';
-    const left = 24, top = 12, h = 62;
+    const rulerLeft = 18, zeroX = 48, top = 12, h = 62;
     const inches = 7;
-    const width = inches * pxPerIn;
+    const measuringWidth = inches * pxPerIn;
+    const endMargin = 34;
+    const bodyWidth = (zeroX - rulerLeft) + measuringWidth + endMargin;
 
-    svg.appendChild(rect(left, top, width, h, '#fff', '#111', 2));
+    // Ruler body starts before the zero mark, like a real ruler.
+    svg.appendChild(rect(rulerLeft, top, bodyWidth, h, '#fff', '#111', 2));
 
     for(let i=0; i<=inches*32; i++){
-      const xx = left + (i/32) * pxPerIn;
+      const xx = zeroX + (i/32) * pxPerIn;
       const rem = i % 32;
       let tick = 9;
       let sw = 1;
 
-      if(rem === 0){ tick = 50; sw = 2; }
-      else if(rem === 16){ tick = 40; sw = 1.7; }
-      else if(rem === 8 || rem === 24){ tick = 31; sw = 1.45; }
-      else if(rem === 4 || rem === 12 || rem === 20 || rem === 28){ tick = 24; sw = 1.25; }
-      else if(rem % 2 === 0){ tick = 17; sw = 1.05; }
+      // Keep tick marks in the upper reading band so they do not intersect the numbers.
+      if(rem === 0){ tick = 36; sw = 2; }
+      else if(rem === 16){ tick = 30; sw = 1.7; }
+      else if(rem === 8 || rem === 24){ tick = 24; sw = 1.45; }
+      else if(rem === 4 || rem === 12 || rem === 20 || rem === 28){ tick = 18; sw = 1.25; }
+      else if(rem % 2 === 0){ tick = 13; sw = 1.05; }
 
       svg.appendChild(line(xx, top, xx, top + tick, '#111', sw));
     }
 
     for(let n=0; n<=inches; n++){
-      const xx = left + n * pxPerIn;
-      svg.appendChild(text(xx + 4, top + 56, String(n), 27));
+      const xx = zeroX + n * pxPerIn;
+      svg.appendChild(text(xx, top + 59, String(n), 22, 'middle'));
     }
-    svg.appendChild(text(left + 4, 89, 'inches — each small mark = 1/32 in', 15));
+
+    // Small start line before zero so students can see that zero is not the ruler edge.
+    svg.appendChild(line(rulerLeft + 8, top + h - 7, zeroX - 7, top + h - 7, '#777', 1));
+    svg.appendChild(text(rulerLeft + 6, 90, 'inches — zero mark is inset; each small mark = 1/32 in', 14));
     modeLabel.innerHTML = 'Current ruler: <strong>1/32 inch</strong>';
     inchBtn.classList.add('active');
     metricBtn.classList.remove('active');
@@ -316,28 +323,35 @@
 
   function drawMetric(){
     svg.innerHTML = '';
-    const left = 24, top = 12, h = 62;
+    const rulerLeft = 18, zeroX = 48, top = 12, h = 62;
     const mm = 170;
-    const width = mm * pxPerMm;
+    const measuringWidth = mm * pxPerMm;
+    const endMargin = 34;
+    const bodyWidth = (zeroX - rulerLeft) + measuringWidth + endMargin;
 
-    svg.appendChild(rect(left, top, width, h, '#fff', '#111', 2));
+    // Ruler body starts before the zero mark, like a real ruler.
+    svg.appendChild(rect(rulerLeft, top, bodyWidth, h, '#fff', '#111', 2));
 
     for(let i=0; i<=mm; i++){
-      const xx = left + i * pxPerMm;
+      const xx = zeroX + i * pxPerMm;
       let tick = 12;
       let sw = 1.05;
 
-      if(i % 10 === 0){ tick = 50; sw = 2; }
-      else if(i % 5 === 0){ tick = 35; sw = 1.6; }
+      // Keep tick marks in the upper reading band so they do not intersect the numbers.
+      if(i % 10 === 0){ tick = 36; sw = 2; }
+      else if(i % 5 === 0){ tick = 26; sw = 1.6; }
 
       svg.appendChild(line(xx, top, xx, top + tick, '#111', sw));
     }
 
     for(let cm=0; cm<=17; cm++){
-      const xx = left + cm * 10 * pxPerMm;
-      svg.appendChild(text(xx + 4, top + 56, String(cm), 24));
+      const xx = zeroX + cm * 10 * pxPerMm;
+      svg.appendChild(text(xx, top + 59, String(cm), 21, 'middle'));
     }
-    svg.appendChild(text(left + 4, 89, 'centimeters — each small mark = 1 mm', 15));
+
+    // Small start line before zero so students can see that zero is not the ruler edge.
+    svg.appendChild(line(rulerLeft + 8, top + h - 7, zeroX - 7, top + h - 7, '#777', 1));
+    svg.appendChild(text(rulerLeft + 6, 90, 'centimeters — zero mark is inset; each small mark = 1 mm', 14));
     modeLabel.innerHTML = 'Current ruler: <strong>millimeter</strong>';
     metricBtn.classList.add('active');
     inchBtn.classList.remove('active');
