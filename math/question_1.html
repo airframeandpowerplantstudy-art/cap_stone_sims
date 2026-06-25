@@ -315,7 +315,8 @@
 
     // Small start line before zero so students can see that zero is not the ruler edge.
     svg.appendChild(line(rulerLeft + 8, top + h - 7, zeroX - 7, top + h - 7, '#777', 1));
-    svg.appendChild(text(rulerLeft + 6, 90, 'inches — zero mark is inset; each small mark = 1/32 in', 14));
+   //
+    //svg.appendChild(text(rulerLeft + 6, 90, 'inches — zero mark is inset; each small mark = 1/32 in', 14));
     modeLabel.innerHTML = 'Current ruler: <strong>1/32 inch</strong>';
     inchBtn.classList.add('active');
     metricBtn.classList.remove('active');
@@ -351,7 +352,7 @@
 
     // Small start line before zero so students can see that zero is not the ruler edge.
     svg.appendChild(line(rulerLeft + 8, top + h - 7, zeroX - 7, top + h - 7, '#777', 1));
-    svg.appendChild(text(rulerLeft + 6, 90, 'centimeters — zero mark is inset; each small mark = 1 mm', 14));
+    //svg.appendChild(text(rulerLeft + 6, 90, 'centimeters — zero mark is inset; each small mark = 1 mm', 14));
     modeLabel.innerHTML = 'Current ruler: <strong>millimeter</strong>';
     metricBtn.classList.add('active');
     inchBtn.classList.remove('active');
