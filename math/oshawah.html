@@ -344,7 +344,12 @@ footer{padding:26px; text-align:center; color:#64748b}
 </div>
 <div class="card">
 <h2></h2>
-<div class="imgBox"><img src="https://airframeandpowerplantstudy-art.github.io/cap_stone_sims/math/harness.png">
+<div class="imgBox"><img
+  class="zoomable-img"
+  src="https://airframeandpowerplantstudy-art.github.io/cap_stone_sims/math/harness.png"
+  alt="Harness inspection reference"
+  onclick="openImageZoom(this.src, this.alt)"
+>
 <img src="https://airframeandpowerplantstudy-art.github.io/cap_stone_sims/math/harness2.png">
 </div></div>
 </div>
@@ -481,5 +486,9 @@ function gradeQuiz(){let score=0; qs.forEach((q,i)=>{const picked=document.query
 function resetQuiz(){renderQuiz();}
 renderQuiz();
 </script>
+  <div id="imageZoomModal" class="imageZoomModal" onclick="closeImageZoom()">
+  <button class="imageZoomClose" type="button" onclick="closeImageZoom()">×</button>
+  <img id="imageZoomTarget" src="" alt="">
+</div>
 </body>
 </html>
