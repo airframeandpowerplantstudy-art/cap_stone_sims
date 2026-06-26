@@ -485,6 +485,22 @@ function renderQuiz(){document.getElementById('quizBox').innerHTML=qs.map((q,i)=
 function gradeQuiz(){let score=0; qs.forEach((q,i)=>{const picked=document.querySelector(`input[name=q${i}]:checked`); if(picked && Number(picked.value)===q.c) score++;}); document.getElementById('quizResult').innerHTML=`<b>Score: ${score} / ${qs.length}</b><br>${score===qs.length?'Nice. You are ready for inspection practice.':'Review the missed items, then try again.'}`;}
 function resetQuiz(){renderQuiz();}
 renderQuiz();
+  function openImageZoom(src, alt){
+  const modal = document.getElementById('imageZoomModal');
+  const img = document.getElementById('imageZoomTarget');
+
+  img.src = src;
+  img.alt = alt || 'Expanded image';
+  modal.classList.add('active');
+}
+
+function closeImageZoom(){
+  const modal = document.getElementById('imageZoomModal');
+  const img = document.getElementById('imageZoomTarget');
+
+  modal.classList.remove('active');
+  img.src = '';
+}
 </script>
   <div id="imageZoomModal" class="imageZoomModal" onclick="closeImageZoom()">
   <button class="imageZoomClose" type="button" onclick="closeImageZoom()">×</button>
