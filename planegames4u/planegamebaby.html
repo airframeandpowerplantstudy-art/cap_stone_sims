@@ -75,4 +75,20 @@ function closeQuiz(){document.getElementById('quiz').classList.remove('show');cu
 function nextQuestion(){if(!currentBank)return;answered=false;const qs=currentBank.questions.length?currentBank.questions:[];currentQuestion=pickQuestion(currentBank);updateQuizProgress();document.getElementById('feedback').style.display='none';document.getElementById('feedback').textContent='';document.getElementById('qtext').innerHTML=currentQuestion?currentQuestion.q:'No sample questions in this bank.';const ans=document.getElementById('answers');ans.innerHTML='';if(!currentQuestion)return;shuffle(currentQuestion.choices).forEach((c,idx)=>{const btn=document.createElement('button');btn.className='answer';btn.dataset.choiceId=c.id;btn.innerHTML=`<b>${String.fromCharCode(65+idx)}.</b> ${c.text}`;btn.onclick=()=>chooseAnswer(btn,c);ans.appendChild(btn);})}
 function chooseAnswer(btn,c){if(answered)return;answered=true;const correct=c.id===currentQuestion.correct;document.querySelectorAll('.answer').forEach(a=>a.disabled=true);btn.classList.add(correct?'correct':'wrong');document.querySelectorAll('.answer').forEach(a=>{if(a.dataset.choiceId===currentQuestion.correct)a.classList.add('correct');});let key=bankKey(currentBank);progress[key]=progress[key]||{};progress[key].answered=progress[key].answered||[];progress[key].correct=progress[key].correct||[];progress[key].attempts=(progress[key].attempts||0)+1;if(!progress[key].answered.includes(currentQuestion.id))progress[key].answered.push(currentQuestion.id);if(correct && !progress[key].correct.includes(currentQuestion.id))progress[key].correct.push(currentQuestion.id);saveProgress();updateQuizProgress();const fb=document.getElementById('feedback');fb.style.display='block';fb.innerHTML=`<b>${correct?'Correct':'Not quite'}.</b> ${currentQuestion.feedback||''}<br><span style="color:#9fb5c8">Bank progress: ${uniqueCount(progress[key].answered)} / ${currentBank.count} answered.</span>`;renderDots();renderPanel();updateQuizProgress();}
 renderAreas();setArea(currentArea);
+</script>
+<button id="fullscreenBtn" onclick="goFullscreen()">
+  ⛶ Full Screen
+</button>
+<script>
+function goFullscreen() {
+  const game = document.documentElement;
+
+  if (game.requestFullscreen) {
+    game.requestFullscreen();
+  } else if (game.webkitRequestFullscreen) {
+    game.webkitRequestFullscreen();
+  } else if (game.msRequestFullscreen) {
+    game.msRequestFullscreen();
+  }
+}
 </script></body></html>
