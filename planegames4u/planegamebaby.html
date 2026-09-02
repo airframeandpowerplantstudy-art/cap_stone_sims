@@ -24,7 +24,24 @@ svg.aircraft{width:100%;height:100%;overflow:visible} .metal{fill:url(#metal);st
 .footer{padding:10px 20px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);background:rgba(3,8,14,.6)}
 @media(max-width:900px){body{overflow:auto}#app{height:auto;min-height:100vh}.stage{min-height:850px}.sidePanel{position:relative;right:auto;top:auto;margin:10px auto;width:calc(100% - 24px)}.quiz{position:relative;left:auto;bottom:auto;width:calc(100% - 24px);margin:12px auto}}
 </style></head>
-<body><div id="app"><header class="header"><div><div class="brand">Capstone Interactive Trainer</div><div class="sub">Use this to break up the monotony of studying!</div></div><div class="areaBtns" id="areaBtns"></div></header>
+<body>
+<div id="app">
+  <header class="header">
+
+    <div>
+      <div class="brand">Capstone Interactive Trainer</div>
+      <div class="sub">Use this to break up the monotony of studying!</div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="areaBtns" id="areaBtns"></div>
+
+      <button id="fullscreenBtn" onclick="goFullscreen()">
+        ⛶ Full Screen
+      </button>
+    </div>
+
+  </header>
 <main class="stage" id="stage"><div class="hangarLight"></div><div class="planeWrap" id="planeWrap">
 <svg class="aircraft" viewBox="0 0 1000 560" aria-label="aircraft top view">
 <defs><linearGradient id="metal" x1="0" x2="1"><stop offset="0" stop-color="#425064"/><stop offset=".45" stop-color="#c5d2df"/><stop offset=".55" stop-color="#7b8da0"/><stop offset="1" stop-color="#2d394b"/></linearGradient><linearGradient id="wing" x1="0" x2="1"><stop offset="0" stop-color="#202b3b"/><stop offset=".5" stop-color="#8396aa"/><stop offset="1" stop-color="#202b3b"/></linearGradient></defs>
@@ -76,9 +93,7 @@ function nextQuestion(){if(!currentBank)return;answered=false;const qs=currentBa
 function chooseAnswer(btn,c){if(answered)return;answered=true;const correct=c.id===currentQuestion.correct;document.querySelectorAll('.answer').forEach(a=>a.disabled=true);btn.classList.add(correct?'correct':'wrong');document.querySelectorAll('.answer').forEach(a=>{if(a.dataset.choiceId===currentQuestion.correct)a.classList.add('correct');});let key=bankKey(currentBank);progress[key]=progress[key]||{};progress[key].answered=progress[key].answered||[];progress[key].correct=progress[key].correct||[];progress[key].attempts=(progress[key].attempts||0)+1;if(!progress[key].answered.includes(currentQuestion.id))progress[key].answered.push(currentQuestion.id);if(correct && !progress[key].correct.includes(currentQuestion.id))progress[key].correct.push(currentQuestion.id);saveProgress();updateQuizProgress();const fb=document.getElementById('feedback');fb.style.display='block';fb.innerHTML=`<b>${correct?'Correct':'Not quite'}.</b> ${currentQuestion.feedback||''}<br><span style="color:#9fb5c8">Bank progress: ${uniqueCount(progress[key].answered)} / ${currentBank.count} answered.</span>`;renderDots();renderPanel();updateQuizProgress();}
 renderAreas();setArea(currentArea);
 </script>
-<button id="fullscreenBtn" onclick="goFullscreen()">
-  ⛶ Full Screen
-</button>
+
 <script>
 function goFullscreen() {
   const game = document.documentElement;
