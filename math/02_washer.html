@@ -1,165 +1,366 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Measurement Lab - Washer</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Measurement Lab</title>
 <style>
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Arial,sans-serif;background:#eef3f7;color:#17202a}
-  .lab{max-width:760px;margin:0 auto;background:white;border:1px solid #c7d0d8}
-  .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:9px 10px;background:#f8fafc;border-bottom:1px solid #d7dee5}
-  .bar strong{margin-right:auto;font-size:14px}
-  button{font:700 12px Arial;padding:7px 10px;border:1px solid #2f6f9f;border-radius:6px;background:white;cursor:pointer}
-  button.active{background:#dceefb}
-  .note{padding:7px 10px;background:#fff8dc;border-bottom:1px solid #e6dba9;font-size:12px}
-  .stage{position:relative;height:360px;overflow:hidden;background:linear-gradient(#f8fbfd,#eef3f7);touch-action:pan-y}
-  .part{position:absolute;left:0;top:0;width:100%;height:230px;pointer-events:none}
-  .ruler{position:absolute;left:110px;top:285px;transform-origin:18px 22px;cursor:grab;touch-action:none;user-select:none}
-  .ruler:active{cursor:grabbing}
-  .hidden{display:none}
-  .hint{position:absolute;left:50%;top:245px;transform:translateX(-50%);font-size:10px;color:#6b7680;border:1px solid #d4dbe1;border-radius:12px;padding:4px 9px;background:white}
-  svg{display:block}
+  :root{
+    --blue:#1f4e79;
+    --bill:#f7f2d8;
+    --ink:#243025;
+  }
+  *{ box-sizing:border-box; }
+  html, body{
+    margin:0;
+    padding:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#eef2f6;
+    color:#12263a;
+    overflow-x:hidden;
+  }
+  .lab-wrap{
+    width:100%;
+    max-width:1000px;
+    margin:0 auto;
+    padding:8px;
+  }
+  .lab-card{
+    background:#fff;
+    border:1px solid #d0d7de;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 8px 24px rgba(0,0,0,.14);
+  }
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    padding:10px;
+    background:#f8fafc;
+    border-bottom:1px solid #d0d7de;
+  }
+  .title{
+    font-size:18px;
+    font-weight:700;
+    margin-right:auto;
+  }
+  button{
+    border:1px solid #aeb9c5;
+    background:#fff;
+    border-radius:10px;
+    padding:8px 10px;
+    font-weight:700;
+    cursor:pointer;
+    color:#17324d;
+  }
+  button:hover{ background:#eef6ff; }
+  button.active{
+    background:#d9ecff;
+    border-color:#1f4e79;
+  }
+  .directions{
+    padding:8px 10px;
+    background:#fff8e1;
+    border-bottom:1px solid #e8dca5;
+    font-size:13px;
+    line-height:1.35;
+  }
+
+  #stage{
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    touch-action:none;
+    user-select:none;
+    background:
+      linear-gradient(#e8edf3 1px, transparent 1px),
+      linear-gradient(90deg, #e8edf3 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+
+  #scene{
+    position:absolute;
+    left:0;
+    top:0;
+    width:1100px;
+    height:650px;
+    transform-origin:top left;
+  }
+
+  .measure-object{position:absolute;left:0;top:55px;width:1100px;height:500px;pointer-events:none;}\n  .lab-note{
+    position:absolute;
+    left:50%;
+    top:438px;
+    transform:translateX(-50%);
+    background:rgba(255,255,255,.92);
+    border:1px solid #ccd5df;
+    border-radius:999px;
+    padding:7px 14px;
+    font-size:13px;
+    color:#465668;
+  }
+  .ruler{
+    position:absolute;
+    left:85px;
+    top:505px;
+    width:930px;
+    height:94px;
+    transform-origin:30px 47px;
+    cursor:grab;
+    touch-action:none;
+    filter:drop-shadow(0 4px 8px rgba(0,0,0,.25));
+  }
+  .ruler:active{ cursor:grabbing; }
+  .rotate-handle{
+    position:absolute;
+    right:-17px;
+    top:50%;
+    transform:translateY(-50%);
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:#fff;
+    border:3px solid var(--blue);
+    color:var(--blue);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    font-weight:900;
+    cursor:grab;
+  }
+  .rotate-handle:active{ cursor:grabbing; }
+  .mode-label{
+    position:absolute;
+    left:16px;
+    bottom:14px;
+    background:rgba(255,255,255,.95);
+    border:1px solid #ccd5df;
+    border-radius:12px;
+    padding:10px 12px;
+    font-size:14px;
+  }
 </style>
 </head>
 <body>
-<div class="lab" id="lab">
-  <div class="bar">
-    <strong>Measurement Lab</strong>
-    <button id="inchBtn" class="active" type="button">1/32 inch ruler</button>
-    <button id="mmBtn" type="button">millimeter ruler</button>
-    <button id="rotateBtn" type="button">Rotate 90°</button>
-    <button id="resetBtn" type="button">Reset</button>
-  </div>
-  <div class="note">Drag the ruler around the object. Switch between the 1/32 inch ruler and the millimeter ruler. Rotate the ruler when measuring height. Record imperial measurements to the nearest 1/32 inch and metric measurements to the nearest millimeter.</div>
-  <div class="stage" id="stage">
-    <svg class="part" viewBox="0 0 760 230" aria-label="Measurement Lab - Washer">
-      
-        <g transform="translate(300 155)">
-          <circle cx="0" cy="0" r="50.62" fill="#c7ccd1" stroke="#454a4f" stroke-width="2"/>
-          <circle cx="0" cy="0" r="21.38" fill="#eef1f4" stroke="#454a4f" stroke-width="2"/>
-          <circle cx="-11.14" cy="-11.14" r="4.05" fill="#e6eaed" opacity=".7"/>
-        </g>
-    </svg>
-    <div class="hint">Measure carefully!</div>
-
-    <div class="ruler" id="inchRuler" aria-label="Draggable 1/32 inch ruler">
-      <svg width="540" height="54" viewBox="0 0 540 54">
-        <rect x="10" y="2" width="520" height="48" rx="2" fill="#fbfbf7" stroke="#2e3439"/>
-        <line x1="18" y1="6" x2="18" y2="42" stroke="#111" stroke-width="1.5"/>
-        <g id="inchTicks"></g>
-      </svg>
+<div class="lab-wrap">
+  <div class="lab-card">
+    <div class="controls">
+      <div class="title">Measurement Lab</div>
+      <button id="inchBtn" class="active">1/32 inch ruler</button>
+      <button id="metricBtn">millimeter ruler</button>
+      <button id="rotateBtn">Rotate 90°</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+    <div class="directions">
+      Drag the ruler around the object. Switch between the <strong>1/32 inch ruler</strong> and the <strong>millimeter ruler</strong>.
+      Rotate the ruler when measuring width/height. Record your measurements in Canvas.
     </div>
 
-    <div class="ruler hidden" id="mmRuler" aria-label="Draggable millimeter ruler">
-      <svg width="540" height="54" viewBox="0 0 540 54">
-        <rect x="10" y="2" width="520" height="48" rx="2" fill="#fbfbf7" stroke="#2e3439"/>
-        <line x1="18" y1="6" x2="18" y2="42" stroke="#111" stroke-width="1.5"/>
-        <g id="mmTicks"></g>
-      </svg>
+    <div id="stage">
+      <div id="scene">
+        <div class="measure-object"><svg viewBox="0 0 1100 500" width="1100" height="500"><circle cx="550" cy="255" r="84.3" fill="#c3c9ce" stroke="#444b50" stroke-width="3"/><circle cx="550" cy="255" r="35.6" fill="#eef2f6" stroke="#444b50" stroke-width="3"/></svg></div>\n\n        <div class="lab-note">Measure Carefully!</div>
+
+        <div id="ruler" class="ruler" aria-label="Draggable ruler">
+          <svg id="rulerSvg" width="930" height="94" viewBox="0 0 930 94" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div id="rotHandle" class="rotate-handle" title="Drag to rotate">↻</div>
+        </div>
+
+        <div class="mode-label" id="modeLabel">
+          Current ruler: <strong>1/32 inch</strong>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
 <script>
-(() => {
-  const PPI = 72;
-  const PPMM = PPI / 25.4;
+(function(){
+  const DESIGN_W = 1100;
+  const DESIGN_H = 650;
+
   const stage = document.getElementById('stage');
-  const inch = document.getElementById('inchRuler');
-  const mm = document.getElementById('mmRuler');
+  const scene = document.getElementById('scene');
+  const ruler = document.getElementById('ruler');
+  const svg = document.getElementById('rulerSvg');
   const inchBtn = document.getElementById('inchBtn');
-  const mmBtn = document.getElementById('mmBtn');
-  let active = inch, angle = 0;
-  const start = {left:110, top:285};
+  const metricBtn = document.getElementById('metricBtn');
+  const modeLabel = document.getElementById('modeLabel');
 
-  const inchG = document.getElementById('inchTicks');
-  for (let i=0;i<=7*32;i++) {
-    const x = 18 + i*(PPI/32);
-    const mod = i % 32;
-    let h = 9;
-    if(mod===0) h=29;
-    else if(mod===16) h=23;
-    else if(mod%8===0) h=19;
-    else if(mod%4===0) h=15;
-    else if(mod%2===0) h=12;
-    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-    line.setAttribute('x1',x); line.setAttribute('x2',x);
-    line.setAttribute('y1',6); line.setAttribute('y2',6+h);
-    line.setAttribute('stroke','#111'); line.setAttribute('stroke-width',mod===0?'1.2':'0.7');
-    inchG.appendChild(line);
-    if(mod===0) {
-      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x',x); t.setAttribute('y',45); t.setAttribute('text-anchor','middle');
-      t.setAttribute('font-size','11'); t.setAttribute('font-family','Arial');
-      t.textContent=i/32; inchG.appendChild(t);
+  const pxPerMm = 4.72;
+  const pxPerIn = pxPerMm * 25.4;
+  let scale = 1;
+
+  let x = 85;
+  let y = 505;
+  let angle = 0;
+  let drag = null;
+
+  function fitStage(){
+    const available = stage.clientWidth || DESIGN_W;
+    scale = Math.min(1, available / DESIGN_W);
+    scene.style.transform = 'scale(' + scale + ')';
+    stage.style.height = (DESIGN_H * scale) + 'px';
+  }
+
+  window.addEventListener('resize', fitStage);
+
+  function make(tag){
+    return document.createElementNS('http://www.w3.org/2000/svg', tag);
+  }
+  function line(x1,y1,x2,y2,stroke,width){
+    const e = make('line');
+    e.setAttribute('x1',x1); e.setAttribute('y1',y1);
+    e.setAttribute('x2',x2); e.setAttribute('y2',y2);
+    e.setAttribute('stroke',stroke);
+    e.setAttribute('stroke-width',width);
+    return e;
+  }
+  function rect(x,y,w,h,fill,stroke,width){
+    const e = make('rect');
+    e.setAttribute('x',x); e.setAttribute('y',y);
+    e.setAttribute('width',w); e.setAttribute('height',h);
+    e.setAttribute('fill',fill);
+    e.setAttribute('stroke',stroke);
+    e.setAttribute('stroke-width',width);
+    return e;
+  }
+  function text(x,y,value,size,anchor='start'){
+    const e = make('text');
+    e.setAttribute('x',x); e.setAttribute('y',y);
+    e.setAttribute('font-size',size);
+    e.setAttribute('font-family','Arial, Helvetica, sans-serif');
+    e.setAttribute('fill','#111');
+    e.setAttribute('text-anchor',anchor);
+    e.textContent = value;
+    return e;
+  }
+
+  function drawInch(){
+    svg.innerHTML = '';
+    const rulerLeft = 18, zeroX = 48, top = 12, h = 62;
+    const inches = 7;
+    const measuringWidth = inches * pxPerIn;
+    const endMargin = 34;
+    const bodyWidth = (zeroX - rulerLeft) + measuringWidth + endMargin;
+
+    svg.appendChild(rect(rulerLeft, top, bodyWidth, h, '#fff', '#111', 2));
+
+    for(let i=0; i<=inches*32; i++){
+      const xx = zeroX + (i/32) * pxPerIn;
+      const rem = i % 32;
+      let tick = 9;
+      let sw = 1;
+
+      if(rem === 0){ tick = 36; sw = 2; }
+      else if(rem === 16){ tick = 30; sw = 1.7; }
+      else if(rem === 8 || rem === 24){ tick = 24; sw = 1.45; }
+      else if(rem === 4 || rem === 12 || rem === 20 || rem === 28){ tick = 18; sw = 1.25; }
+      else if(rem % 2 === 0){ tick = 13; sw = 1.05; }
+
+      svg.appendChild(line(xx, top, xx, top + tick, '#111', sw));
     }
-  }
 
-  const mmG=document.getElementById('mmTicks');
-  for(let i=0;i<=178;i++) {
-    const x=18+i*PPMM;
-    let h=9;
-    if(i%10===0) h=28;
-    else if(i%5===0) h=19;
-    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-    line.setAttribute('x1',x); line.setAttribute('x2',x);
-    line.setAttribute('y1',6); line.setAttribute('y2',6+h);
-    line.setAttribute('stroke','#111'); line.setAttribute('stroke-width',i%10===0?'1.2':'0.7');
-    mmG.appendChild(line);
-    if(i%10===0) {
-      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x',x); t.setAttribute('y',45); t.setAttribute('text-anchor','middle');
-      t.setAttribute('font-size','10'); t.setAttribute('font-family','Arial');
-      t.textContent=i; mmG.appendChild(t);
+    for(let n=0; n<=inches; n++){
+      const xx = zeroX + n * pxPerIn;
+      svg.appendChild(text(xx, top + 59, String(n), 22, 'middle'));
     }
+
+    modeLabel.innerHTML = 'Current ruler: <strong>1/32 inch</strong>';
+    inchBtn.classList.add('active');
+    metricBtn.classList.remove('active');
   }
 
-  function applyTransform(el) {
-    el.style.transform = `rotate(${angle}deg)`;
+  function drawMetric(){
+    svg.innerHTML = '';
+    const rulerLeft = 18, zeroX = 48, top = 12, h = 62;
+    const mm = 170;
+    const measuringWidth = mm * pxPerMm;
+    const endMargin = 34;
+    const bodyWidth = (zeroX - rulerLeft) + measuringWidth + endMargin;
+
+    svg.appendChild(rect(rulerLeft, top, bodyWidth, h, '#fff', '#111', 2));
+
+    for(let i=0; i<=mm; i++){
+      const xx = zeroX + i * pxPerMm;
+      let tick = 12;
+      let sw = 1.05;
+
+      if(i % 10 === 0){ tick = 36; sw = 2; }
+      else if(i % 5 === 0){ tick = 26; sw = 1.6; }
+
+      svg.appendChild(line(xx, top, xx, top + tick, '#111', sw));
+    }
+
+    for(let cm=0; cm<=17; cm++){
+      const xx = zeroX + cm * 10 * pxPerMm;
+      svg.appendChild(text(xx, top + 59, String(cm), 21, 'middle'));
+    }
+
+    modeLabel.innerHTML = 'Current ruler: <strong>millimeter</strong>';
+    metricBtn.classList.add('active');
+    inchBtn.classList.remove('active');
   }
-  function show(which) {
-    const pos={left:active.offsetLeft,top:active.offsetTop};
-    active.classList.add('hidden');
-    active=which; active.classList.remove('hidden');
-    active.style.left=pos.left+'px'; active.style.top=pos.top+'px';
-    applyTransform(active);
-    inchBtn.classList.toggle('active', active===inch);
-    mmBtn.classList.toggle('active', active===mm);
+
+  function applyTransform(){
+    ruler.style.left = x + 'px';
+    ruler.style.top = y + 'px';
+    ruler.style.transform = 'rotate(' + angle + 'deg)';
   }
-  inchBtn.addEventListener('click',()=>show(inch));
-  mmBtn.addEventListener('click',()=>show(mm));
-  document.getElementById('rotateBtn').addEventListener('click',()=>{ angle=(angle+90)%360; applyTransform(active); });
-  document.getElementById('resetBtn').addEventListener('click',()=>{
-    angle=0;
-    [inch,mm].forEach(r=>{r.style.left=start.left+'px';r.style.top=start.top+'px';r.style.transform='rotate(0deg)';});
+
+  function getScenePoint(e){
+    const r = stage.getBoundingClientRect();
+    return {
+      x:(e.clientX - r.left) / scale,
+      y:(e.clientY - r.top) / scale
+    };
+  }
+
+  ruler.addEventListener('pointerdown', (e) => {
+    if(e.target.id === 'rotHandle') return;
+    ruler.setPointerCapture(e.pointerId);
+    const p = getScenePoint(e);
+    drag = { type:'move', dx:p.x - x, dy:p.y - y };
   });
 
-  let dragging=false, dx=0, dy=0;
-  function down(e) {
-    dragging=true;
-    active.setPointerCapture(e.pointerId);
-    dx=e.clientX-active.offsetLeft; dy=e.clientY-active.offsetTop;
-    e.preventDefault();
-  }
-  function move(e) {
-    if(!dragging) return;
-    const rect=stage.getBoundingClientRect();
-    let left=e.clientX-rect.left-dx+stage.scrollLeft;
-    let top=e.clientY-rect.top-dy+stage.scrollTop;
-    left=Math.max(-470,Math.min(stage.clientWidth-25,left));
-    top=Math.max(-470,Math.min(stage.clientHeight-20,top));
-    active.style.left=left+'px'; active.style.top=top+'px';
-  }
-  function up(e) {
-    dragging=false;
-    try{active.releasePointerCapture(e.pointerId)}catch(_e){}
-  }
-  [inch,mm].forEach(r=>{
-    r.addEventListener('pointerdown',down);
-    r.addEventListener('pointermove',move);
-    r.addEventListener('pointerup',up);
-    r.addEventListener('pointercancel',up);
+  document.getElementById('rotHandle').addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+    ruler.setPointerCapture(e.pointerId);
+    drag = { type:'rotate', cx:x+30, cy:y+47 };
   });
+
+  ruler.addEventListener('pointermove', (e) => {
+    if(!drag) return;
+    const p = getScenePoint(e);
+
+    if(drag.type === 'move'){
+      x = p.x - drag.dx;
+      y = p.y - drag.dy;
+    } else {
+      angle = Math.atan2(p.y - drag.cy, p.x - drag.cx) * 180 / Math.PI;
+    }
+    applyTransform();
+  });
+
+  ruler.addEventListener('pointerup', () => drag = null);
+  ruler.addEventListener('pointercancel', () => drag = null);
+
+  inchBtn.addEventListener('click', drawInch);
+  metricBtn.addEventListener('click', drawMetric);
+  document.getElementById('rotateBtn').addEventListener('click', () => {
+    angle = (Math.round(angle / 90) * 90 + 90) % 360;
+    applyTransform();
+  });
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    x = 85; y = 505; angle = 0;
+    applyTransform();
+  });
+
+  drawInch();
+  applyTransform();
+  fitStage();
 })();
 </script>
 </body>
