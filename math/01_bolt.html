@@ -271,25 +271,13 @@
 const zeroLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
 zeroLine.setAttribute("x1", zeroX);
 zeroLine.setAttribute("x2", zeroX);
-zeroLine.setAttribute("y1", top - 7);
-zeroLine.setAttribute("y2", top + h + 7);
+zeroLine.setAttribute("y1", top - 12);
+zeroLine.setAttribute("y2", top + h + 2);
 zeroLine.setAttribute("stroke", "#0066cc");
 zeroLine.setAttribute("stroke-width", "1.5");
 zeroLine.setAttribute("stroke-dasharray", "4 3");
 svg.appendChild(zeroLine);
-    // Zero alignment pointer
-const zeroPointer = document.createElementNS(
-  "http://www.w3.org/2000/svg",
-  "polygon"
-);
 
-zeroPointer.setAttribute(
-  "points",
-  `${zeroX - 5},${top - 8} ${zeroX + 5},${top - 8} ${zeroX},${top - 1}`
-);
-
-zeroPointer.setAttribute("fill", "#0066cc");
-svg.appendChild(zeroPointer);
     
     modeLabel.innerHTML = 'Current ruler: <strong>1/32 inch</strong>';
     inchBtn.classList.add('active');
@@ -325,10 +313,10 @@ svg.appendChild(zeroPointer);
 const zeroLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
 zeroLine.setAttribute("x1", zeroX);
 zeroLine.setAttribute("x2", zeroX);
-zeroLine.setAttribute("y1", top - 7);
-zeroLine.setAttribute("y2", top + h + 7);
+zeroLine.setAttribute("y1", top - 12);
+zeroLine.setAttribute("y2", top + h + 2);
 zeroLine.setAttribute("stroke", "#0066cc");
-zeroLine.setAttribute("stroke-width", "2");
+zeroLine.setAttribute("stroke-width", "1.5");
 zeroLine.setAttribute("stroke-dasharray", "4 3");
 svg.appendChild(zeroLine);
     
