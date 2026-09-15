@@ -267,7 +267,17 @@
       const xx = zeroX + n * pxPerIn;
       svg.appendChild(text(xx, top + 59, String(n), 22, 'middle'));
     }
-
+// Zero alignment centerline
+const zeroLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+zeroLine.setAttribute("x1", zeroX);
+zeroLine.setAttribute("x2", zeroX);
+zeroLine.setAttribute("y1", top - 7);
+zeroLine.setAttribute("y2", top + h + 7);
+zeroLine.setAttribute("stroke", "#0066cc");
+zeroLine.setAttribute("stroke-width", "2");
+zeroLine.setAttribute("stroke-dasharray", "4 3");
+svg.appendChild(zeroLine);
+    
     modeLabel.innerHTML = 'Current ruler: <strong>1/32 inch</strong>';
     inchBtn.classList.add('active');
     metricBtn.classList.remove('active');
@@ -298,7 +308,17 @@
       const xx = zeroX + cm * 10 * pxPerMm;
       svg.appendChild(text(xx, top + 59, String(cm), 21, 'middle'));
     }
-
+// Zero alignment centerline
+const zeroLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+zeroLine.setAttribute("x1", zeroX);
+zeroLine.setAttribute("x2", zeroX);
+zeroLine.setAttribute("y1", top - 7);
+zeroLine.setAttribute("y2", top + h + 7);
+zeroLine.setAttribute("stroke", "#0066cc");
+zeroLine.setAttribute("stroke-width", "2");
+zeroLine.setAttribute("stroke-dasharray", "4 3");
+svg.appendChild(zeroLine);
+    
     modeLabel.innerHTML = 'Current ruler: <strong>millimeter</strong>';
     metricBtn.classList.add('active');
     inchBtn.classList.remove('active');
