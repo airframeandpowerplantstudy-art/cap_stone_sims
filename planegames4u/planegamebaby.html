@@ -23,25 +23,11 @@ svg.aircraft{width:100%;height:100%;overflow:visible} .metal{fill:url(#metal);st
 .quiz{position:absolute;left:22px;bottom:22px;width:min(720px,calc(100vw - 380px));max-height:calc(100vh - 130px);overflow:auto;display:none;background:rgba(5,14,25,.90);border:1px solid rgba(113,214,255,.28);border-radius:22px;padding:18px;box-shadow:0 30px 80px rgba(0,0,0,.5);backdrop-filter:blur(18px)} .quiz.show{display:block} .quizTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px} .quizRight{min-width:210px;display:flex;flex-direction:column;gap:8px;align-items:stretch}.subjectMeter{padding:10px 12px;border:1px solid rgba(113,214,255,.20);background:rgba(255,255,255,.045);border-radius:14px}.subjectMeterTop{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#dcefff;margin-bottom:6px}.subjectMeter .bar{height:9px}.subjectMeter small{display:block;color:#9fb5c8;margin-top:6px;font-size:11px}.tag{font-size:12px;color:#06111f;background:#71d6ff;border-radius:999px;padding:5px 9px;font-weight:700} .qtext{font-size:18px;line-height:1.45} .qtext img{max-width:100%;height:auto;border-radius:12px;border:1px solid rgba(255,255,255,.16);display:block;margin:12px auto;background:white} .answers{display:grid;gap:10px;margin-top:15px} .answer{text-align:left;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12)} .answer.correct{border-color:var(--good);background:rgba(73,230,139,.16)} .answer.wrong{border-color:var(--bad);background:rgba(255,107,122,.13)} .feedback{margin-top:12px;padding:12px;border-radius:14px;background:rgba(255,255,255,.06);border-left:4px solid var(--accent);display:none;color:#dcefff} .quizActions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
 .footer{padding:10px 20px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);background:rgba(3,8,14,.6)}
 @media(max-width:900px){body{overflow:auto}#app{height:auto;min-height:100vh}.stage{min-height:850px}.sidePanel{position:relative;right:auto;top:auto;margin:10px auto;width:calc(100% - 24px)}.quiz{position:relative;left:auto;bottom:auto;width:calc(100% - 24px);margin:12px auto}}
+ .headerControls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+#resetProgressBtn{border:1px solid rgba(255,180,120,.55);background:rgba(95,48,34,.45);color:#ffdec9;border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:700;white-space:nowrap}
+#resetProgressBtn:hover,#resetProgressBtn:focus-visible{background:rgba(155,65,42,.7);outline:2px solid rgba(255,190,130,.35);outline-offset:2px}
 </style></head>
-<body>
-<div id="app">
-  <header class="header">
-
-    <div>
-      <div class="brand">Capstone Interactive Trainer</div>
-      <div class="sub">Use this to break up the monotony of studying!</div>
-    </div>
-
-    <div style="display:flex; align-items:center; gap:10px;">
-      <div class="areaBtns" id="areaBtns"></div>
-
-      <button id="fullscreenBtn" onclick="goFullscreen()">
-        ⛶ Full Screen
-      </button>
-    </div>
-
-  </header>
+<body><div id="app"><header class="header"><div><div class="brand">Capstone Interactive Trainer</div><div class="sub">Visual prototype: zoom hotspots • randomized answers • figures • local progress</div></div><div class="headerControls"><div class="areaBtns" id="areaBtns"></div><button type="button" id="resetProgressBtn" onclick="resetAllProgress()" title="Clear saved progress on this browser">↺ Clear Progress</button></div></header>
 <main class="stage" id="stage"><div class="hangarLight"></div><div class="planeWrap" id="planeWrap">
 <svg class="aircraft" viewBox="0 0 1000 560" aria-label="aircraft top view">
 <defs><linearGradient id="metal" x1="0" x2="1"><stop offset="0" stop-color="#425064"/><stop offset=".45" stop-color="#c5d2df"/><stop offset=".55" stop-color="#7b8da0"/><stop offset="1" stop-color="#2d394b"/></linearGradient><linearGradient id="wing" x1="0" x2="1"><stop offset="0" stop-color="#202b3b"/><stop offset=".5" stop-color="#8396aa"/><stop offset="1" stop-color="#202b3b"/></linearGradient></defs>
@@ -66,6 +52,15 @@ const AREAS=['General','Airframe','Powerplant'];
 let currentArea='Powerplant', currentBank=null, currentQuestion=null, answered=false;
 const progress=JSON.parse(localStorage.getItem('capstoneTrainerProgress')||'{}');
 function saveProgress(){localStorage.setItem('capstoneTrainerProgress',JSON.stringify(progress));}
+function resetAllProgress(){
+ const ok=window.confirm('Clear ALL saved progress for General, Airframe, and Powerplant on this browser?\n\nThis cannot be undone.');
+ if(!ok)return;
+ localStorage.removeItem('capstoneTrainerProgress');
+ Object.keys(progress).forEach(key=>delete progress[key]);
+ answered=false;currentQuestion=null;
+ closeQuiz();hideTip();renderDots();renderPanel();
+ window.alert('Progress cleared. All subjects are back to 0 answered.');
+}
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
 function areaBanks(area){return BANKS.filter(b=>b.area===area);}
 function bankKey(b){return b.rawTitle;}
@@ -89,21 +84,7 @@ function zoomTo(pos){const wrap=document.getElementById('planeWrap');const dx=(5
 function resetZoom(){const wrap=document.getElementById('planeWrap');wrap.classList.remove('zoomed');wrap.style.transform='translate(-50%,-50%) scale(1)';}
 function openBank(b,pos){currentBank=b;zoomTo(pos);document.getElementById('quiz').classList.add('show');document.getElementById('quizTag').textContent=currentArea;document.getElementById('quizTitle').textContent=b.title;updateQuizProgress();nextQuestion();}
 function closeQuiz(){document.getElementById('quiz').classList.remove('show');currentBank=null;resetZoom();}
-function nextQuestion(){if(!currentBank)return;answered=false;const qs=currentBank.questions.length?currentBank.questions:[];currentQuestion=pickQuestion(currentBank);updateQuizProgress();document.getElementById('feedback').style.display='none';document.getElementById('feedback').textContent='';document.getElementById('qtext').innerHTML=currentQuestion?currentQuestion.q:'No sample questions in this bank.';const ans=document.getElementById('answers');ans.innerHTML='';if(!currentQuestion)return;shuffle(currentQuestion.choices).forEach((c,idx)=>{const btn=document.createElement('button');btn.className='answer';btn.dataset.choiceId=c.id;btn.innerHTML=`<b>${String.fromCharCode(65+idx)}.</b> ${c.text}`;btn.onclick=()=>chooseAnswer(btn,c);ans.appendChild(btn);})}
-function chooseAnswer(btn,c){if(answered)return;answered=true;const correct=c.id===currentQuestion.correct;document.querySelectorAll('.answer').forEach(a=>a.disabled=true);btn.classList.add(correct?'correct':'wrong');document.querySelectorAll('.answer').forEach(a=>{if(a.dataset.choiceId===currentQuestion.correct)a.classList.add('correct');});let key=bankKey(currentBank);progress[key]=progress[key]||{};progress[key].answered=progress[key].answered||[];progress[key].correct=progress[key].correct||[];progress[key].attempts=(progress[key].attempts||0)+1;if(!progress[key].answered.includes(currentQuestion.id))progress[key].answered.push(currentQuestion.id);if(correct && !progress[key].correct.includes(currentQuestion.id))progress[key].correct.push(currentQuestion.id);saveProgress();updateQuizProgress();const fb=document.getElementById('feedback');fb.style.display='block';fb.innerHTML=`<b>${correct?'Correct':'Not quite'}.</b> ${currentQuestion.feedback||''}<br><span style="color:#9fb5c8">Bank progress: ${uniqueCount(progress[key].answered)} / ${currentBank.count} answered.</span>`;renderDots();renderPanel();updateQuizProgress();}
+function nextQuestion(){if(!currentBank)return;answered=false;const qs=currentBank.questions.length?currentBank.questions:[];currentQuestion=pickQuestion(currentBank);updateQuizProgress();document.getElementById('feedback').style.display='none';document.getElementById('feedback').textContent='';document.getElementById('qtext').innerHTML=currentQuestion?currentQuestion.q:'No sample questions in this bank.';const ans=document.getElementById('answers');ans.innerHTML='';if(!currentQuestion)return;shuffle(currentQuestion.choices).forEach((c,idx)=>{const btn=document.createElement('button');btn.className='answer';btn.innerHTML=`<b>${String.fromCharCode(65+idx)}.</b> ${c.text}`;btn.onclick=()=>chooseAnswer(btn,c);ans.appendChild(btn);})}
+function chooseAnswer(btn,c){if(answered)return;answered=true;const correct=c.id===currentQuestion.correct;document.querySelectorAll('.answer').forEach(a=>a.disabled=true);btn.classList.add(correct?'correct':'wrong');document.querySelectorAll('.answer').forEach(a=>{if(a.textContent.includes((currentQuestion.choices.find(x=>x.id===currentQuestion.correct)||{text:''}).text))a.classList.add('correct');});let key=bankKey(currentBank);progress[key]=progress[key]||{};progress[key].answered=progress[key].answered||[];progress[key].correct=progress[key].correct||[];progress[key].attempts=(progress[key].attempts||0)+1;if(!progress[key].answered.includes(currentQuestion.id))progress[key].answered.push(currentQuestion.id);if(correct && !progress[key].correct.includes(currentQuestion.id))progress[key].correct.push(currentQuestion.id);saveProgress();updateQuizProgress();const fb=document.getElementById('feedback');fb.style.display='block';fb.innerHTML=`<b>${correct?'Correct':'Not quite'}.</b> ${currentQuestion.feedback||''}<br><span style="color:#9fb5c8">Bank progress: ${uniqueCount(progress[key].answered)} / ${currentBank.count} answered.</span>`;renderDots();renderPanel();updateQuizProgress();}
 renderAreas();setArea(currentArea);
-</script>
-
-<script>
-function goFullscreen() {
-  const game = document.documentElement;
-
-  if (game.requestFullscreen) {
-    game.requestFullscreen();
-  } else if (game.webkitRequestFullscreen) {
-    game.webkitRequestFullscreen();
-  } else if (game.msRequestFullscreen) {
-    game.msRequestFullscreen();
-  }
-}
 </script></body></html>
